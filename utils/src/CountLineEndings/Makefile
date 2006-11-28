@@ -4,8 +4,8 @@
 #
 ###########################################################################
 
-MK_OS			= cygwin
-MK_BIN_TARGET 	= CountLineEndings
+MK_OS			= host
+MK_ELF_TARGET 	= CountLineEndings
 
 MK_SRC_FILES = CountLineEndings.c
 

@@ -18,8 +18,8 @@ $(TARGETS):
 
 else
 
-MK_OS			= cygwin
-MK_BIN_TARGET	= $(TARGET)
+MK_OS			= host
+MK_ELF_TARGET	= $(TARGET)
 
 MK_SRC_FILES = $(TARGET).c
 
