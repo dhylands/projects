@@ -8,9 +8,6 @@
 #
 ###########################################################################
 
-MK_LIB_PREFIX	= lib
-MK_LIB_EXT    	= .a
-MK_OBJ_EXT    	= .o
-MK_BIN_EXT    	= .exe
+MK_ELF_EXT    	= .exe
 
 include $(MK_RULES_DIR)/mkEnv-gcc.mk

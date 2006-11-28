@@ -42,7 +42,7 @@ export Q
 # 	Makefile which included this file,
 
 ifeq ($(MK_ROOT),)
-MK_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))..)
+MK_ROOT := $(dir $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 endif
 export MK_ROOT
 
@@ -61,13 +61,41 @@ space := $(empty) $(empty)
 
 #--------------------------------------------------------------------------
 #
+#	MK_HOST_OS describes the OS that the make system is running on.
+#
+
+MK_SUPPORTED_HOST_OS = cygwin linux
+
+ifeq ($(MK_HOST_OS),)
+MK_HOST_UNAME = $(shell uname -s)
+ifeq ($(findstring CYGWIN_NT,$(MK_HOST_UNAME)),CYGWIN_NT)
+export MK_HOST_OS = cygwin
+endif
+ifeq ($(MK_HOST_UNAME),Linux)
+export MK_HOST_OS = linux
+endif
+endif
+
+ifeq ($(filter $(MK_HOST_OS),$(MK_SUPPORTED_HOST_OS)),)
+$(warning Unsupported value for MK_HOST_OS: '$(MK_HOST_OS)')
+$(warning MK_OS must be one of the following:)
+$(warning $(space))
+$(foreach os,$(MK_SUPPORTED_HOST_OS),$(warning $(space)  $(os)))
+endif
+
+ifeq ($(MK_OS),host)
+MK_OS = $(MK_HOST_OS)
+endif
+  
+#--------------------------------------------------------------------------
+#
 # 	MK_OS describes the "Operating system" which is the source code is 
 # 	currently being compiled for. For each supported OS, there is another
 # 	rules file in the $(MK_ROOT)/rules directory which is named using
 # 	mkRules_$(MK_OS).mk
 #
 
-MK_SUPPORTED_OS = avr cygwin gumstix none win32
+MK_SUPPORTED_OS = avr cortex-m3 cygwin gumstix linux none win32
 
 ifeq ($(filter $(MK_OS),$(MK_SUPPORTED_OS)),)
 $(warning Unsupported value for MK_OS: '$(MK_OS)')
@@ -79,7 +107,7 @@ $(warning Please note that these are case sensitive)
 $(warning $(space))
 $(error Run 'make MK_OS=DesiredOS' to correct)
 endif
-  
+
 #--------------------------------------------------------------------------
 #
 # 	Run make with debug=1 to have non-optimized code generated.
@@ -171,7 +199,8 @@ MK_UTILS_DIR = $(MK_ROOT)/utils/bin
 
 MK_LIB_NAME = $(foreach libBase,$(1),$(MK_LIB_DIR)/$(MK_LIB_PREFIX)$(libBase)$(MK_LIB_EXT))
 MK_BIN_NAME = $(foreach binBase,$(1),$(MK_BIN_DIR)/$(binBase)$(MK_BIN_EXT))
-MK_HEX_NAME = $(foreach hexBase,$(1),$(MK_EXE_DIR)/$(hexBase)$(MK_HEX_EXT))
+MK_ELF_NAME = $(foreach binBase,$(1),$(MK_BIN_DIR)/$(binBase)$(MK_ELF_EXT))
+MK_HEX_NAME = $(foreach hexBase,$(1),$(MK_BIN_DIR)/$(hexBase)$(MK_HEX_EXT))
 MK_OBJ_NAME = $(foreach objBase,$(1),$(MK_OBJ_DIR)/$(objBase)$(MK_OBJ_EXT))
 
 #--------------------------------------------------------------------------

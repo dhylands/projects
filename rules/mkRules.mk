@@ -8,7 +8,7 @@
 ###########################################################################
 
 ifneq ($(MK_ENV_INCLUDED),1)
-include $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/mkEnv.mk
+include $(dir $(lastword $(MAKEFILE_LIST)))mkEnv.mk
 endif
 
 #--------------------------------------------------------------------------
@@ -93,10 +93,10 @@ target: lib_target
 .PHONY: lib_target
 endif
 
-ifneq ($(MK_BIN_TARGET),)
-target: bin_target
-bin_target: $(MK_BIN_TARGET)
-.PHONY: bin_target
+ifneq ($(MK_ELF_TARGET),)
+target: elf_target
+elf_target: $(MK_ELF_TARGET)
+.PHONY: elf_target
 endif
 
 ifneq ($(MK_HEX_TARGET),)
@@ -155,13 +155,13 @@ clean-bin:
 clean-lib:
 clean-obj:
 
-MK_CLEAN_DESCR = $(strip $(MK_LIB_BASE) $(MK_BIN_TARGET) $(MK_HEX_TARGET))
+MK_CLEAN_DESCR = $(strip $(MK_LIB_BASE) $(MK_ELF_TARGET) $(MK_HEX_TARGET))
 
 ifneq ($(MK_DEP_FILES),)
 clean-dep: mk_clean-dep
 mk_clean-dep:
-	 @$(ECHO) "Removing $(MK_CLEAN_DESCR) dependencies ..."
-	 $(Q)$(RM) -f $(MK_DEP_FILES)
+	@$(ECHO) "Removing $(MK_CLEAN_DESCR) dependencies ..."
+	$(Q)$(RM) -f $(MK_DEP_FILES)
 	 
 .PHONY: mk_clean-dep
 endif

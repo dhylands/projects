@@ -152,7 +152,7 @@ $(MK_HEX_TARGET): mkdir_bin mkdir_obj $(call MK_HEX_NAME, $(MK_HEX_TARGET))
 
 .PHONY: $(MK_HEX_TARGET)
 
-$(call MK_HEX_NAME, $(MK_HEX_TARGET)) : $(call MK_BIN_NAME, $(MK_HEX_TARGET))
+$(call MK_HEX_NAME, $(MK_HEX_TARGET)) : $(call MK_ELF_NAME, $(MK_HEX_TARGET))
 	$(ECHO) "Creating $@ ..."
 	$(Q)$(OBJCOPY) -j .text -j .data -O ihex $< $@
 	$(ECHO)
@@ -167,20 +167,24 @@ endif
 # Create simple executables
 #
 
-ifneq ($(MK_BIN_TARGET),)
+ifneq ($(MK_ELF_TARGET),)
 
-$(MK_BIN_TARGET): mkdir_bin mkdir_obj $(call MK_BIN_NAME, $(MK_BIN_TARGET))
+$(MK_ELF_TARGET): mkdir_bin mkdir_obj $(call MK_ELF_NAME, $(MK_ELF_TARGET))
 
-.PHONY: $(MK_BIN_TARGET)
+.PHONY: $(MK_ELF_TARGET)
 
-MK_LINK_TARGET += $(MK_BIN_TARGET)
+MK_LINK_TARGET += $(MK_ELF_TARGET)
 
-install-bin: install-bin_$MK_BIN_TARGET)	   
-install-bin_$MK_BIN_TARGET): $(MK_BIN_TARGET) $(MK_UTILS_DIR)/$(MK_BIN_TARGET)$(MK_BIN_EXT)
+install-bin: install-bin_$MK_ELF_TARGET)	   
+install-bin_$MK_ELF_TARGET): $(MK_ELF_TARGET) $(MK_UTILS_DIR)/$(MK_ELF_TARGET)$(MK_ELF_EXT)
 
 .PHONY: install
 
-$(MK_UTILS_DIR)/$(MK_BIN_TARGET)$(MK_BIN_EXT) : $(call MK_BIN_NAME, $(MK_BIN_TARGET))
+#
+# Install executable into utils dir
+#
+
+$(MK_UTILS_DIR)/$(MK_ELF_TARGET)$(MK_ELF_EXT) : $(call MK_ELF_NAME, $(MK_ELF_TARGET))
 	@$(ECHO) "Installing $@ ..."
 	$(Q)$(INSTALL) $< $@
 	@$(ECHO)
@@ -193,18 +197,30 @@ ifneq ($(filter %.cpp,$(MK_SRC_FILES)),)
 LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 endif
 
-$(call MK_BIN_NAME, $(MK_LINK_TARGET)) : $(MK_OBJ_FILES)
+#
+# Link executable (aka .elf) file from object files
+#
+
+$(call MK_ELF_NAME, $(MK_LINK_TARGET)) : $(MK_OBJ_FILES)
 	$(ECHO) "Linking $@ ..."
-	$(Q)$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(Q)$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@ $(LD_CRTFLAGS)
 	$(ECHO)
-ifneq ($(MK_PRINT_BIN_SIZE),)
-	$(Q)$(MK_PRINT_BIN_SIZE)
+ifneq ($(MK_PRINT_ELF_SIZE),)
+	$(Q)$(MK_PRINT_ELF_SIZE)
 	$(ECHO)
 endif
 
+#
+# Create .bin file from .elf file
+#
+
+$(call MK_BIN_NAME, $(MK_LINK_TARGET)) : $(call MK_ELF_NAME, $(MK_LINK_TARGET))
+	$(ECHO) "Creating $@ ..."
+	$(Q)$(OBJCOPY) -O binary $< $@	
+
 clean-bin: clean-link_$(MK_LINK_TARGET)
 clean-link_$(MK_LINK_TARGET):
-	$(ECHO) "Removing $(MK_LINK_TARGET) bin file..."
+	$(ECHO) "Removing $(MK_LINK_TARGET) bin files..."
 	$(Q)$(RM) -rf $(MK_BIN_DIR)
 
 endif

@@ -8,12 +8,6 @@
 #
 ###########################################################################
 
-MK_LIB_PREFIX	= lib
-MK_LIB_EXT    	= .a
-MK_OBJ_EXT    	= .o
-MK_BIN_EXT    	= .elf
-MK_HEX_EXT		= .hex
-
 MK_CROSS_COMPILE		= avr-
 
 ifeq ($(MK_AVR_MCU),)
@@ -27,12 +21,13 @@ $(error MK_AVR_FREQ not specified)
 endif
 
 MK_OS_DIR = avr-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
+MK_AVR_FREQ_DEF = -DCFG_CPU_CLOCK=$(patsubst %MHz,%000000,$(MK_AVR_FREQ))
 
 MK_AVR_MCU_FLAGS	= -mmcu=$(MK_AVR_MCU_LONG)
 
 MK_COMMON_AVR_DIR	= $(MK_COMMON_DIR)/avr
 
-CPPFLAGS += $(MK_AVR_MCU_FLAGS) -I $(MK_COMMON_AVR_DIR)
+CPPFLAGS += $(MK_AVR_MCU_FLAGS) -I $(MK_COMMON_AVR_DIR) $(MK_AVR_FREQ_DEF)
 LDFLAGS  += $(MK_AVR_MCU_FLAGS)
 
 CXXFLAGS += -fno-exceptions -fno-rtti
