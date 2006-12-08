@@ -29,13 +29,13 @@
 
 #include <stdint.h>
 
-#include <avr/io.h>
-
 #include "Switch.h"
-#include "Expansion.h"
 
 /* ---- Public Variables -------------------------------------------------- */
 
+uint8_t gSwitchRaw[ NUM_SWITCH_BYTES ];
+uint8_t gSwitchEnabled[ NUM_SWITCH_BYTES ];
+                                                         
 /* ---- Private Constants and Types --------------------------------------- */
 
 /* ---- Private Variables ------------------------------------------------- */
@@ -44,33 +44,13 @@
 
 // Stores the raw value retrieved for the above switches
 
-static  uint16_t    gRawSwitch;
-
 #define SWITCH_STATE_OFF            0
 #define SWITCH_STATE_BOUNCING_ON    1
 #define SWITCH_STATE_ON             2
 #define SWITCH_STATE_BOUNCING_OFF   3
 
-#define SWITCH_BOUNCE_ON_COUNT      3   // 10 msec/count or 100ths of a sec
-#define SWITCH_BOUNCE_OFF_COUNT     1   // 10 msec/count or 100ths of a sec
-
-static  uint8_t gSwitchBounceCount[ NUM_SWITCHES ];
-static  uint8_t gSwitchState[ NUM_SWITCHES ];
-
-/***************************************************************************/
-/**
-*   Checks to see if a button is pressed. This is a raw check and doesn't
-*   factor debouncing into the equation
-*/
-
-static inline uint8_t IsRawSwitchPressed( uint8_t switchNum )
-{
-    // All of the buttons have pullups and closing the button connects to
-    // ground
-
-    return ( gRawSwitch & ( 1 << switchNum )) == 0;
-
-} // IsRawSwitchPressed
+static  SwitchCount_t   gSwitchBounceCount[ CFG_NUM_SWITCHES ];
+static  SwitchState_t   gSwitchState[ CFG_NUM_SWITCHES ];
 
 /***************************************************************************/
 /**
@@ -88,9 +68,9 @@ static inline void SetSwitchState( SwitchNum_t sw, SwitchState_t state )
 *   Clears the switch bounce counter
 */
 
-static inline void ClearSwitchBounceCounter( SwitchNum_t sw )
+static inline void ClearSwitchBounceCount( SwitchNum_t sw )
 {
-    gSwitchBounceCounter[ sw ] = 0;
+    gSwitchBounceCount[ sw ] = 0;
 
 } // ClearSwitchBounceCounter
 
@@ -99,11 +79,24 @@ static inline void ClearSwitchBounceCounter( SwitchNum_t sw )
 *   Increments the switch bounce counter
 */
 
-static inline void IncrementSwitchBounceCounter( SwitchNum_t sw )
+static inline void IncrementSwitchBounceCount( SwitchNum_t sw )
 {
-    gSwitchBounceCounter[ sw ]++;
+    gSwitchBounceCount[ sw ]++;
 
 } // IncrementSwitchBounceCounter
+
+/***************************************************************************/
+/**
+*   Retrieves the bounce counter for a particular switch
+*/
+
+static inline SwitchCount_t SwitchBounceCount( SwitchNum_t sw )
+{
+    return gSwitchBounceCount[ sw ];
+
+} // IncrementSwitchBounceCounter
+
+
 
 /***************************************************************************/
 /**
@@ -114,84 +107,80 @@ void CheckSwitches( void )
 {
     uint8_t     sw;
 
-    // Retrieve most of the switches from the expansion card.
-
-    gRawSwitch = EXP_TransferWord( 0, 0 ) & 0x7FF0;
-
-    if ( PIND & ( 1 << 6 ))
+    for ( sw = 0; sw < CFG_NUM_SWITCHES; sw++ ) 
     {
-        // Switch S3 comes from Port D.6
-
-        gRawSwitch |= ( 1 << SWITCH_S3 );
-    }
-
-    for ( sw = 4; sw < NUM_SWITCHES; sw++ ) 
-    {
-        switch ( gSwitchState[ sw ])
+        if ( IsSwitchEnabled( sw ))
         {
-            case SWITCH_STATE_OFF:
+            switch ( gSwitchState[ sw ])
             {
-                if ( IsRawSwitchPressed( sw ))
+                case SWITCH_STATE_OFF:
                 {
-                    gSwitchState[ sw ] = SWITCH_STATE_BOUNCING_ON;
-                    ClearSwitchBounceCounter();
-                }
-                break;
-            }
-
-            case SWITCH_STATE_BOUNCING_ON:
-            {
-                if ( gSwitchBounceCount[ sw ] >= SWITCH_BOUNCE_ON_COUNT )
-                {
-                    if ( IsRawSwitchPressed( sw ) )
+                    if ( IsRawSwitchPressed( sw ))
                     {
-                        gSwitchState[ sw ] = SWITCH_STATE_ON;
-                        SwitchTurnedOn( sw );
+                        SetSwitchState( sw, SWITCH_STATE_BOUNCING_ON );
+                        ClearSwitchBounceCount( sw );
+                    }
+                    break;
+                }
+    
+                case SWITCH_STATE_BOUNCING_ON:
+                {
+                    if ( SwitchBounceCount(  sw ) >= CFG_SWITCH_BOUNCE_ON_COUNT )
+                    {
+                        if ( IsRawSwitchPressed( sw ) )
+                        {
+                            SetSwitchState( sw, SWITCH_STATE_ON );
+                            SwitchEvent( sw, SWITCH_EVENT_PRESSED );
+                        }
+                        else
+                        {
+                            SetSwitchState( sw, SWITCH_STATE_OFF );
+                        }
                     }
                     else
                     {
-                        gSwitchState[ sw ] = SWITCH_STATE_OFF;
+                        IncrementSwitchBounceCount( sw );
                     }
+                    break;
                 }
-                else
+    
+                case SWITCH_STATE_ON:
                 {
-                    gSwitchBounceCount[ sw ]++;
-                }
-                break;
-            }
-
-            case SWITCH_STATE_ON:
-            {
-                if ( !IsRawSwitchPressed( sw ))
-                {
-                    gSwitchState[ sw ] = SWITCH_STATE_BOUNCING_OFF;
-                    ClearSwitchBounceCounter();
-                }
-                break;
-            }
-
-            case SWITCH_STATE_BOUNCING_OFF:
-            {
-                if ( gSwitchBounceCount[ sw ] >= SWITCH_BOUNCE_OFF_COUNT )
-                {
-                    if ( IsRawSwitchPressed( sw ) )
+                    if ( !IsRawSwitchPressed( sw ))
                     {
-                        gSwitchState[ sw ] = SWITCH_STATE_ON;
+                        SetSwitchState( sw, SWITCH_STATE_BOUNCING_OFF );
+                        ClearSwitchBounceCount( sw );
+                    }
+                    break;
+                }
+    
+                case SWITCH_STATE_BOUNCING_OFF:
+                {
+                    if ( SwitchBounceCount( sw ) >= CFG_SWITCH_BOUNCE_OFF_COUNT )
+                    {
+                        if ( IsRawSwitchPressed( sw ) )
+                        {
+                            SetSwitchState( sw, SWITCH_STATE_ON );
+                        }
+                        else
+                        {
+                            SetSwitchState( sw, SWITCH_STATE_OFF );
+                            SwitchEvent( sw, SWITCH_EVENT_RELEASED );
+                        }
                     }
                     else
                     {
-                        gSwitchState[ sw ] = SWITCH_STATE_OFF;
-                        SwitchTurnedOff( sw );
+                        IncrementSwitchBounceCount( sw );
                     }
+                    break;
                 }
-                else
-                {
-                    gSwitchBounceCount[ sw ]++;
-                }
-                break;
             }
         }
+        else
+        {
+            SetSwitchState( sw, SWITCH_STATE_OFF );
+        }
     }
-}
 
+} // CheckSwitches
 

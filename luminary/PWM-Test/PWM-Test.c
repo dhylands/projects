@@ -37,6 +37,7 @@
 
 #include "lcd.h"
 #include "Str.h"
+#include "Switch.h"
                  
 /* ---- Public Variables ------------------------------------------------- */
 /* ---- Private Constants and Types -------------------------------------- */
@@ -49,6 +50,8 @@
 unsigned	long	gADC[ 4 ];
 
 unsigned    long    gFlags;
+
+int                 gRunMotors;
 
 #define FLAG_ADC_SAMPLES_AVAIL  0
 
@@ -211,6 +214,21 @@ void InitMotors( void )
 
 /****************************************************************************
 *
+*   SwitchEvent
+*
+****************************************************************************/
+
+void SwitchEvent( SwitchNum_t switchNum, SwitchEvent_t event )
+{
+    if ( event == SWITCH_EVENT_PRESSED )
+    {
+        gRunMotors = !gRunMotors;
+    }
+
+} // SwitchEvent
+
+/****************************************************************************
+*
 *   Main loop for the test program
 *
 ****************************************************************************/
@@ -220,6 +238,8 @@ int main( void )
     int         spinIdx = 0;
     const char *spinner = "-\\|/";
     char        buf[ 20 ];
+    uint32_t    lastTimerVal;
+    uint32_t    tenMsec;
 
     // Set the clocking to run at 20MHz from the PLL.
 
@@ -227,7 +247,6 @@ int main( void )
                   | SYSCTL_USE_PLL 
                   | SYSCTL_OSC_MAIN 
                   | SYSCTL_XTAL_6MHZ );
-
 
     LCD_Init( 2, 16 );
     LCD_PutStr( "PWM-Test" );
@@ -275,6 +294,7 @@ int main( void )
     GPIODirModeSet( GPIO_PORTC_BASE, USER_LED, GPIO_DIR_MODE_OUT );
     GPIOPinWrite( GPIO_PORTC_BASE, USER_LED, 0 );
 
+    EnableSwitch( 0 );
 
     PutStr( "*****\n" );
     PutStr( "***** PWM-Test program\n" );
@@ -283,6 +303,9 @@ int main( void )
     TimerMatchSet( TIMER0_BASE, TIMER_B, 0 );
     GPIODirModeSet( GPIO_PORTC_BASE, USER_LED, GPIO_DIR_MODE_HW );
 
+    tenMsec = SysCtlClockGet() / 100;
+    lastTimerVal = TimerValueGet( TIMER1_BASE, TIMER_A );
+
     while ( 1 )
     {
         uint32_t    pulseWidth;
@@ -290,12 +313,17 @@ int main( void )
 
         while ( HWREGBITW( &gFlags, FLAG_ADC_SAMPLES_AVAIL ) == 0 )
         {
-            ;
+            uint32_t    currTimerVal = TimerValueGet( TIMER1_BASE, TIMER_A );
+
+            if (( currTimerVal - lastTimerVal ) > tenMsec )
+            {
+                SetRawSwitch( 0, GPIOPinRead( GPIO_PORTC_BASE, PUSH_BUTTON ) != 0 );
+                CheckSwitches();
+
+                lastTimerVal = currTimerVal;
+            }
         }
         HWREGBITW( &gFlags, FLAG_ADC_SAMPLES_AVAIL ) = 0;
-
-        pulseWidth = gADC[ 0 ] * gMotorPeriod / 1023;
-        pulsePct   = gADC[ 0 ] * 100 / 1023;
 
         StrPrintf( buf, sizeof( buf ), "%c PWM-Test", spinner[ spinIdx ]);
 
@@ -305,7 +333,19 @@ int main( void )
         PutStr( "\r" );
         PutStr(  buf );
 
-        StrPrintf( buf, sizeof( buf ), "%3lx %3d%%", gADC[0], pulsePct );
+        if ( gRunMotors )
+        {
+            pulseWidth = gADC[ 0 ] * gMotorPeriod / 1023;
+            pulsePct   = gADC[ 0 ] * 100 / 1023;
+
+            StrPrintf( buf, sizeof( buf ), "%3lx %3d%%    ", gADC[0], pulsePct );
+        }
+        else
+        {
+            pulseWidth = 0;
+
+            StrPrintf( buf, sizeof( buf ), "Motors Off" );
+        }
 
         PutStr( " " );
         PutStr( buf );
