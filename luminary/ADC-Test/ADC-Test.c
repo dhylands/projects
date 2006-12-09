@@ -53,8 +53,9 @@ unsigned    long    gFlags;
 
 /* ---- Private Function Prototypes -------------------------------------- */
 
+void ADC_isr( void ) __attribute__(( __interrupt__ ));
+
 void PutStr( const char *str );
-void ADC_isr( void );
 void InitADC( void );
 
 /* ---- Functions -------------------------------------------------------- */

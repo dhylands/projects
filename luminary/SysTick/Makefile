@@ -1,13 +1,13 @@
 ###########################################################################
 #
-#	Makefile to build ADC-Test
+#	Makefile to build SysTick
 #
 ###########################################################################
 
 MK_OS			= cortex-m3
-MK_ELF_TARGET 	= ADC-Test
+MK_ELF_TARGET 	= SysTick
 
-MK_SRC_FILES 	= ADC-Test.c StrPrintf.c lcd-printf.c lcd-osram96x16. startup-gcc.c osram96x16.c
+MK_SRC_FILES 	= SysTick.c StrPrintf.c lcd-printf.c lcd-osram96x16. startup-gcc.c osram96x16.c
 
 LM3S811_DIR	= $(MK_ROOT)/WinARM/lm3s811_evalboard
 
