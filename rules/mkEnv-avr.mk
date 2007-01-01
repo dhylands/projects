@@ -14,7 +14,10 @@ ifeq ($(MK_AVR_MCU),)
 $(error MK_AVR_MCU not specified)
 endif
 
-MK_AVR_MCU_LONG = $(patsubst m%,atmega%,$(MK_AVR_MCU))
+MK_AVR_MCU_LONG = $(patsubst t%,attiny%,$(patsubst m%,atmega%,$(MK_AVR_MCU)))
+
+$(info MK_AVR_MCU = $(MK_AVR_MCU))
+$(info MK_AVR_MCU_LONG = $(MK_AVR_MCU_LONG))
 
 ifeq ($(MK_AVR_FREQ),)
 $(error MK_AVR_FREQ not specified)
@@ -45,3 +48,4 @@ vpath %.cpp $(MK_COMMON_AVR_DIR)
 include $(MK_RULES_DIR)/mkEnv-gcc.mk
 
 BOOTHOST = $(MK_ROOT)/BootHost/exe/BootHost.exe
+STK500	 = "c:/Program Files/Atmel/AVR Tools/STK500/STK500.exe"
