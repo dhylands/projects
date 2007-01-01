@@ -244,6 +244,12 @@ print-obj:
 print-dep:
 	 @$(ECHO) "MK_DEP_FILES = $(MK_DEP_FILES)"
 
+print-def:
+	 @$(ECHO) "The following defines are built into the $(CC) compiler"
+	 touch __empty__.c
+	 @$(CC) -E -Wp,-dM __empty__.c
+	 @$(RM) -f __empty__.c
+
 #--------------------------------------------------------------------------
 #
 # 	Rule to build subdirectories
