@@ -59,20 +59,20 @@
 //--------------------------------------------------------------------------
 // LED Constants
 
-#define RED_LED_PIN     4
+#define RED_LED_PIN     2
 #define RED_LED_MASK    ( 1 << RED_LED_PIN )
-#define RED_LED_DDR     DDRG
-#define RED_LED_PORT    PORTG
+#define RED_LED_DDR     DDRC
+#define RED_LED_PORT    PORTC
 
-#define BLUE_LED_PIN    3
+#define BLUE_LED_PIN    1
 #define BLUE_LED_MASK   ( 1 << BLUE_LED_PIN )
-#define BLUE_LED_DDR    DDRG
-#define BLUE_LED_PORT   PORTG
+#define BLUE_LED_DDR    DDRC
+#define BLUE_LED_PORT   PORTC
 
-#define YELLOW_LED_PIN  4
+#define YELLOW_LED_PIN  0
 #define YELLOW_LED_MASK ( 1 << YELLOW_LED_PIN )
-#define YELLOW_LED_DDR  DDRB
-#define YELLOW_LED_PORT PORTB
+#define YELLOW_LED_DDR  DDRC
+#define YELLOW_LED_PORT PORTC
 
 //--------------------------------------------------------------------------
 // Some convenience macros to turn the LEDs on/off.
@@ -282,8 +282,9 @@ int main( void )
 
     // Set LEDs outputs
 
-    DDRB    = YELLOW_LED_MASK;
-    DDRG    = ( RED_LED_MASK | BLUE_LED_MASK );
+	YELLOW_LED_DDR |= YELLOW_LED_MASK;
+	RED_LED_DDR    |= RED_LED_MASK;
+	BLUE_LED_DDR   |= BLUE_LED_MASK;
 
     // Set both UARTs GPIO lines as inputs
 
