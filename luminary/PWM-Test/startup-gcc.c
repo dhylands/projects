@@ -55,10 +55,12 @@ extern int main(void);
 
 //*****************************************************************************
 //
-// External declaration for the interrupt handler used by the application.
+// External declaration for the interrupt handlers used by the application.
 //
 //*****************************************************************************
-extern void ADC_isr( void );
+
+void ADC_isr( void );
+void Timer0A_isr( void );
 
 //*****************************************************************************
 //
@@ -119,7 +121,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    IntDefaultHandler,                      // Timer 0 subtimer A
+    Timer0A_isr,                            // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
     IntDefaultHandler,                      // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B

@@ -13,7 +13,7 @@
 *
 ****************************************************************************
 *
-*   Test program for monitoring the ADC lines.
+*   Test program for Generating PWM signals to drive a motor
 *
 ****************************************************************************/
 
@@ -106,6 +106,18 @@ void ADC_isr( void )
     HWREGBITW( &gFlags, FLAG_ADC_SAMPLES_AVAIL ) = 1;
 
 } // ADC_isr
+
+/****************************************************************************
+*
+*   Interrupt handler for Timer0 A 
+*
+****************************************************************************/
+
+void Timer0A_isr( void )
+{
+    
+
+} // Timer0A_isr
 
 /****************************************************************************
 *
@@ -215,6 +227,26 @@ void InitMotors( void )
 
 /****************************************************************************
 *
+*   InitTach
+*
+****************************************************************************/
+
+void InitTach( void )
+{
+    SysCtlPeripheralEnable( SYSCTL_PERIPH_TIMER0 );
+
+    TimerConfigure( TIMER0_BASE, TIMER_CFG_16_BIT_PAIR
+                               | TIMER_CFG_A_CAP_TIME
+                               | TIMER_CFG_B_CAP_TIME );
+
+    TimerControlEvent( TIMER0_BASE, TIMER_BOTH, TIMER_EVENT_POS_EDGE );
+
+    TimerEnable( TIMER0_BASE, TIMER_BOTH );
+
+} // InitTach
+
+/****************************************************************************
+*
 *   SwitchEvent
 *
 ****************************************************************************/
@@ -254,6 +286,7 @@ int main( void )
 
 	InitADC();
     InitMotors();
+    InitTach();
 
     // Configure Timer0 to generate a 10 kHz PWM signal for driving
     // the user LED.
