@@ -66,7 +66,11 @@ on them:
     mount d: /d
     
     mkdir /MyDocuments
-    mount c:/MyDocuments /MyDocuments
+    mount c:/MyDocuments /MyDocuments 
+
+    Replace c:/MyDocuments with whereever you MyDocuments folder exists. 
+    For convenience I normally drag it (in Windows Explorer) to the root of 
+    my C drive and rename it to not have the space in it.
     
 Edit the home directory in /etc/passwd (c:\cygwin\etc\passwd) for your userid to be
     /c/Home
@@ -74,13 +78,21 @@ Edit the home directory in /etc/passwd (c:\cygwin\etc\passwd) for your userid to
 rather than 
     /home/dhylands
     
+Note: There is one line in the passwd file for each user on your system.
+    
 cd ~
 svn co http://svn.hylands.org/ projects
 cd projects/bash
 ./isntall.sh
 
 Exit from the current cygwin shell and start a new one. You should have a
-green prompt.
+green prompt and be of the form:
+
+username@hostname pathname
+99 > 
+
+Where username@hostname are in dark green, and pathname is in a bright green.
+Customize this in the ~/.startup.d/90-prompt.sh file.
 
 I also normally click on the System Menu (top corner of your command line prompt)
 Under the Layout tab:
