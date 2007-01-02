@@ -1,0 +1,99 @@
+This file documents what I would do to setup a new computer with my preferred
+command line environment. Feel free to customize as appropriate.
+
+Goto http://www.cygwin.com/ and install cygwin
+I use the following:
+    - install from Internet
+    - Root Directory: c:\cygwin
+    - Install for All Users
+    - Default Text File Type: Unix/binary
+    - Local Package directory:
+        c:\cygwin\Download
+    - I use ftp://mirrors.kernel.org/
+    
+I install the following packages in addition to the default:
+
+    Archive
+        unzip
+        zip
+    Devel
+        binutils
+        bison
+        flex
+        gcc
+        make
+        subversion
+    Editors
+        gvim
+        vim
+    Graphics
+        exif
+        GrpahicsMagick
+        ImageMagick
+    Interpreters
+        perl
+    Net
+        inetutils
+        netcat
+        ping
+        whois
+    Perl
+        perl_manpages
+    Shells
+        bash_completion
+    Text
+        enscript
+    Utils
+        file
+        patch
+    Web
+        wget
+        
+I then modify the cygwin icon so that instead of having a target of:
+    C:\cygwin\cygwin.bat 
+    
+it contains:
+    C:\cygwin\bin\bash.exe --login -i
+    
+
+I create the directory c:\Home and make the HOME environment variable point
+to that location.
+
+I create single letter directories for each of my drives and mount the drives
+on them:
+    mkdir /c /d
+    mount c: /c
+    mount d: /d
+    
+    mkdir /MyDocuments
+    mount c:/MyDocuments /MyDocuments
+    
+Edit the home directory in /etc/passwd (c:\cygwin\etc\passwd) for your userid to be
+    /c/Home
+    
+rather than 
+    /home/dhylands
+    
+cd ~
+svn co http://svn.hylands.org/ projects
+cd projects/bash
+./isntall.sh
+
+Exit from the current cygwin shell and start a new one. You should have a
+green prompt.
+
+I also normally click on the System Menu (top corner of your command line prompt)
+Under the Layout tab:
+    Set Screen Buffer Size Width to 160 
+    Set Screen Buffer Size Height to 999
+    Set Window Size Width to 160
+
+Under the Options tab:
+    Ensure QuickEdit mode and Insert Mode are set
+    
+Note; Quick Edit mode allows you to hilight text with the cursor (using a mouse).
+Pressing Enter copies the hilighted text into the clipboard. Pressing the right
+mouse button pastes the text.
+        
+Click OK and choose "Modify shortcut which started this window" to make the
+changes permanent.
