@@ -1,0 +1,14 @@
+#
+# This script executes all of the scripts in ~/.startup.d (in alphabetical order)
+#
+
+if [ "${RC_VERBOSE}" = "Y" ]; then echo "Executing ~/.startup"; fi
+
+for f in ~/.startup.d/*.sh
+do
+   if [ "${RC_VERBOSE}" = "Y" ]; then echo "Executing $f"; fi
+   . $f
+   if [ "${RC_VERBOSE}" = "Y" ]; then echo "Leaving $f"; fi
+done
+
+

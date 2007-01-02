@@ -1,0 +1,10 @@
+if [ "${RC_VERBOSE}" = "Y" ]; then echo "Executing ~/.bash_profile"; fi
+
+#
+# Since X-Windows bash shells are not login shells, we make our login
+# shell behave pretty much like a normal shell.
+#
+
+. ~/.bashrc
+
+if [ "${RC_VERBOSE}" = "Y" ]; then echo "Leaving ~/.bash_profile"; fi

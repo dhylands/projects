@@ -1,0 +1,3 @@
+if [ "${RC_VERBOSE}" = "Y" ]; then echo "Executing ~/.bash_logout"; fi
+
+if [ "${RC_VERBOSE}" = "Y" ]; then echo "Leaving ~/.bash_logout"; fi

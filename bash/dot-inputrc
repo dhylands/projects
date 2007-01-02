@@ -1,0 +1,33 @@
+#
+# Make Bash 8bit clean
+#
+
+set meta-flag on
+set input-meta on
+set convert-meta off
+set output-meta on
+
+#
+# Ignore case while completing
+#
+
+set completion-ignore-case on
+set completion-query-items 20
+
+#
+# Make the completion cycle through the matches, rather than just ding
+#
+
+TAB: menu-complete
+
+#
+# Map Hom/End et al
+#
+
+"\e[1~": beginning-of-line    # Home
+"\e[4~": end-of-line          # End
+"\e[5~": beginning-of-history # Page Up
+"\e[6~": end-of-history       # Page Down
+"\e[3~": delete-char          # Delete
+"\e[2~": quoted-insert        # Insert
+
