@@ -9,9 +9,18 @@ I use the following:
     - Default Text File Type: Unix/binary
     - Local Package directory:
         c:\cygwin\Download
-    - I use ftp://mirrors.kernel.org/
+    - I often use ftp://mirrors.kernel.org/
     
 I install the following packages in addition to the default:
+
+    Devel
+        make
+        subversion
+        
+This should be enough to use the build system I use (you'll need to also install
+some compiler as well).
+
+I also like to install the following, although is more for my own benefit:
 
     Archive
         unzip
@@ -21,8 +30,6 @@ I install the following packages in addition to the default:
         bison
         flex
         gcc
-        make
-        subversion
     Editors
         gvim
         vim
@@ -109,3 +116,4 @@ mouse button pastes the text.
         
 Click OK and choose "Modify shortcut which started this window" to make the
 changes permanent.
+
