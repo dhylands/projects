@@ -90,7 +90,7 @@ Note: There is one line in the passwd file for each user on your system.
 cd ~
 svn co http://svn.hylands.org/ projects
 cd projects/bash
-./isntall.sh
+./install.sh
 
 Exit from the current cygwin shell and start a new one. You should have a
 green prompt and be of the form:
