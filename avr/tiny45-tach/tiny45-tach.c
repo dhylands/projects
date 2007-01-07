@@ -285,7 +285,10 @@ static void PutNum( uint16_t num )
 
 int main( void )
 {
-    uint16_t num;
+    uint16_t    num;
+    uint32_t    t1;
+    uint32_t    t2;
+    uint8_t     numSamples;
 
     // Setup the USI module to be an SPI Master. The HC4LED display only has
     // a clock and data-in line, so it's a write-only interface
@@ -313,25 +316,46 @@ int main( void )
 
     sei();
 
-    num = 0;
-
     while ( 1 )
     {
-        if ( num > 9999 )
+        ms_spin( 500 );
+
+        LED_PORT ^= LED_MASK;
+
+        cli();
+        if (( numSamples = CBUF_Len( TACH_gBuffer )) >= 2 )
         {
-            num = 0;
+            uint8_t     i;
+            uint32_t    old_time = t1 - CFG_CPU_CLOCK;
+
+            t1 = CBUF_GetEnd( TACH_gBuffer, 0 );
+            t2 = CBUF_GetEnd( TACH_gBuffer, 1 );
+            
+            for ( i = 2; i < numSamples; i++ ) 
+            {
+                uint32_t    t = CBUF_GetEnd( TACH_gBuffer, i );
+
+                if ( t < old_time )
+                {
+                    break;
+                }
+                t2 = t;
+            }
         }
-        PutNum( num++ );
+        sei();
 
-        LED_PORT &= ~LED_MASK;
+        if ( numSamples >= 2 )
+        {
+            
+        }
 
-        ms_spin( 10 );
-
-        PutNum( num++ );
-
-        LED_PORT |=  LED_MASK;
-
-        ms_spin( 10 );
+        else
+        {
+            PutByte( S7 );
+            PutByte( S7 );
+            PutByte( S7 );
+            PutByte( S7 );
+        }
     }
 
 } // main
