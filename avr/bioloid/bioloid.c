@@ -41,6 +41,8 @@
 #define UART0_BAUD_RATE     115200
 #define UART1_BAUD_RATE     1000000
 
+#define	START_OF_PACKET		0xFF	// Two in a row is the start of a packet
+
 #define UART_DATA_BIT_8  (( 1 << UCSZ1 ) | ( 1 << UCSZ0 ))
 #define UART_PARITY_NONE (( 0 << UPM1 )  | ( 0 << UPM0 ))
 #define UART_STOP_BIT_1  ( 1 << USBS )
@@ -53,11 +55,32 @@
 #define UCSR0C_INIT  ( UART_DATA_BIT_8 | UART_PARITY_NONE | UART_STOP_BIT_1 )
 
 #define UCSR1A_INIT  ( 1 << U2X1 )
-#define UCSR1B_INIT  (( 1 << RXCIE ) | ( 1 << RXEN ) | ( 1 << TXEN ))
+#define UCSR1B_INIT  (( 1 << RXCIE ) | ( 1 << RXEN ))
 #define UCSR1C_INIT  ( UART_DATA_BIT_8 | UART_PARITY_NONE | UART_STOP_BIT_1 )
 
 //--------------------------------------------------------------------------
 // LED Constants
+
+#define ROBOSTIX    0
+
+#if ROBOSTIX
+
+#define RED_LED_PIN     4
+#define RED_LED_MASK    ( 1 << RED_LED_PIN )
+#define RED_LED_DDR     DDRG
+#define RED_LED_PORT    PORTG
+
+#define BLUE_LED_PIN    3
+#define BLUE_LED_MASK   ( 1 << BLUE_LED_PIN )
+#define BLUE_LED_DDR    DDRG
+#define BLUE_LED_PORT   PORTG
+
+#define YELLOW_LED_PIN  4
+#define YELLOW_LED_MASK ( 1 << YELLOW_LED_PIN )
+#define YELLOW_LED_DDR  DDRB
+#define YELLOW_LED_PORT PORTB
+
+#else
 
 #define RED_LED_PIN     2
 #define RED_LED_MASK    ( 1 << RED_LED_PIN )
@@ -73,6 +96,8 @@
 #define YELLOW_LED_MASK ( 1 << YELLOW_LED_PIN )
 #define YELLOW_LED_DDR  DDRC
 #define YELLOW_LED_PORT PORTC
+
+#endif
 
 //--------------------------------------------------------------------------
 // Some convenience macros to turn the LEDs on/off.
@@ -106,7 +131,12 @@ typedef struct
 
 static  volatile    uint8_t     gTxActivity;
 static  volatile    uint8_t     gRxActivity;
-static  volatile    uint8_t     gIgnoreCount;
+
+#define	STATE_OFF		0
+#define	STATE_FIRST_FF	1
+#define	STATE_ON		2
+
+static	uint8_t		gState;
 
 static  Buffer_t    gToServoBuf;
 static  Buffer_t    gFromServoBuf;
@@ -118,7 +148,6 @@ static  Buffer_t    gFromServoBuf;
 
 /* ---- Functions -------------------------------------------------------- */
 
-
 //***************************************************************************
 /**
 *   Interrupt handler for characters from the gumstix.
@@ -128,15 +157,49 @@ ISR( USART0_RX_vect )
 {
     uint8_t ch = UDR0;   // Read the character from the UART
 
-    if ( !CBUF_IsFull( gToServoBuf ))
-    {
-        CBUF_Push( gToServoBuf, ch );
+	switch ( gState )
+	{
+		case STATE_OFF:
+		{
+			if ( ch == START_OF_PACKET )
+			{
+				gState = STATE_FIRST_FF;
+			}
+			break;
+		}
 
-        // Enable the transmit interrupt for the servo side now that there's 
-        // a character in the buffer.
+		case STATE_FIRST_FF:
+		{
+			if ( ch != START_OF_PACKET )
+			{
+				gState = STATE_OFF;
+				break;
+			}
+			gState = STATE_ON;
 
-        UCSR1B |= ( 1 << UDRIE1 );
-    }
+			// Push the first 0xFF that we dropped earlier onto the queue
+			// so that it gets sent out.
+
+			CBUF_Push( gToServoBuf, ch );
+
+			// Fall through into STATE_ON (causes the second 0xFF to get sent)
+		}
+
+		case STATE_ON:
+		{
+			if ( !CBUF_IsFull( gToServoBuf ))
+			{
+				CBUF_Push( gToServoBuf, ch );
+
+				// We want to write a character, so we need to enable the transmitter
+				// and disable the receiver.
+
+//				UCSR1B &= ~( 1 << RXEN );
+				UCSR1B |= (( 1 << TXEN ) | ( 1 << UDRIE ));
+			}
+			break;
+		}
+	}
 
 } // USART0_RX_vect
 
@@ -149,28 +212,17 @@ ISR( USART1_RX_vect )
 {
     uint8_t ch = UDR1;   // Read the character from the UART
 
-    if ( gIgnoreCount > 0 ) 
-    {
-        // We just received a character that we sent
+	if ( !CBUF_IsFull( gFromServoBuf ))
+	{
+		CBUF_Push( gFromServoBuf, ch );
 
-        gIgnoreCount--;
-    }
-    else
-    {
-        // It isn't a character that we sent
+		// Enable the transmit interrupt for the gumstix side now that 
+		// there's a character in the buffer.
 
-        if ( !CBUF_IsFull( gFromServoBuf ))
-        {
-            CBUF_Push( gFromServoBuf, ch );
+		UCSR0B |= ( 1 << UDRIE );
+	}
 
-            // Enable the transmit interrupt for the gumstix side now that 
-            // there's a character in the buffer.
-
-            UCSR0B |= ( 1 << UDRIE0 );
-        }
-
-        gRxActivity = 1;
-    }
+	gRxActivity = 1;
 
 } // USART1_RX_vect
 
@@ -186,7 +238,7 @@ ISR( USART0_UDRE_vect )
     {
         // Nothing left to transmit, disable the transmit interrupt
 
-        UCSR0B &= ~( 1 << UDRIE0 );
+        UCSR0B &= ~( 1 << UDRIE );
     }
     else
     {
@@ -211,31 +263,46 @@ ISR( USART1_UDRE_vect )
 {
     if ( CBUF_IsEmpty( gToServoBuf ))
     {
-        // Nothing left to transmit, disable the transmit interrupt, and the
-        // transmitter. Disabling the transmitter allows the servo to drive
-        // it when it sends a response.
+        // Nothing left to transmit, disable the transmit interrupt.
+		// The transmitter will be disabled when the Tx Complete interrupt 
+		// occurs.
 
-        UCSR1B &= ~(( 1 << TXEN ) | ( 1 << UDRIE1 ));
+        UCSR1B &= ~( 1 << UDRIE );
     }
     else
     {
-        // Increment the ignore count since we're going to wind up receiving
-        // our own transmission
-
-        gIgnoreCount++;
-
-        // We want to write a character, so we need to enable the transmitter.
-
-        UCSR1B |=  (( 1 << TXEN ) | ( 1 << UDRIE1 ));
-
-        // And write the next character from the TX Buffer
+        // Write the next character from the TX Buffer
 
         UDR1 = CBUF_Pop( gToServoBuf );
 
-        gTxActivity = 1;
+		// Enable the Tx Complete interrupt. This is used to turn off the
+		// transmitter and enable the receiver.
+
+		UCSR1B |= ( 1 << TXCIE );
+
+		gTxActivity = 1;
     }
 
 }  // USART1_UDRE_vect
+
+//***************************************************************************
+/**
+*   Interrupt handler for when the data has completely left the Tx shift
+*	register.
+*
+*	We use this to disable the transmitter and re-enable the receiver.
+*/
+
+ISR( USART1_TX_vect )
+{
+	// Since we were called, the data register is also empty. This means
+	// that we can go ahead and disable the transmitter and re-enable the
+	// receiver.
+
+	UCSR1B &= ~(( 1 << TXEN ) | ( 1 << TXCIE ));
+	UCSR1B |=   ( 1 << RXEN );
+
+} // USART1_TX_vect
 
 //***************************************************************************
 /**
