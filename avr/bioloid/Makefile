@@ -6,7 +6,7 @@
 
 ifeq ($(TARGET),)
 
-TARGETS = bioloid serial-echo
+TARGETS = bioloid-rs bioloid-128 serial-echo
 
 all $(MAKECMDGOALS): $(TARGETS)
 
