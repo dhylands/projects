@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   bioloiid.c
+*   @file   bioloid.c
 *
 *   @brief  Program which interfaces between the gumstix and the bioloid
 *           AX-12 servos.
@@ -61,7 +61,9 @@
 //--------------------------------------------------------------------------
 // LED Constants
 
-#define ROBOSTIX    0
+#if !defined( ROBOSTIX )
+#  error ROBOSTIX should be defined to be 0 or 1
+#endif
 
 #if ROBOSTIX
 
