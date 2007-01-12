@@ -19,7 +19,18 @@ PREPROCESS.c = $(CC) $(CPPFLAGS) $(TARGET_ARCH) -E -Wp,-C,-dD,-dI
 #
 # Since we can generate the dependencies as part of the compilation, we
 # do that rather than generate the dependency files separately.
-		   
+
+#--------------------------------------------------------------------------
+#
+# Making the .d's be phony and providing a dummy rule to make them, 
+# combined with the %.o : %.c %.d causes make to work properly when the .d 
+# file is removed, but the .o file isn't. make will now regenerate the .d 
+# by recompiling the .o
+#
+	
+.PHONY: $(MK_OBJ_DIR)/%.d
+$(MK_OBJ_DIR)/%.d: ;
+
 #--------------------------------------------------------------------------
 #
 # Compile C source files
@@ -27,7 +38,7 @@ PREPROCESS.c = $(CC) $(CPPFLAGS) $(TARGET_ARCH) -E -Wp,-C,-dD,-dI
 #   COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 #
 
-$(MK_OBJ_DIR)/%.o : %.c
+$(MK_OBJ_DIR)/%.o : %.c $(MK_OBJ_DIR)/%.d
 	$(ECHO) "Compiling $< ..."
 	$(Q)$(COMPILE.c) $(DEP_OUTPUT_OPTION) $(OUTPUT_OPTION) $<
 
@@ -38,7 +49,7 @@ $(MK_OBJ_DIR)/%.o : %.c
 #   COMPILE.cc = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 #
 
-$(MK_OBJ_DIR)/%.o : %.cpp
+$(MK_OBJ_DIR)/%.o : %.cpp $(MK_OBJ_DIR)/%.d
 	$(ECHO) "Compiling $< ..."
 	$(Q)$(COMPILE.cc) $(DEP_OUTPUT_OPTION) $(OUTPUT_OPTION) $<
 
@@ -60,7 +71,7 @@ $(MK_OBJ_DIR)/%.o : %.s
 #   COMPILE.S = $(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c
 #
 
-$(MK_OBJ_DIR)/%.o : %.S
+$(MK_OBJ_DIR)/%.o : %.S $(MK_OBJ_DIR)/%.d
 	$(ECHO) "Assembling $< ..."
 	$(Q)$(COMPILE.S) $(DEP_OUTPUT_OPTION) $(OUTPUT_OPTION) $<
 
