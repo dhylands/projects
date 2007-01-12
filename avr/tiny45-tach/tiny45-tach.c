@@ -34,6 +34,34 @@
 
 /* ---- Private Constants and Types -------------------------------------- */
 
+#define TIMER0_CLOCK_SEL_NONE       (( 0 << CS02 ) | ( 0 << CS01 ) | ( 0 << CS00 ))
+#define TIMER0_CLOCK_SEL_DIV_1      (( 0 << CS02 ) | ( 0 << CS01 ) | ( 1 << CS00 ))
+#define TIMER0_CLOCK_SEL_DIV_8      (( 0 << CS02 ) | ( 1 << CS01 ) | ( 0 << CS00 ))
+#define TIMER0_CLOCK_SEL_DIV_64     (( 0 << CS02 ) | ( 1 << CS01 ) | ( 1 << CS00 ))
+#define TIMER0_CLOCK_SEL_DIV_256    (( 1 << CS02 ) | ( 0 << CS01 ) | ( 0 << CS00 ))
+#define TIMER0_CLOCK_SEL_DIV_1024   (( 1 << CS02 ) | ( 0 << CS01 ) | ( 1 << CS00 ))
+#define TIMER0_CLOCK_SEL_T0_FALLING (( 1 << CS02 ) | ( 1 << CS01 ) | ( 0 << CS00 ))
+#define TIMER0_CLOCK_SEL_T0_RISING  (( 1 << CS02 ) | ( 1 << CS01 ) | ( 1 << CS00 ))
+
+#if 0
+#   define  PRESCALAR   1uL
+#   define  TIMER0_CLOCK_SEL    TIMER0_CLOCK_SEL_DIV_1
+#elif 1
+#   define  PRESCALAR   8uL
+#   define  TIMER0_CLOCK_SEL    TIMER0_CLOCK_SEL_DIV_8
+#elif 0
+#   define  PRESCALAR   64uL
+#   define  TIMER0_CLOCK_SEL    TIMER0_CLOCK_SEL_DIV_64
+#endif
+
+#define TICKS_PER_SEC   ( CFG_CPU_CLOCK / PRESCALAR )
+
+// The HC4LED connector goes like this:
+//
+//      Data Clock NC Blank GND +5
+//
+// across the top, where +5 is on the right.
+
 #define MOSI_DDR        DDRB
 #define MOSI_PORT       PORTB
 #define MOSI_MASK       ( 1 << 0 )
@@ -83,6 +111,7 @@ typedef struct
 //
 // where the number is the bit position within the byte.
 
+#define BLANK   0x00
 #define S1  0x02
 #define S2  0x04
 #define S3  0x08
@@ -107,7 +136,7 @@ uint8_t gNumBits[ 10 ] =
 
 volatile    TACH_Buffer_t   TACH_gBuffer;
 
-volatile    uint16_t    gOverflowCount;
+volatile    uint32_t    gOverflowCount;
 
 /* ---- Functions -------------------------------------------------------- */
 
@@ -160,7 +189,7 @@ ISR( TIM0_OVF_vect )
 static inline uint32_t GetTimer( void )
 {
     uint8_t     tcnt;
-    uint16_t    overflowCount;
+    uint32_t    overflowCount;
     uint32_t    timerCount;
 
     tcnt = TCNT0;
@@ -173,7 +202,7 @@ static inline uint32_t GetTimer( void )
         tcnt = TCNT0;
         overflowCount++;
     }
-    timerCount = ( overflowCount << 8 ) + tcnt;
+    timerCount = ( (uint32_t)overflowCount << 8 ) + (uint32_t)tcnt;
 
     return timerCount;
 
@@ -245,6 +274,16 @@ static void PutByte( uint8_t b )
 
 static void PutNum( uint16_t num )
 {
+    uint8_t printLastDigit = 1;
+
+    if ( num > 9999 )
+    {
+        num /= 100;
+
+        PutByte( S7 );
+        printLastDigit = 0;
+    }
+
     // We need to write the 1's first
 
     PutByte( gNumBits[   num          % 10 ]);
@@ -255,7 +294,7 @@ static void PutNum( uint16_t num )
     }
     else
     {
-        PutByte( 0 );
+        PutByte( BLANK );
     }
 
     if ( num > 99 )
@@ -264,16 +303,19 @@ static void PutNum( uint16_t num )
     }
     else
     {
-        PutByte( 0 );
+        PutByte( BLANK );
     }
 
+    if ( printLastDigit )
+    {
     if ( num > 999 )
     {
         PutByte( gNumBits[ ( num / 1000 ) % 10 ]);
     }
     else
     {
-        PutByte( 0 );
+            PutByte( BLANK );
+        }
     }
 
 } // PutNum
@@ -285,10 +327,13 @@ static void PutNum( uint16_t num )
 
 int main( void )
 {
-    uint16_t    num;
-    uint32_t    t1;
-    uint32_t    t2;
-    uint8_t     numSamples;
+    uint32_t    prev_t1 = 0;
+    uint32_t    t1 = 0;
+    uint32_t    t2 = 0;
+    uint32_t    rpm;
+    uint8_t     numSamples = 0;
+    uint8_t     maxSamples;
+    uint8_t     noChangeCount = 0;
 
     // Setup the USI module to be an SPI Master. The HC4LED display only has
     // a clock and data-in line, so it's a write-only interface
@@ -309,10 +354,13 @@ int main( void )
     // Initialize Timer 0 to count clock ticks
 
     TCCR0A = 0; // COM = 0, WGM = 0
-    TCCR0B = ( 0 << CS02 ) | ( 0 << CS01 ) | ( 1 << CS00 ); // Divide by 1 prescalar
+    TCCR0B = TIMER0_CLOCK_SEL;
 
     GIMSK |= ( 1 << PCIE );
     PCMSK |= TACH_MASK;
+    TIMSK |= ( 1 << TOIE0 );
+
+    gOverflowCount = 0;
 
     sei();
 
@@ -323,15 +371,18 @@ int main( void )
         LED_PORT ^= LED_MASK;
 
         cli();
-        if (( numSamples = CBUF_Len( TACH_gBuffer )) >= 2 )
+        if (( maxSamples = CBUF_Len( TACH_gBuffer )) >= 2 )
         {
             uint8_t     i;
-            uint32_t    old_time = t1 - CFG_CPU_CLOCK;
+            uint32_t    old_time;
 
             t1 = CBUF_GetEnd( TACH_gBuffer, 0 );
             t2 = CBUF_GetEnd( TACH_gBuffer, 1 );
+            numSamples = 2;
+
+            old_time = t1 - TICKS_PER_SEC;
             
-            for ( i = 2; i < numSamples; i++ ) 
+            for ( i = 2; i < maxSamples; i++ ) 
             {
                 uint32_t    t = CBUF_GetEnd( TACH_gBuffer, i );
 
@@ -340,15 +391,34 @@ int main( void )
                     break;
                 }
                 t2 = t;
+                numSamples = i + 1;
             }
         }
         sei();
 
         if ( numSamples >= 2 )
         {
-            
-        }
+            if ( t1 == prev_t1 )
+            {
+                noChangeCount++;
+                if ( noChangeCount > 4 )
+                {
+                    PutByte( S7 );
+                    PutByte( S7 );
+                    PutByte( S7 );
+                    PutByte( S7 );
+                }
+            }
+            else
+            {
+                noChangeCount = 0;
+                prev_t1 = t1;
 
+                rpm = (uint16_t)((( numSamples - 1 ) * TICKS_PER_SEC * 60uL ) / ( t1 - t2 ));
+
+                PutNum( (uint16_t)rpm );
+            }
+        }
         else
         {
             PutByte( S7 );
