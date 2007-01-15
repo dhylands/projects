@@ -308,12 +308,12 @@ static void PutNum( uint16_t num )
 
     if ( printLastDigit )
     {
-    if ( num > 999 )
-    {
-        PutByte( gNumBits[ ( num / 1000 ) % 10 ]);
-    }
-    else
-    {
+        if ( num > 999 )
+        {
+            PutByte( gNumBits[ ( num / 1000 ) % 10 ]);
+        }
+        else
+        {
             PutByte( BLANK );
         }
     }
