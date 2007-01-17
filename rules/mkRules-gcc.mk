@@ -197,6 +197,7 @@ install-bin_$MK_ELF_TARGET): $(MK_ELF_TARGET) $(MK_UTILS_DIR)/$(MK_ELF_TARGET)$(
 
 $(MK_UTILS_DIR)/$(MK_ELF_TARGET)$(MK_ELF_EXT) : $(call MK_ELF_NAME, $(MK_ELF_TARGET))
 	@$(ECHO) "Installing $@ ..."
+	$(Q)$(MKDIR) -p $(@D)
 	$(Q)$(INSTALL) $< $@
 	@$(ECHO)
 

@@ -7,6 +7,10 @@
 #
 ###########################################################################
 
+ifneq ($(lastword a b),b)
+$(error These Makefiles require make 3.81 or newer)
+endif
+
 ifneq ($(MK_ENV_INCLUDED),1)
 include $(dir $(lastword $(MAKEFILE_LIST)))mkEnv.mk
 endif

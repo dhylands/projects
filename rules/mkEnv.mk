@@ -41,9 +41,7 @@ export Q
 # 	MK_ROOT describes the path to get from the directory containing the
 # 	Makefile which included this file,
 
-ifeq ($(MK_ROOT),)
-MK_ROOT := $(dir $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
-endif
+MK_ROOT := $(patsubst %/,%,$(dir $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))))
 export MK_ROOT
 
 ifeq ($(verbose),1)
