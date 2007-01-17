@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <memory.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 #include <string.h>
-#include "GetOpt.h"
+#include "getopt.h"
 
 #define	LINE_WIDTH	16
 
