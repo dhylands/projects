@@ -267,3 +267,4 @@ endif
 	$(ECHO) "Making $(MK_DIR_PREFIX)$@ ..."
 	$(Q)$(MAKE) MK_DIR_PREFIX=$(MK_DIR_PREFIX)$@ -C $@ $(MAKECMDGOALS)
 
+include $(MK_RULES_DIR)/svn-version.mk

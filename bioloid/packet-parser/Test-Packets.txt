@@ -1,0 +1,164 @@
+#
+# This file contains test packets from the AX-12 Manual
+#
+
+# Set the ID of a connected Dynamixel actuator to 1
+
+ff ff fe 04 03 03 01 f6
+
+# Read the internal temperature of the Dynamixel actuator with an ID of 1
+
+ff ff 01 04 02 2b 01 cc
+
+# Status packet
+
+ff ff 01 03 00 20 db
+
+# Obtain the status packet of the Dynamixel actuator with an ID of 1
+
+ff ff 01 02 01 fb
+
+# Status pcket
+
+ff ff 01 02 00 fc
+
+# Reset the Dynamixel actuator with an ID of 0
+
+ff ff 00 02 06 f7
+
+# Status packet
+
+ff ff 00 02 00 fd
+
+# Sync Write example - Set multiple positions and velocities
+# Dynamixel actuator with an ID of 0: to position 0x010 with a speed of 0x150
+# Dynamixel actuator with an ID of 1: to position 0x220 with a speed of 0x360
+# Dynamixel actuator with an ID of 2: to position 0x030 with a speed of 0x170
+# Dynamixel actuator with an ID of 0: to position 0x220 with a speed of 0x380
+
+ff ff fe 18 83 1e 04 
+00 10 00 50 01 
+01 20 02 60 03 
+02 30 00 70 01 
+03 20 02 80 03 
+e2
+
+FF FF FE 18 83 1E 04 00 10 00 50
+01 01 20 02 60 03 02 30 00 70 01 03 20 02 80
+03 e2
+
+# Reading the Model Number and Firmware Version of the Dynamixel actuator with an ID of 1
+# Instruction = READ_DATA, Address = 0x00, Length = 0x03
+
+ff ff 01 04 02 00 03 f5
+
+# Response
+
+ff ff 01 05 00 74 00 08 7d
+
+# Changing the ID to 0 for a Dynamixel actuator with an ID of 1
+# Instruction = WRITE_DATA, Address = 0x03, DATA = 0x00
+
+FF FF 01 04 03 03 00 F4
+FF FF 01 02 00 FC
+
+# Changing the Baud Rate of a Dynamixel actuator to 1M bps
+# Instruction = WRITE_DATA, Address = 0x04, DATA = 0x01
+
+FF FF 00 04 03 04 01 F3
+FF FF 00 02 00 FD
+
+# Resetting the Return Delay Time to 4 uSec for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x05, DATA = 0x02
+
+FF FF 00 04 03 05 02 F1
+FF FF 00 02 00 FD
+
+# Limiting the operating angle range to 0°~150° for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x08, DATA = 0xff, 0x01
+
+FF FF 00 05 03 08 FF 01 EF
+FF FF 00 02 00 FD
+
+# Resetting the upper limit for the operating temperature to 80°C for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x0B, DATA = 0x50
+
+FF FF 00 04 03 0B 50 9D
+FF FF 00 02 00 FD
+
+# Setting the operating voltage to 10V ~ 17V for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x0C, DATA = 0x64, 0xAA
+
+FF FF 00 05 03 0C 64 AA DD
+FF FF 00 02 00 FD
+
+# Setting the maximum torque to 50% of its maximum possible value for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x0E, DATA = 0xff, 0x01
+
+FF FF 00 05 03 0E FF 01 E9
+FF FF 00 02 00 FD
+
+# Set the Dynamixel actuator with an ID of 0 to never return a Status Packet
+# Instruction = WRITE_DATA, Address = 0x10, DATA = 0x00
+
+FF FF 00 04 03 10 00 E8
+FF FF 00 02 00 FD
+
+# Set the Alarm to blink the LED and Shutdown (Torque off) the actuator when the operating temperature goes over the set limit
+# Instruction = WRITE_DATA, Address = 0x11, DATA = 0x04, 0x04
+
+FF FF 00 05 03 11 04 04 DE
+FF FF 00 02 00 FD
+
+# Turn on the LED and Enable Torque for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x18, DATA = 0x01, 0x01
+
+FF FF 00 05 03 18 01 01 DD
+FF FF 00 02 00 FD
+
+# Setting the Compliance Margin to 1 and Compliance Slope to 0x40 for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x1A, DATA = 0x01, 0x01, 0x40, 0x40
+
+FF FF 00 07 03 1A 01 01 40 40 59
+FF FF 00 02 00 FD
+
+# Position the output of a Dynamixel actuator with an ID of 0 to 180° with an angular velocity of 057RPM
+# Instruction = WRITE_DATA, Address = 0x1E, DATA = 0x00, 0x02, 0x00, 0x02
+
+FF FF 00 07 03 1E 00 02 00 02 D3
+FF FF 00 02 00 FD
+
+# Position the output of a Dynamixel actuator with an ID of 0 to 0° and Position the
+# output of a Dynamixel actuator with an ID of 1 to 300 deg, and initiate the movement
+# at the same time.
+#
+# ID=0, Instruction = REG_WRITE, Address = 0x1E, DATA = 0x00, 0x00
+# ID=1, Instruction = REG_WRITE, Address = 0x1E, DATA = 0xff, 0x03
+# ID=0xfe(Broadcasting ID), Instruction = ACTION,
+
+FF FF 00 05 04 1E 00 00 D8
+FF FF 00 02 00 FD
+
+FF FF 01 05 04 1E FF 03 D5
+FF FF 01 02 00 FC
+
+FF FF FE 02 05 FA
+
+# Lock all addresses except for Address 0x18 ~ Address0x23 for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x2F, DATA = 0x01
+
+FF FF 00 04 03 2F 01 C8
+FF FF 00 02 00 FD
+
+# Sample error with trying to change locked actuator
+
+FF FF 00 05 03 30 40 00 87
+FF FF 00 02 08 F5
+
+# Set the minimum power (Punch) to 0x40 for a Dynamixel actuator with an ID of 0
+# Instruction = WRITE_DATA, Address = 0x30, DATA = 0x40, 0x00
+
+FF FF 00 05 03 30 40 00 87
+FF FF 00 02 00 FD
+
+
