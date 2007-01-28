@@ -82,6 +82,76 @@ struct BLD_Instance_s
 
 };
 
+/*
+ * Control Table
+ */
+
+// EEPROM Area
+
+#define BLD_P_MODEL_NUMBER_L            0
+#define BLD_P_MODOEL_NUMBER_H           1
+#define BLD_P_VERSION                   2
+#define BLD_P_ID                        3
+#define BLD_P_BAUD_RATE                 4
+#define BLD_P_RETURN_DELAY_TIME         5
+#define BLD_P_CW_ANGLE_LIMIT_L          6
+#define BLD_P_CW_ANGLE_LIMIT_H          7
+#define BLD_P_CCW_ANGLE_LIMIT_L         8
+#define BLD_P_CCW_ANGLE_LIMIT_H         9
+#define BLD_P_RESERVED_10               10
+#define BLD_P_LIMIT_TEMPERATURE         11
+#define BLD_P_DOWN_LIMIT_VOLTAGE        12
+#define BLD_P_UBLD_P_LIMIT_VOLTAGE          13
+#define BLD_P_MAX_TORQUE_L              14
+#define BLD_P_MAX_TORQUE_H              15
+#define BLD_P_RETURN_LEVEL              16
+#define BLD_P_ALARM_LED                 17
+#define BLD_P_ALARM_SHUTDOWN            18
+#define BLD_P_RESERVED_19               19
+#define BLD_P_DOWN_CALIBRATION_L        20
+#define BLD_P_DOWN_CALIBRATION_H        21
+#define BLD_P_UBLD_P_CALIBRATION_L          22
+#define BLD_P_UBLD_P_CALIBRATION_H          23
+
+// RAM Area
+
+#define BLD_P_TORQUE_ENABLE             24
+#define BLD_P_LED                       25
+#define BLD_P_CW_COMPLIANCE_MARGIN      26
+#define BLD_P_CCW_COMPLIANCE_MARGIN     27
+#define BLD_P_CW_COMPLIANCE_SLOPE       28
+#define BLD_P_CCW_COMPLIANCE_SLOPE      29
+#define BLD_P_GOAL_POSITION_L           30
+#define BLD_P_GOAL_POSITION_H           31
+#define BLD_P_GOAL_SPEED_L              32
+#define BLD_P_GOAL_SPEED_H              33
+#define BLD_P_TORQUE_LIMIT_L            34
+#define BLD_P_TORQUE_LIMIT_H            35
+#define BLD_P_PRESENT_POSITION_L        36
+#define BLD_P_PRESENT_POSITION_H        37
+#define BLD_P_PRESENT_SPEED_L           38
+#define BLD_P_PRESENT_SPEED_H           39
+#define BLD_P_PRESENT_LOAD_L            40
+#define BLD_P_PRESENT_LOAD_H            41
+#define BLD_P_PRESENT_VOLTAGE           42
+#define BLD_P_PRESENT_TEMPERATURE       43
+#define BLD_P_REGISTERED_INSTRUCTION    44
+#define BLD_P_RESERVED_45               45
+#define BLD_P_MOVING                    46
+#define BLD_P_LOCK                      47
+#define BLD_P_PUNCH_L                   48
+#define BLD_P_PUNCH_H                   49
+
+// Instructions
+
+#define BLD_CMD_PING        0x01
+#define BLD_CMD_READ        0x02
+#define BLD_CMD_WRITE       0x03
+#define BLD_CMD_REG_WRITE   0x04
+#define BLD_CMD_ACTION      0x05
+#define BLD_CMD_RESET       0x06
+
+#define BLD_CMD_SYNC_WRITE  0x83
 
 /* ---- Variable Externs ------------------------------------------------- */
 

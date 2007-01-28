@@ -29,7 +29,7 @@ svn-version.h: FORCE
 	@echo " * Generated file - Do NOT edit" >> svn-version.tmp
 	@echo " */" >> svn-version.tmp
 	@echo >> svn-version.tmp
-	@echo "#define	SVN_REVISION $(svn-revision)" >> svn-version.tmp
+	@echo '#define	SVN_REVISION "'$(svn-revision)'"' >> svn-version.tmp
 	@cmp --quiet svn-version.tmp svn-version.h || cp svn-version.tmp svn-version.h
 	@rm svn-version.tmp
 

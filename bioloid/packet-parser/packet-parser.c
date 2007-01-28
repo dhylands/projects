@@ -27,6 +27,7 @@
 #include <ctype.h>
 #include <getopt.h>
 
+#include "bioloid-dump.h"
 #include "bioloid-pkt.h"
 #include "Log.h"
 #include "svn-version.h"
@@ -62,6 +63,9 @@ struct option gOption[] =
     { NULL }
 };
 
+uint8_t gLastID = 0xFF;
+uint8_t gExpectingStatus = 0;
+
 /* ---- Private Function Prototypes --------------------------------------- */
 
 /* ---- Functions --------------------------------------------------------- */
@@ -91,25 +95,21 @@ static void Usage( void )
 
 static void PacketReceived( BLD_Instance_t *inst, BLD_Packet_t *pkt, BLD_Error_t err )
 {
-    int     i;
-
     if ( err == BLD_ERROR_NONE )
     {
-        Log( "Rcvd ID: 0x%02x Len: 0x%02x Cmd: 0x%02x Param:", 
-             pkt->m_id, pkt->m_length, pkt->m_cmd );
-
-        if ( pkt->m_length > 2 )
+        if ( gExpectingStatus && ( pkt->m_id == gLastID ))
         {
-            for ( i = 0; i < pkt->m_length - 2; i++ ) 
-            {
-                Log( " 0x%02x", pkt->m_param[ i ] );
-            }
+            BLD_DumpRspPacket( pkt );
+
+            gExpectingStatus = 0;
         }
         else
         {
-            Log( " None" );
+            BLD_DumpCmdPacket( pkt );
+
+            gExpectingStatus = ( pkt->m_id != BLD_BROADCAST_ID );
+            gLastID = pkt->m_id;
         }
-        Log( "\n" );
     }
     else
     {
@@ -174,7 +174,7 @@ int main( int argc, char **argv )
 
             case OPT_VERSION:
             {   
-                Log( "packet-parser: SVN Revision: %d\n", SVN_REVISION );
+                Log( "packet-parser: SVN Revision: %s\n", SVN_REVISION );
                 exit( 0 );
             }
 
