@@ -1,0 +1,83 @@
+STK500 command line programmer, v 2.2 Atmel Corp (C) 2004-2005.
+
+Command Line Switches:
+    [-d device name] [-m s|p] [-if infile] [-ie infile] [-of outfile]
+    [-oe outfile] [-s] [-O address] [-Sf addr] [-Seaddr] [-e] [-p f|e|b]
+    [-r f|e|b] [-v f|e|b] [-l value] [-L value] [-y] [-f value] [-E value]
+    [-F value] [-G value] [-q] [-Y] [-Z address] [-c port] [-ut value]
+    [-Wt value] [-ua value] [-wt] [-wa] [-b h|s] [-! freq] [-t] [-I freq]
+    [-J] [-h] [-?]
+
+Examples:
+    STK500.EXE -dATmega128 -e -ifFlash.hex -pf -vf
+    STK500.EXE -dATmega128 -fF73A -FF73A -EFF -GFF
+
+    Note that there are no spaces between switches and their parameters
+    and that hexadecimal values do not have a '0x' prefix.
+
+Parameters:
+d   Device name. For a list of supported devices use STK500.EXE -?
+m   Select programming mode; serial (s) or parallel/high-voltage (p).
+    Serial mode is the default mode if this parameter is ommitted.
+if  Name of FLASH input file. Required for programming or verification
+    of the FLASH memory. The file format is Intel Extended HEX.
+ie  Name of EEPROM input file. Required for programming or verification
+    of the EEPROM memory. The file format is Intel Extended HEX.
+of  Name of flash output file. Required for readout of the FLASH memory.
+    The file format is Intel Extended HEX.
+oe  Name of EEPROM output file. Required for readout of the EEPROM
+    memory. The file format is Intel Extended HEX.
+s   Read signature bytes.
+O   Read oscillator callibration byte. 'address' is the address of the
+    calibration byte as decribed in the data sheet of the device.
+Sf  Write oscillator call. byte to FLASH memory. 'addr' is byte address
+Se  Write oscillator call. byte to EEPROM memory. 'addr' is byte address
+e   Erase device. If applied with another programming parameter, the
+    device will be erased before any other programming takes place.
+p   Program device; FLASH (f), EEPROM (e) or both (b). Corresponding
+    input files are required.
+r   Read out device; FLASH (f), EEPROM (e) or both (b). Corresponding
+    output files are required
+v   Verify device; FLASH (f), EEPROM (e) or both (b). Can be used with
+    -p or stand alone. Corresponding input files are required.
+l   Set lock byte. 'value' is an 8-bit hex. value.
+L   Verify lock byte. 'value' is an 8-bit hex. value to verify against.
+y   Read back lock byte.
+f   Set fuse bytes. 'value' is a 16-bit hex. value describing the
+    settings for the upper and lower fuse.
+E   Set extended fuse byte. 'value' is an 8-bit hex. value describing the
+    extend fuse settings.
+F   Verify fuse bytes. 'value' is a 16-bit hex. value to verify against.
+G   Verify extended fuse byte. 'value' is an 8-bit hex. value describing
+    the extend fuse settings.
+q   Read back fuse bytes.
+af  FLASH address range. Specifies the address range of operations. The
+    default is the entire FLASH. Addresses are byte oriented.
+ae  EEPROM address range. Specifies the address range of operations.
+    The default is the entire EEPROM. Byte addresses.
+Y   Perform the oscillator calibration sequence. See appnote AVR053 for more
+    information.
+Z   Loads a value from an EEPROM location prior to chip erase which then
+    can be programmed into FLASH or EEPROM using the S option. Address is
+    a hex value. See appnote AVR053 for more information.
+c   Select communication port; 'com1' to 'com8'. If this parameter is
+    ommitted the program will scan the comm. ports for the STK500
+ut  Set target voltage VTARGET in Volts. 'value' is a floating point
+    value between 0.0 and 6.0, describing the new voltage.
+ua  Set adjustable voltage AREF in Volts. 'value' is a floating point
+    value between 0.0 and 6.0, describing the new voltage.
+wt  Get current target voltage VTARGET.
+wa  Get current adjustable voltage AREF.
+Wt  Verify that VTARGET is within 5% of the given value. 'value' is a
+    floating point value between 0.0 and 6.0.
+b   Get revisions; hardware revision (h) and software revision (s).
+!   Set oscillator frequency; 'freq' can be whole Hz, or kHz or MHz
+t   Get oscillator frequency.
+I   Set ISP frequency; 'freq' can be whole Hz, or kHz or MHz
+J   Get ISP frequency.
+g   Silent operation.
+z   Not used. Supported for backwards compability.
+h   Help information (overrides all other settings)
+
+Supported devices:
+    To display supported devices type "STK500.EXE -?"
