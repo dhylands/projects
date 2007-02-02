@@ -189,6 +189,7 @@ endif
 #
 
 svn-clean: svn-clean-dirs svn-clean-gen
+	$(Q)$(RM) -f BootHost.log
 
 svn-clean-dirs: $(filter %/,$(MK_SRC_FILES))
 

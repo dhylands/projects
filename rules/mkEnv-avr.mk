@@ -47,5 +47,6 @@ vpath %.cpp $(MK_COMMON_AVR_DIR)
 
 include $(MK_RULES_DIR)/mkEnv-gcc.mk
 
-BOOTHOST = $(MK_ROOT)/BootHost/exe/BootHost.exe
+#BOOTHOST = $(MK_ROOT)/BootHost/exe/BootHost.exe
+BOOTHOST = "c:/MyDocuments/Robotics/MyBots/Orion/BootHost/exe/BootHost.exe" --baud=38400 --port=ttyS0
 STK500	 = "c:/Program Files/Atmel/AVR Tools/STK500/STK500.exe"
