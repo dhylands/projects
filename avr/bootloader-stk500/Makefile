@@ -9,7 +9,7 @@ MK_AVR_MCU			= m168
 MK_AVR_FREQ			= 8MHz
 MK_AVR_PROGRAMMER  ?= stk500
 
-MK_HEX_TARGET		= Boot-m$(MK_AVR_MCU)-$(MK_AVR_FREQ)
+MK_HEX_TARGET		= Boot-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
 MK_SRC_FILES		= start.c boot.c
 
 # Determnine the starting address for the bootloader. Note that this is a byte
