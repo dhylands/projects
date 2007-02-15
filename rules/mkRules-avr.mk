@@ -16,11 +16,7 @@ download d : mkdir_bin mkdir_obj d_target
 
 d_target: $(call MK_HEX_NAME, $(MK_HEX_TARGET))
 	$(ECHO) "Downloading $< ..."
-ifeq ($(MK_AVR_PROGRAMMER),STK500)
-	$(STK500) -cUSB -d$(MK_AVR_MCU_LONG) -e -if$< -pf
-else
-	$(Q)$(BOOTHOST) $(BOOTHOST_OPTS) -b 38400 $<
-endif
+	$(MK_$(MK_AVR_PROGRAMMER)_CMD)
 
 MK_AVR_FUSES = $(MK_AVR_FUSES_$(MK_AVR_MCU))
 
@@ -29,11 +25,10 @@ ifeq ($(MK_AVR_FUSES),)
 	$(error Need to set MK_AVR_FUSES_$(MK_AVR_MCU))
 else
 	$(ECHO) "Programming fuses to $(MK_AVR_FUSES) ..."
-ifeq ($(MK_AVR_PROGRAMMER),STK500)
-	$(STK500) -cUSB -d$(MK_AVR_MCU_LONG) -E$(word 1,$(MK_AVR_FUSES)) -f$(word 2,$(MK_AVR_FUSES))$(word 3,$(MK_AVR_FUSES))
-else
+ifeq ($(MK_$(MK_AVR_PROGRAMMER)_CMD_FUSE),)
 	$(error Programmer $(MK_AVR_PROGRAMMER) doesn't support programming fuses)
 endif
+	$(MK_$(MK_AVR_PROGRAMMER)_CMD_FUSE)
 	
 endif
 
@@ -43,7 +38,7 @@ endif
 
 mon: 
 	$(ECHO) "Launching BootHost ..."
-	$(Q)$(BOOTHOST) $(BOOTHOST_OPTS) -b 38400
+	$(Q)$(BOOTHOST) $(BOOTHOST_OPTS)
 
 .PHONY: mon
 
