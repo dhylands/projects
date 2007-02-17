@@ -52,6 +52,7 @@ MK_avrdude_PORT		?= usb
 MK_avrdude_PROG    	?= avrispmkII
 MK_avrdude_CMD		= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U flash:w:$<:a
 MK_avrdude_CMD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U efuse:w:0x$(word 1,$(MK_AVR_FUSES)):m -U hfuse:w:0x$(word 2,$(MK_AVR_FUSES)):m -U lfuse:w:0x$(word 3,$(MK_AVR_FUSES)):m
+MK_avrdude_RD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -v
 	
 MK_BootHost 		= $(MK_ROOT)/BootHost/BootHost.exe
 MK_BootHost_BAUD	?= 38400
@@ -63,5 +64,6 @@ MK_stk500	 		= "c:/Program Files/Atmel/AVR Tools/stk500/stk500.exe"
 MK_stk500_PORT		?=	USB
 MK_stk500_CMD 		= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -e -if$< -pf
 MK_stk500_CMD_FUSE	= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -E$(word 1,$(MK_AVR_FUSES)) -f$(word 2,$(MK_AVR_FUSES))$(word 3,$(MK_AVR_FUSES))
+MK_stk500_RD_FUSE	= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -s -q
 
 
