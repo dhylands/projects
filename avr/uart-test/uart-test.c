@@ -41,7 +41,6 @@
 int main(void)
 {
     int     i;
-    int     led = 0;
 
     InitTimer();
     InitUART();
