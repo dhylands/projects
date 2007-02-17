@@ -49,7 +49,7 @@ int main(void)
     LED_DDR |= LED_MASK;
 
     // The first handle opened for read goes to stdin, and the first handle
-    // opened for write goes to stdout. So u0 is stdin, stdout, and stderr
+    // opened for write goes to stdout.
 
     fdevopen( UART0_PutCharStdio, UART0_GetCharStdio );
 
