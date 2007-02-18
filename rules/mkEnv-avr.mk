@@ -61,7 +61,7 @@ MK_BootHost_OPTS	?= --baud=$(MK_BootHost_BAUD) --port=$(MK_BootHost_PORT)
 MK_BootHost_CMD		= $(Q)$(MK_BootHost) $(MK_BootHost_OPTS) $<
 
 MK_stk500	 		= "c:/Program Files/Atmel/AVR Tools/stk500/stk500.exe"
-MK_stk500_PORT		?=	USB
+MK_stk500_PORT		?= USB
 MK_stk500_CMD 		= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -e -if$< -pf
 MK_stk500_CMD_FUSE	= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -E$(word 1,$(MK_AVR_FUSES)) -f$(word 2,$(MK_AVR_FUSES))$(word 3,$(MK_AVR_FUSES))
 MK_stk500_RD_FUSE	= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -s -q

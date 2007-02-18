@@ -7,13 +7,10 @@
 MK_OS				= avr
 MK_AVR_MCU			= m168
 MK_AVR_FREQ			= 8MHz
-MK_AVR_PROGRAMMER  ?= stk500
-
-# Extended fuse byte should be FB for standalone, FA for bootloader-stk500
-MK_AVR_FUSES_m168   = FB DF E2
+MK_AVR_PROGRAMMER  ?= BootHost
 					  
-MK_HEX_TARGET	= flasher
-MK_SRC_FILES	= flasher.c
+MK_HEX_TARGET	= log-test
+MK_SRC_FILES	= log-test.c Log.c StrPrintf.o UART.c Timer.c
 
 include ../../rules/mkRules.mk
 

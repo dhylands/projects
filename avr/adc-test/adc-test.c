@@ -18,6 +18,8 @@
 #include <avr/io.h>
 #include <stdio.h>
 
+#include "adc.h"
+#include "Log.h"
 #include "Timer.h"
 #include "UART.h"
 
@@ -45,40 +47,60 @@ int main(void)
     InitTimer();
     InitUART();
 
+    ADC_Init( ADC_PRESCALAR_AUTO );
+
     LED_DDR |= LED_MASK;
+
+    // Note: CFG_LOG_USE_STDIO is defined in Config.h
+
+#if CFG_LOG_USE_STDIO
 
     // The first handle opened for read goes to stdin, and the first handle
     // opened for write goes to stdout.
 
     fdevopen( UART0_PutCharStdio, UART0_GetCharStdio );
+    LogInit( stdout );
 
-    printf( "*****\n" );
-    printf( "***** Uart Test program\n" );
-    printf( "*****\n" );
+#define GET_CHAR    getchar
+#else
+#define GET_CHAR    UART0_GetChar
+
+#endif
+
+    Log( "*****\n" );
+    Log( "***** ADC Test program\n" );
+    Log( "*****\n" );
+
+    // Sleep for a bit to allow the ADC to initialize
+
+    WaitForTimer0Rollover();    
+    WaitForTimer0Rollover();    // 10 msec
 
     while( 1 )
     {
         LED_PORT ^= LED_MASK;
 
-        printf( "." );
+        Log( "ADC 0: %4d  1: %4d\n", ADC_Read( 0 ), ADC_Read( 1 ));
 
         // Tick rate is 100/sec so waiting for 100 waits for 1 sec
 
         for ( i = 0; i < 100; i++ ) 
         {
-            WaitForTimer0Rollover();
+            WaitForTimer0Rollover();    
 
             if ( UART0_IsCharAvailable() )
             {
-                char    ch = getchar();
+                char    ch;
 
-                printf( "Read: '%c'\n", ch );
+                ch = GET_CHAR();
+
+                Log( "Read: '%c'\n", ch );
 
                 if ( ch == ' ' )
                 {
-                    printf( "*** Press a key to continue\n" );
-                    ch = getchar();
-                    printf( "*** Continuing...\n" );
+                    Log( "*** Press a key to continue\n" );
+                    ch = GET_CHAR();
+                    Log( "*** Continuing...\n" );
                 }
             }
         }

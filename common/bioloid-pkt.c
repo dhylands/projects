@@ -123,9 +123,8 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
                 {
                     // CRC failed
 
-                    LogError( "CRC failed: calculated 0x%02x, read: 0x%02x\n", inst->m_pkt.m_crc, ch );
-
                     err = BLD_ERROR_CHECKSUM;
+
                 }
 
                 if ( inst->m_pktRcvd != NULL )
