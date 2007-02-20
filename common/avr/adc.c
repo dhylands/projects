@@ -85,7 +85,7 @@ ISR( ADC_vect )
 
     // Setup the mux for the next channel
 
-    ADMUX = gAdcChannel & 7;
+    ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 ))) | ( gAdcChannel & 7 );
 
     // Start the next conversion
 
