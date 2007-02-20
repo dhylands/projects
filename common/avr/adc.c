@@ -51,6 +51,10 @@ static  volatile ADC_Sample_t   gAdcHistory[ 8 * CFG_ADC_AVERAGE ] = { 0 };
 
 /* ---- Private Constants and Types --------------------------------------- */
 
+#define ADMUX_REF_AREF      (( 0 << REFS1 ) | ( 0 << REFS0 ))
+#define ADMUX_REF_AVCC      (( 0 << REFS1 ) | ( 1 << REFS0 ))
+#define ADMUX_REF_INTERNAL  (( 1 << REFS1 ) | ( 1 << REFS0 ))
+
 /* ---- Private Variables ------------------------------------------------- */
 
 /* ---- Private Function Prototypes --------------------------------------- */
@@ -154,7 +158,7 @@ void ADC_Init( uint8_t prescalar )
 {
     // Start off on channel 0
 
-    ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 )))
+    ADMUX = ADMUX_REF_AVCC
 #if ( CFG_ADC_POLL == 0 )
           | ( 1 << ADATE )
 #endif
