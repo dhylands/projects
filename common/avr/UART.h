@@ -16,7 +16,7 @@
 *
 *   @file   UART.h
 *
-*   @brief  This file implements the interrupt drive UART class.
+*   @brief  This file implements an interrupt driven UART access.
 *
 ****************************************************************************/
 
@@ -44,7 +44,10 @@ extern "C"
 //  To use this header file the following #defines should be made in Config.h
 //  Replace the x by a 0 or a 1.
 //
-//  CFG_USE_UARTx   0 or 1  Controls if anything relating to that UART is generated
+//  CFG_USE_UARTx               0 or 1  Controls if anything relating to that 
+//                              UART is generated
+//
+//  CFG_UARTx_BAUD_RATE         Determines the baud rate which will be used.
 //
 //  CFG_UARTx_RX_BUFFER_SIZE    How many bytes to put in the Rx buffer.
 //                              Setting the buffer size to zero, means that
