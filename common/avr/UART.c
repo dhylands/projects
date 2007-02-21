@@ -14,9 +14,9 @@
 ****************************************************************************/
 /**
 *
-*   @file   UART.cpp
+*   @file   UART.c
 *
-*   @brief  Class for abstracting an interrupt driven UART
+*   @brief  Implements the interrupt drive UART access
 *
 ****************************************************************************/
 
