@@ -142,33 +142,32 @@ volatile    uint32_t    gOverflowCount;
 
 /* ---- Functions -------------------------------------------------------- */
 
-#define LOOPS_PER_MS ( CFG_CPU_CLOCK / 1000 / 4 )
-
 //***************************************************************************
 /**
 *   Spin for ms milliseconds
 */
 
+#define LOOPS_PER_MS ( CFG_CPU_CLOCK / 1000 / 4)
+
 static void ms_spin( unsigned short ms )
 {
-    if ( ms == 0 )
-    {
-        return;
-    }
+   if (!ms)
+           return;
 
-    // the inner loop takes 4 cycles per iteration
+   /* the inner loop takes 4 cycles per iteration */
+   __asm__ __volatile__ (
+           "1:                     \n"
+           "       ldi r26, %3     \n"
+           "       ldi r27, %2     \n"
+           "2:     sbiw r26, 1     \n"
+           "       brne 2b         \n"
+           "       sbiw %1, 1      \n"
+           "       brne 1b         \n"
+           : "+w" (ms)
+           : "w" (ms), "i" (LOOPS_PER_MS >> 8), "i" (0xff & LOOPS_PER_MS)
+           : "r26", "r27"
+           );
 
-    __asm__ __volatile__ (
-            "1:                     \n"
-            "       ldi r26, %3     \n"
-            "       ldi r27, %2     \n"
-            "2:     sbiw r26, 1     \n"
-            "       brne 2b         \n"
-            "       sbiw %0, 1      \n"
-            "       brne 1b         \n"
-            : "=w" (ms)
-            : "w" (ms), "i" (LOOPS_PER_MS >> 8), "i" (0xff & LOOPS_PER_MS)
-            );
 } // ms_spin
 
 //***************************************************************************
