@@ -52,6 +52,10 @@
 #   endif
 #endif
 
+#if !CFG_LOG_USE_STDIO
+#   include CFG_LOG_PUT_CHAR_HDR
+#endif
+
 
 /**
  * @addtogroup Log

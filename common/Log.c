@@ -28,7 +28,6 @@
 #   include <stdio.h>
 #else
 #   include "Str.h"
-#   include "UART.h"
 #endif
 
 // ---- Public Variables ----------------------------------------------------
@@ -136,7 +135,7 @@ void LogInit( FILE *logFs )
 
 static int LogToUartFunc( void *outParm, int ch )
 {
-    UART0_PutChar( ch );
+    CFG_LOG_PUT_CHAR_FUNC( ch );
 
     return 1;
 }
