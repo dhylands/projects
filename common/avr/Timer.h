@@ -60,6 +60,15 @@
 #define TIMER0_CLOCK_SEL_T0_FALLING (( 1 << CS02 ) | ( 1 << CS01 ) | ( 0 << CS00 ))
 #define TIMER0_CLOCK_SEL_T0_RISING  (( 1 << CS02 ) | ( 1 << CS01 ) | ( 1 << CS00 ))
 
+#define TIMER2_CLOCK_SEL_NONE       (( 0 << CS22 ) | ( 0 << CS21 ) | ( 0 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_1      (( 0 << CS22 ) | ( 0 << CS21 ) | ( 1 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_8      (( 0 << CS22 ) | ( 1 << CS21 ) | ( 0 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_32     (( 0 << CS22 ) | ( 1 << CS21 ) | ( 1 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_64     (( 1 << CS22 ) | ( 0 << CS21 ) | ( 0 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_128    (( 1 << CS22 ) | ( 0 << CS21 ) | ( 1 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_256    (( 1 << CS22 ) | ( 1 << CS21 ) | ( 0 << CS20 ))
+#define TIMER2_CLOCK_SEL_DIV_1024   (( 1 << CS22 ) | ( 1 << CS21 ) | ( 1 << CS20 ))
+
 #elif defined (__AVR_ATmega644__)
 
 #define TIMER0_CLOCK_SEL_NONE       (( 0 << CS02 ) | ( 0 << CS01 ) | ( 0 << CS00 ))
