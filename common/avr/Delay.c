@@ -30,7 +30,7 @@
 
 #define LOOPS_PER_MS ( CFG_CPU_CLOCK / 1000 / 4)
 
-static void ms_spin( unsigned short ms )
+void ms_spin( unsigned short ms )
 {
    if (!ms)
            return;
