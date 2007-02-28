@@ -138,7 +138,7 @@ static  volatile    uint8_t     gRxActivity;
 #define	STATE_FIRST_FF	1
 #define	STATE_ON		2
 
-static	uint8_t		gState;
+static	uint8_t		gState = STATE_OFF;
 
 static  Buffer_t    gToServoBuf;
 static  Buffer_t    gFromServoBuf;
@@ -196,7 +196,7 @@ ISR( USART0_RX_vect )
 				// We want to write a character, so we need to enable the transmitter
 				// and disable the receiver.
 
-//				UCSR1B &= ~( 1 << RXEN );
+				UCSR1B &= ~( 1 << RXEN );
 				UCSR1B |= (( 1 << TXEN ) | ( 1 << UDRIE ));
 			}
 			break;
@@ -255,10 +255,6 @@ ISR( USART0_UDRE_vect )
 /**
 *   Interrupt handler for Uart Data Register Empty (Space available in
 *   the uart to the servo).
-*
-*   Enabling/disabling the receiver causes extraneous data to show up, so
-*   we expect to recieve our own transmissions, and we just drop a character
-*   for each character that we send.
 */
 
 ISR( USART1_UDRE_vect )

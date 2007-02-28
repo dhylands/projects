@@ -22,7 +22,8 @@ else
 MK_OS			= avr
 MK_AVR_MCU		= m128
 MK_AVR_FREQ		= 16MHz
-					  
+MK_AVR_PROGRAMMER  ?= stk500
+
 MK_HEX_TARGET	= $(TARGET)
 MK_SRC_FILES	= $(TARGET).c
 
