@@ -136,6 +136,15 @@ extern "C"
 #define UDR0            UDR
 #define UDRIE0          UDRIE
 #define UDRE0           UDRE
+#define U2X0            U2X
+#define RXCIE0          RXCIE
+#define RXEN0           RXEN
+#define TXEN0           TXEN
+#define UCSZ01          UCSZ1
+#define UCSZ00          UCSZ0
+#define UPM01           UPM1
+#define UPM00           UPM0
+#define USBS0           USBS
 
 #endif
 
