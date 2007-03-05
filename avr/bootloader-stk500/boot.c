@@ -117,8 +117,11 @@ how/if it works for you.
 #   define  UCSRA   UCSR0A
 #   define  UCSRB   UCSR0B
 #   define  UCSRC   UCSR0C
-#   define  UDRE    UDRE0
 #   define  UDR     UDR0
+#endif
+
+#if !defined( UDRE )
+#   define  UDRE    UDRE0
 #   define  RXC     RXC0
 #   define  RXEN    RXEN0
 #   define  TXEN    TXEN0
