@@ -46,7 +46,7 @@ endif
 
 mon: 
 	$(ECHO) "Launching BootHost ..."
-	$(Q)$(BOOTHOST) $(BOOTHOST_OPTS)
+	$(Q)$(MK_BootHost) $(MK_BootHost_OPTS)
 
 .PHONY: mon
 

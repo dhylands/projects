@@ -53,6 +53,12 @@
 #endif
 
 #if !CFG_LOG_USE_STDIO
+
+#   if !defined( CFG_LOG_PUT_CHAR_FUNC )
+#       define  CFG_LOG_PUT_CHAR_FUNC   UART0_PutChar
+#       define  CFG_LOG_PUT_CHAR_HDR    "UART.h"
+#   endif
+
 #   include CFG_LOG_PUT_CHAR_HDR
 #endif
 

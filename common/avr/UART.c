@@ -552,7 +552,7 @@ void InitUART( void )
 
     UCSR1A = ( 1 << U2X1 );
     UCSR1B = (( 1 << RXCIE1 ) | ( 1 << RXEN1 ) | ( 1 << TXEN1 ));
-    UCSR1C = ( UART_DATA_BIT_8 | UART_PARITY_NONE | UART_STOP_BIT_1 );
+    UCSR1C = ( UART1_DATA_BIT_8 | UART1_PARITY_NONE | UART1_STOP_BIT_1 );
 
 #endif
 
