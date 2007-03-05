@@ -56,6 +56,10 @@
 #define BLD_UART0_RX_MASK   ( 1 << 0 )
 #define BLD_UART0_TX_MASK   ( 1 << 1 )
 
+#define USART0_RX_vect      USART_RX_vect
+#define USART0_UDRE_vect    USART_UDRE_vect
+#define USART0_TX_vect      USART_TX_vect
+
 #elif defined( __AVR_ATmega128__ )
 
 #define BLD_UART0_DDR       DDRE
@@ -102,7 +106,6 @@ volatile BLD_UART1_TxBuffer_t BLD_gUart1TxBuf;
 
 ISR( USART0_RX_vect )
 {
-#error USART0_RX_vect
     uint8_t ch = UDR0;   // Read the character from the UART
 
 	if ( !CBUF_IsFull( BLD_gUart0RxBuf ))
@@ -144,14 +147,13 @@ ISR( USART1_RX_vect )
 
 ISR( USART0_UDRE_vect )
 {
-#error USART0_UDRE_vect
     if ( CBUF_IsEmpty( BLD_gUart0TxBuf ))
     {
         // Nothing left to transmit, disable the transmit interrupt.
 		// The transmitter will be disabled when the Tx Complete interrupt 
 		// occurs.
 
-        UCSR0B &= ~( 0 << UDRIE );
+        UCSR0B &= ~( 0 << UDRIE0 );
     }
     else
     {
@@ -162,7 +164,7 @@ ISR( USART0_UDRE_vect )
 		// Enable the Tx Complete interrupt. This is used to turn off the
 		// transmitter and enable the receiver.
 
-		UCSR0B |= ( 1 << TXCIE );
+		UCSR0B |= ( 1 << TXCIE0 );
     }
 
 }  // USART0_UDRE_vect
@@ -185,7 +187,7 @@ ISR( USART1_UDRE_vect )
 		// The transmitter will be disabled when the Tx Complete interrupt 
 		// occurs.
 
-        UCSR1B &= ~( 1 << UDRIE );
+        UCSR1B &= ~( 1 << UDRIE1 );
     }
     else
     {
@@ -196,7 +198,7 @@ ISR( USART1_UDRE_vect )
 		// Enable the Tx Complete interrupt. This is used to turn off the
 		// transmitter and enable the receiver.
 
-		UCSR1B |= ( 1 << TXCIE );
+		UCSR1B |= ( 1 << TXCIE1 );
     }
 
 }  // USART1_UDRE_vect
@@ -268,7 +270,7 @@ void BLD_InitUART( void )
 
     // Configure TxD and RxD pins as inputs and turn off the pullups
 
-    BLD_UART0_DDR  |=  ( BLD_UART0_RX_MASK | BLD_UART0_TX_MASK )
+    BLD_UART0_DDR  |=  ( BLD_UART0_RX_MASK | BLD_UART0_TX_MASK );
 
 #if CFG_BLD_UART0_ENABLE_TX_PULLUP
     BLD_UART0_PORT &= ~BLD_UART0_RX_MASK;
