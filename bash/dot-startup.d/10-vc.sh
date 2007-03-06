@@ -1,5 +1,5 @@
 #
-# 02-vc.sh
+# 10-vc.sh
 #
 #  This script sets up variables for using Visual Studio. These
 #  partcular variables are setup for VC++ 6
