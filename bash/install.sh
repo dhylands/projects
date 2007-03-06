@@ -1,33 +1,91 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Installs the files in this directory into the users home directory
 #
 
 #set -x
 
-for file in *
+if [ "$(echo ${DIR}*)" = "${DIR}"'*' ]
+then
+    # We've been asked to install an empty directory - nothing to do
+
+    echo "${DIR} is an empty directory"
+    exit 0;
+fi
+
+osName=
+case "$(uname)" in
+    CYGWIN*)
+        osName=cygwin
+        ;;
+
+    Linux)
+        osName=linux
+        ;;
+esac
+
+for srcFile in ${DIR}*
 do
-    if [ "${file}" = "install.sh" ]
+    if [ "${srcFile}" = "install.sh" ]
     then
         # That's this file - skip it
 
         continue
     fi
+
+    # Change files which look like dot-foo to be .foo
     
-    if [ "${file:0:4}" = "dot-" ]
+    if [ "${srcFile:0:4}" = "dot-" ]
     then
-        install_file=~/.${file:4}
+        dstFile=~/.${srcFile:4}
     else
-        install_file=~/${file}
+        dstFile=~/${srcFile}
     fi
 
-    echo "Installing ${file} to ${install_file} ..."
+    # Install the file
 
-    if [ -d ${file} ]
+    if [ -d ${srcFile} ]
     then
-        mkdir -p ${install_file}
-        cp ${file}/* ${install_file}
+        #
+        # We're installing a subdirectory - recurse
+        #
+        
+        mkdir -p ${dstFile}
+
+        DIR="${srcFile}/" $0
     else
-        cp ${file} ${install_file}
+        #
+        # We're installing an individual file - check for os specific variants
+        #
+
+        installThisFile=0
+        case "${srcFile}" in
+
+            *-cygwin.sh)
+                if [ "${osName}" = "cygwin" ]
+                then
+                    installThisFile=1
+                fi
+                ;;
+
+            *-linux.sh)
+                if [ "${osName}" = "linux" ]
+                then
+                    installThisFile=1
+                fi
+                ;;
+
+            *)
+                installThisFile=1
+                ;;
+        esac
+
+        if [ "${installThisFile}" = "1" ]
+        then
+            echo "Installing ${srcFile} to ${dstFile} ..."
+            cp ${srcFile} ${dstFile}
+        else
+            echo "Skipping   ${srcFile} ..."
+        fi
     fi
 done
