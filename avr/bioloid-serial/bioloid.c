@@ -150,10 +150,6 @@ int main( void )
 
     InitTimer();
 
-    UART0_PutStr( "*****\n" );
-    UART0_PutStr( "***** bioloid serial test\n" );
-    UART0_PutStr( "*****\n" );
-
     sei();  // Enable interrupts.
 
     // The foreground copies data from one FIFO to the other

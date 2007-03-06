@@ -153,7 +153,7 @@ ISR( USART0_UDRE_vect )
 		// The transmitter will be disabled when the Tx Complete interrupt 
 		// occurs.
 
-        UCSR0B &= ~( 0 << UDRIE0 );
+        UCSR0B &= ~( 1 << UDRIE0 );
     }
     else
     {
@@ -270,7 +270,7 @@ void BLD_InitUART( void )
 
     // Configure TxD and RxD pins as inputs and turn off the pullups
 
-    BLD_UART0_DDR  |=  ( BLD_UART0_RX_MASK | BLD_UART0_TX_MASK );
+    BLD_UART0_DDR  &= ~( BLD_UART0_RX_MASK | BLD_UART0_TX_MASK );
 
 #if CFG_BLD_UART0_ENABLE_TX_PULLUP
     BLD_UART0_PORT &= ~BLD_UART0_RX_MASK;
@@ -301,7 +301,7 @@ void BLD_InitUART( void )
 
     // Configure TxD and RxD pins as inputs and turn off the pullups
 
-    BLD_UART1_DDR  |=  ( BLD_UART1_RX_MASK | BLD_UART1_TX_MASK );
+    BLD_UART1_DDR  &= ~( BLD_UART1_RX_MASK | BLD_UART1_TX_MASK );
 
 #if CFG_BLD_UART1_ENABLE_TX_PULLUP
     BLD_UART1_PORT &= ~BLD_UART1_RX_MASK;
