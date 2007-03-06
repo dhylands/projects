@@ -201,7 +201,7 @@ static uint8_t ReadControlTableByte (uint8_t address)
 
 static void WriteControlTableByte (uint8_t address, uint8_t value)
 {
-	Log ("WRITE - [%2d] = %3d\n", address, value);
+	// Log ("WRITE - [%2d] = %3d\n", address, value);
 
 	// first, update the control table in RAM
 	gControlTable [address] = value;
@@ -350,21 +350,21 @@ static void PacketReceived (BLD_Instance_t *inst, BLD_Packet_t *packet, BLD_Erro
 		    {
 		        case BLD_CMD_PING:
 		        {
-					Log ("got PING command\n");
+					// Log ("got PING command\n");
 					OutputResponse (BLD_ERROR_NONE, TRUE);
 		            break;
 		        }
 
 		        case BLD_CMD_READ:
 		        {
-		            Log ("got READ command\n");
+		            // Log ("got READ command\n");
 					HandleReadCommand (packet, isBroadcast);
 		            break;
 		        }
 
 		        case BLD_CMD_WRITE:
 		        {
-		            Log ("got WRITE command\n");
+		            // Log ("got WRITE command\n");
 					HandleWriteCommand (packet, isBroadcast);
 		            break;
 		        }
@@ -385,8 +385,8 @@ static void PacketReceived (BLD_Instance_t *inst, BLD_Packet_t *packet, BLD_Erro
 		        }
 			}
 		}
-		else
-			Log ("Got packet for ID: %3d\n", packet->m_id);
+		//else
+		//	Log ("Got packet for ID: %3d\n", packet->m_id);
 	}
 	else
 	{
