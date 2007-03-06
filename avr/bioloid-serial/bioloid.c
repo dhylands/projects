@@ -171,8 +171,43 @@ int main( void )
             {
                 if ( UART0_IsCharAvailable() )
                 {
-                    gTxActivity = 1;
-                    UART1_PutChar( UART0_GetChar() );
+                    uint8_t ch = UART0_GetChar();
+
+                    switch ( gState )
+                    {
+                        case STATE_OFF:
+                        {
+                            if ( ch == START_OF_PACKET )
+                            {
+                                gState = STATE_FIRST_FF;
+                            }
+                            break;
+                        }
+
+                        case STATE_FIRST_FF:
+                        {
+                            if ( ch != START_OF_PACKET )
+                            {
+                                gState = STATE_OFF;
+                                break;
+                            }
+                            gState = STATE_ON;
+
+                            // Push the first 0xFF that we dropped earlier onto the queue
+                            // so that it gets sent out.
+
+                            UART1_PutChar( ch );
+
+                            // Fall through into STATE_ON (causes the second 0xFF to get sent)
+                        }
+
+                        case STATE_ON:
+                        {
+                            gTxActivity = 1;
+                            UART1_PutChar( ch );
+                            break;
+                        }
+                    }
                 }
 
                 if ( UART1_IsCharAvailable() )
