@@ -1,12 +1,12 @@
 ###########################################################################
 #
-#	Makefile to build everything
+#	Makefile to build the utilities
 #
 ###########################################################################
 
 MK_OS = none
 
-MK_SRC_FILES = src/
+MK_SRC_FILES = src/ scripts/
 
 include ../rules/mkRules.mk
 

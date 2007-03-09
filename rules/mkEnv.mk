@@ -181,7 +181,7 @@ MK_RULES_DIR = $(MK_ROOT)/rules
 #	are installed.
 #
 
-MK_UTILS_DIR = $(MK_ROOT)/utils/bin
+MK_UTILS_DIR = $(shell echo ~)/bin
 
 #--------------------------------------------------------------------------
 #
@@ -209,7 +209,7 @@ MK_OBJ_NAME = $(foreach objBase,$(1),$(MK_OBJ_DIR)/$(objBase)$(MK_OBJ_EXT))
 ECHO	= @echo
 MKDIR	= mkdir
 RM		= rm
-INSTALL	= install --strip
+INSTALL	= install
 
 #--------------------------------------------------------------------------
 #
