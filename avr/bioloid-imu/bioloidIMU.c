@@ -37,7 +37,7 @@
 
 #define LED_DDR DDRD
 #define LED_PORT PORTD
-#define LED_MASK (1 << 3)
+#define LED_MASK (1 << 5)
 
 /* ---- Private Variables ------------------------------------------------ */
 

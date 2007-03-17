@@ -21,7 +21,7 @@
 #define CFG_TIMER_UART_LF_TO_CRLF   1
 #define CFG_TIMER_UART_DDR          DDRD
 #define CFG_TIMER_UART_PORT         PORTD
-#define CFG_TIMER_UART_MASK         ( 1 << 2 )
+#define CFG_TIMER_UART_MASK         ( 1 << 3 )
 
 #define CFG_LOG_TO_BUFFER           1
 #define CFG_LOG_NUM_BUFFER_ENTRIES  32
