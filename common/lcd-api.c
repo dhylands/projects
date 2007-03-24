@@ -281,6 +281,8 @@ void LCD_PutChar( char ch )
     {
         LCD_HAL_Write( LCD_RS_DATA, ch );
         LCD_HAL_Delay( 1 );
+
+        gX++;
     }
 
 } // LCD_PutChar

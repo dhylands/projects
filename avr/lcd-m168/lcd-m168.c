@@ -29,10 +29,10 @@ int main(void)
 
     LED_DDR |= LED_MASK;
 
-    LCD_Init( 2, 8 );
+    LCD_Init( 2, 16 );
 
-    LCD_PutStr( "**** R/C Input ****\n" );
-    LCD_PutStr( "LCD Test Line 6 1234\n" );
+    LCD_PutStr( "** R/C Input ***\n" );
+    LCD_PutStr( "LCD Test Line 6<\n" );
 
     while( 1 )
     {
