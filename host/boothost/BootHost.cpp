@@ -144,7 +144,7 @@ void SendByte( unsigned char ch );
  * @{
  */
 
-#if 1
+#if 0
 //***************************************************************************
 /**
 *   ControlC
@@ -203,8 +203,8 @@ int main( int argc, char **argv )
     PKT_PacketReceived  = PacketReceived;
 #endif
 
-    signal( SIGINT, ControlC );
-    signal( SIGTERM, ControlC );
+//    signal( SIGINT, ControlC );
+//    signal( SIGTERM, ControlC );
 
     LogInit( stdout );
 
@@ -396,6 +396,13 @@ int main( int argc, char **argv )
         LogError( "Unable to restore terminal settings\n" );
     }
 
+    // Under Windows closing the serial port and stdin will cause the reads
+    // to unblock. Under linux, this isn't required, but it doesn't hurt 
+    // either.
+
+    gSerialPort.Close();
+    fclose( stdin );
+
     // Unblock the termination signals so the user can kill us if we hang up
     // waiting for the reader threads to exit.
 
@@ -403,8 +410,6 @@ int main( int argc, char **argv )
 
     pthread_join( readSerialThreadId, NULL );
     pthread_join( readStdinThreadId, NULL );
-
-    gSerialPort.Close();
 
     if ( gVerbose )
     {
@@ -570,7 +575,6 @@ void *ReadSerialThread( void *param )
             state = state( buf[ i ]);
         }
     }
-
     LogDebug( "ReadSerialThread ending\n" );
     gReadSerialThreadRunning = false;
 
@@ -593,7 +597,7 @@ void *ReadStdinThread( void *param )
 
         if ( read( fileno( stdin ), &ch, 1 ) < 1 )
         {
-            fprintf( stderr, "read of stdin failed\n" );
+            LogDebug( "read of stdin failed\n" );
             break;
         }
 
