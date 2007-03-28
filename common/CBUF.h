@@ -10,6 +10,9 @@
 *
 *   @file   CBUF.h
 *
+*   @defgroup   CBUF Circular Buffer
+*   @{
+*
 *   @brief  This file contains global definitions for circular buffer
 *           manipulation.
 *
@@ -92,8 +95,8 @@
 #define CBUF_Init( cbuf )       cbuf.m_getIdx = cbuf.m_putIdx = 0
 
 /**
-*   Returns the number of elements which are currently contained in the 
- *  circular buffer.
+*   Returns the number of elements which are currently
+*   contained in the circular buffer.
 */
 
 #define CBUF_Len( cbuf )        ((typeof( cbuf.m_putIdx ))(( cbuf.m_putIdx ) - ( cbuf.m_getIdx )))
