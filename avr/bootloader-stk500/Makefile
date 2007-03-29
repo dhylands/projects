@@ -5,11 +5,11 @@
 ###########################################################################
 
 MK_OS               = avr
-MK_AVR_MCU          = m128
-MK_AVR_FREQ         = 16MHz
+MK_AVR_MCU          = m168
+MK_AVR_FREQ         = 8MHz
 #MK_AVR_MCU          = m168
 #MK_AVR_FREQ         = 8MHz
-MK_AVR_PROGRAMMER  ?= stk500
+MK_AVR_PROGRAMMER  ?= avrdude
 MK_stk500_PORT		= COM1
 
 MK_HEX_TARGET       = Boot-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
@@ -110,7 +110,7 @@ DEFS = \
     -DSW_PIN=$(SW_PIN) \
     -DBAUD_RATE=38400
 
-CFLAGS += $(DEFS) -mshort-calls -Os
+CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions
 
 LDFLAGS += -Wl,--section-start=.text=$(BOOT_START),-e,boot,--defsym,zero_addr=0 -nostdlib
 

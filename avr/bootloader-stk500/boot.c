@@ -128,6 +128,13 @@ how/if it works for you.
 #   define  U2X     U2X0
 #endif
 
+#define PRINT_BANNER    0
+
+#if PRINT_BANNER
+static const char gBanner[] PROGMEM = "***** STK500 BootLoader *****\n\n";
+static const char *s;
+#endif
+
 void putch(uint8_t);
 uint8_t getch(void);
 uint8_t checkchar(void);
@@ -216,12 +223,16 @@ void boot(char bCalled)
     InitSW();      // Enable BootLoader input pullup
     InitLed();
 
-#if 0
-    for ( i = 0; i < 40; i++ ) 
+#if PRINT_BANNER
     {
-        putch( '*' );
+        s = gBanner;
+
+        while (( ch = pgm_read_byte( s )) != '\0' ) 
+        {
+            putch( ch );
+            s++;
+        }
     }
-    putch( '\n' );
 #endif
 
 	if (bCalled)
