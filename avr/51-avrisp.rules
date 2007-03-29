@@ -1,0 +1,2 @@
+#AVRISP mkII
+SUBSYSTEM=="usb_device",SYSFS{idVendor}=="03eb",SYSFS{idProduct}=="2104",MODE="0666"
