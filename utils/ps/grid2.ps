@@ -1,0 +1,61 @@
+%!PS
+
+statusdict begin true setduplexmode end
+
+/width	   576 def
+/height	   756 def
+/xmargin	18 def
+/ymargin	18 def
+
+/drawgrid
+{
+	% 612 4 div 792 4 div translate
+	% .5 .5 scale
+
+	xmargin ymargin translate
+
+	0  setgray
+	.1 setlinewidth
+
+	0 72 width
+	{
+		0 moveto
+		0 height rlineto
+		stroke
+	} for
+
+	0 72 height
+	{
+		0 exch moveto
+		width 0 rlineto
+		stroke
+	} for
+
+    0 72 moveto
+    72 0 lineto
+    stroke
+
+	0 setgray
+	1 setlinewidth
+
+	0 0 moveto
+	width 0 rlineto 0 height rlineto width neg 0 rlineto
+	closepath stroke
+
+	0 0 moveto
+	width height lineto
+    stroke
+
+    .1 setlinewidth
+
+    0 height moveto
+    width 0 lineto
+	stroke
+
+} bind def
+
+drawgrid
+showpage
+
+drawgrid
+showpage

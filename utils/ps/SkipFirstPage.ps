@@ -1,0 +1,17 @@
+%!PS
+
+<<
+    /Duplex true    % Enable duplexing
+    /Tumble false   % Tumble off = Long Edge binding
+>>
+setpagedevice
+
+userdict /org_showpage /showpage load put
+
+userdict /showpage
+{
+    erasepage
+    userdict /showpage undef
+} bind def
+
+
