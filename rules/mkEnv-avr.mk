@@ -53,8 +53,8 @@ MK_avrdude_PROG    	?= avrispmkII
 MK_avrdude_CMD		= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U flash:w:$<:a
 MK_avrdude_CMD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U efuse:w:0x$(word 1,$(MK_AVR_FUSES)):m -U hfuse:w:0x$(word 2,$(MK_AVR_FUSES)):m -U lfuse:w:0x$(word 3,$(MK_AVR_FUSES)):m
 MK_avrdude_RD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -v
-	
-MK_BootHost 		= $(MK_ROOT)/BootHost/BootHost.exe
+
+MK_BootHost 		= boothost
 MK_BootHost_BAUD	?= 38400
 MK_BootHost_PORT	?= ttyS0
 MK_BootHost_OPTS	?= --baud=$(MK_BootHost_BAUD) --port=$(MK_BootHost_PORT)

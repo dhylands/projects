@@ -6,7 +6,8 @@
 #
 ###########################################################################
 
-MK_PRINT_ELF_SIZE = avr-size --mcu=$(MK_AVR_MCU_LONG) $@
+#MK_PRINT_ELF_SIZE = avr-size --mcu=$(MK_AVR_MCU_LONG) $@
+MK_PRINT_ELF_SIZE = avr-size $@
 
 include $(MK_RULES_DIR)/mkRules-gcc.mk
 
