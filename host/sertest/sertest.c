@@ -32,6 +32,7 @@
 #include <sys/ioctl.h>
 #include <sys/unistd.h>
 #include <pthread.h>
+#include <signal.h>
 #include <getopt.h>
 #include <termios.h>
 
@@ -92,13 +93,13 @@ int gPortFd = -1;
 
 /* ---- Private Function Prototypes -------------------------------------- */
 
-void *ReaderThread( void *param );
+void *ReadSerialThread( void *param );
+void *ReadStdinThread( void *param );
 char *StrMaxCpy( char *dst, const char *src, size_t maxLen );
 char *StrMaxCat( char *dst, const char *src, size_t maxLen );
 void  Usage( void );
 
 /* ---- Functions -------------------------------------------------------- */
-
 
 /***************************************************************************
 *
@@ -108,13 +109,18 @@ void  Usage( void );
 
 int main( int argc, char **argv )
 {
+    int         sig;
     int         rc;
     int         opt;
     char        devName[ 40 ];
     const char *baudStr = NULL;
     const char *portStr = "ttyS2";
     speed_t     baudRate;
-    pthread_t   readerThreadId;
+    sigset_t    termSig;
+    pthread_t   readSerialThreadId;
+    pthread_t   readStdinThreadId;
+    struct termios stdin_tio;
+    struct termios stdin_tio_org;
 
     struct termios attr;
 
@@ -202,12 +208,12 @@ int main( int argc, char **argv )
         exit( 3 );
     }
 
-    attr.c_iflag = 0;
-    attr.c_oflag = 0;
-    attr.c_cflag = CLOCAL | CREAD | CS8;
-    attr.c_lflag = 0;
-    attr.c_cc[ VTIME ] = 0; // timeout in tenths of a second
-    attr.c_cc[ VMIN ] = 1;  // Only wait for a single char
+    cfmakeraw( &attr );
+
+    // CLOCAL - Disable modem control lines
+    // CREAD  - Enable Receiver
+
+    attr.c_cflag |= ( CLOCAL | CREAD );
 
     cfsetispeed( &attr, baudRate );
     cfsetospeed( &attr, baudRate );
@@ -223,74 +229,87 @@ int main( int argc, char **argv )
     setbuf( stdin, NULL );
     setbuf( stdout, NULL );
 
+    sigemptyset( &termSig );
+    sigaddset( &termSig, SIGINT );
+    sigaddset( &termSig, SIGTERM );
+
+    pthread_sigmask( SIG_BLOCK, &termSig, NULL );
+
     // Put stdin in raw mode (i.e. turn off canonical mode). Canonical mode
     // causes the driver to wait for the RETURN character so that line editing
     // can take place. We also want to turn off ECHO.
 
+    if ( tcgetattr( fileno( stdin ), &stdin_tio_org ) < 0 )
     {
-        struct termios tio;
+        fprintf( stderr, "Unable to retrieve terminal settings: %s\n", strerror( errno ));
+        exit( 5 );
+    }
 
-        if ( tcgetattr( fileno( stdin ), &tio ) < 0 )
-        {
-            fprintf( stderr, "Unable to retrieve terminal settings: %s\n", strerror( errno ));
-            exit( 5 );
-        }
+    stdin_tio = stdin_tio_org;
+    stdin_tio.c_lflag &= ~( ICANON | ECHO );
+    stdin_tio.c_cc[VTIME] = 0;
+    stdin_tio.c_cc[VMIN] = 1;
 
-        tio.c_lflag &= ~( ICANON | ECHO );
-        tio.c_cc[VTIME] = 0;
-        tio.c_cc[VMIN] = 1;
-
-        if ( tcsetattr( fileno( stdin ), TCSANOW, &tio ) < 0 )
-        {
-            fprintf( stderr, "Unable to update terminal settings: %s\n", strerror( errno ));
-            exit( 6 );
-        }
+    if ( tcsetattr( fileno( stdin ), TCSANOW, &stdin_tio ) < 0 )
+    {
+        fprintf( stderr, "Unable to update terminal settings: %s\n", strerror( errno ));
+        exit( 6 );
     }
 
     // Kick off the serial port reader thread.
 
-    rc = pthread_create( &readerThreadId, NULL, ReaderThread, NULL );
+    rc = pthread_create( &readSerialThreadId, NULL, ReadSerialThread, NULL );
     if ( rc != 0 )
     {
-        fprintf( stderr, "Error creating ReaderThread: %s\n", strerror( rc ));
+        fprintf( stderr, "Error creating ReadSerialThread: %s\n", strerror( rc ));
         exit( 7 );
     }
 
-    // Read stdin and send rcvd chars to the serial port
+    // Kick off the stdin reader thread
 
-    while ( 1 )
+    rc = pthread_create( &readStdinThreadId, NULL, ReadStdinThread, NULL );
+    if ( rc != 0 )
     {
-        char    ch;
-        int     chInt = fgetc( stdin );
-        if ( chInt < 0 )
-        {
-            fprintf( stderr, "Exiting...\n" );
-            break;
-        }
-        ch = (char)chInt;
-
-        if ( gDebug )
-        {
-            if (( ch < ' ' ) || ( ch > '~' ))
-            {
-                fprintf( stderr, "stdin Read: 0x%02x '.'\n", ch );
-            }
-            else
-            {
-                fprintf( stderr, "stdin Read: 0x%02x '%c'\n", ch, ch );
-            }
-
-        }
-
-        if ( write( gPortFd, &ch, 1 ) != 1 )
-        {
-            fprintf( stderr, "write to serial port failed: %s\n", strerror( errno ));
-            break;
-        }
+        fprintf( stderr, "Error creating ReadStdinThread: %s\n", strerror( rc ));
+        exit( 7 );
     }
 
+    // Wait for a termmination signal
+
+    if (( rc = sigwait( &termSig, &sig )) != 0 )
+    {
+        fprintf( stderr, "sigwait failed\n" );
+    }
+    else
+    {
+        fprintf( stderr, "Exiting...\n" );
+    }
+
+    pthread_cancel( readSerialThreadId );
+    pthread_cancel( readStdinThreadId );
+
+    // Restore stdin back to the way it was when we started
+
+    if ( tcsetattr( fileno( stdin ), TCSANOW, &stdin_tio_org ) < 0 )
+    {
+        fprintf( stderr, "Unable to update terminal settings: %s\n", strerror( errno ));
+        exit( 6 );
+    }
+
+    // Unblock the termination signals so the user can kill us if we hang up
+    // waiting for the reader threads to exit.
+
+    pthread_sigmask( SIG_UNBLOCK, &termSig, NULL );
+
+    pthread_join( readSerialThreadId, NULL );
+    pthread_join( readStdinThreadId, NULL );
 
     close( gPortFd );
+
+    if ( gVerbose )
+    {
+        fprintf( stderr, "Done\n" );
+    }
 
     exit( 0 );
     return 0;   // Get rid of warning about not returning anything
@@ -301,7 +320,7 @@ int main( int argc, char **argv )
 *   Thread which processes the incoming serial data.
 */
 
-void *ReaderThread( void *param )
+void *ReadSerialThread( void *param )
 {
     while ( 1 )
     {
@@ -330,9 +349,51 @@ void *ReaderThread( void *param )
         putc( ch, stdout );
     }
 
-    return 0;
+    return NULL;
 
-} // ReaderThread
+} // ReadSerialThread
+
+/***************************************************************************/
+/**
+*   Thread which processes the incoming serial from stdin.
+*/
+
+void *ReadStdinThread( void *param )
+{
+    while ( 1 )
+    {
+        char    ch;
+        int     chInt = fgetc( stdin );
+        if ( chInt < 0 )
+        {
+            fprintf( stderr, "Error reading stdin...\n" );
+            break;
+        }
+        ch = (char)chInt;
+
+        if ( gDebug )
+        {
+            if (( ch < ' ' ) || ( ch > '~' ))
+            {
+                fprintf( stderr, "stdin Read: 0x%02x '.'\n", ch );
+            }
+            else
+            {
+                fprintf( stderr, "stdin Read: 0x%02x '%c'\n", ch, ch );
+            }
+
+        }
+
+        if ( write( gPortFd, &ch, 1 ) != 1 )
+        {
+            fprintf( stderr, "write to serial port failed: %s\n", strerror( errno ));
+            break;
+        }
+    }
+
+    return NULL;
+
+} // ReadStdinThread
 
 /***************************************************************************/
 /**
