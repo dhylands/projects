@@ -74,6 +74,16 @@ public:
 
     size_t Write( const void *buf, size_t bytesToWrite );
 
+    //------------------------------------------------------------------------
+    //  Sets up the RTS line to be used to reset the target
+
+    void UseRTStoReset( bool useRTStoReset );
+
+    //------------------------------------------------------------------------
+    //  Resets the target.
+
+    void ResetTarget();
+
 private:
 
     //------------------------------------------------------------------------
@@ -85,11 +95,22 @@ private:
 
     //------------------------------------------------------------------------
 
-    int m_fd;
+    int     m_fd;
+    bool    m_useRTStoReset;
 
 };
 
 // ---- Inline Functions ----------------------------------------------------
+
+//***************************************************************************
+/**
+*   Sets up the RTS line to be used to reset the target
+*/
+
+inline void SerialPort::UseRTStoReset( bool useRTStoReset )
+{
+    m_useRTStoReset = useRTStoReset;
+}
 
 /** @} */
 

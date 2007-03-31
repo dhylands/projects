@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <sys/unistd.h>
 #include <string.h>
+#include <sys/ioctl.h>
 
 // ---- Public Variables ----------------------------------------------------
 
@@ -243,6 +244,32 @@ size_t SerialPort::Write( const void *buf, size_t bytesToWrite )
     return bytesWritten;
 
 } // Write
+
+//***************************************************************************
+/**
+*   Resets the target
+*/
+
+void SerialPort::ResetTarget()
+{
+    int bits = TIOCM_RTS;
+
+    if ( m_useRTStoReset )
+    {
+        // On my computer downstairs, settinging the RTS line makes it low.
+
+        ioctl( m_fd, TIOCMBIS, &bits );
+
+        // Sleep for 10 msec to allow the reset to take effect.
+
+        usleep( 10000 );
+        
+        // On my computer downstairs, clearing the RTS line makes it high.
+
+        ioctl( m_fd, TIOCMBIC, &bits );
+    }
+
+} // ResetTarget
 
 /** @} */
 

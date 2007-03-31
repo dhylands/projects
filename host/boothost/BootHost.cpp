@@ -78,6 +78,7 @@ struct option gLongOption[] =
     { "help",               0, NULL, 'h' },
     { "megaload",           0, NULL, 'm' }, // Use MegaLoad protocol
     { "port",               1, NULL, 'p' },
+    { "rts-reset",          0, NULL, 'r' }, // Use RTS as reset for device
     { "stk500",             0, NULL, 's' }, // Use STK500 protocol
     { "verbose",            0, NULL, 'v' },
     { 0 },
@@ -88,6 +89,7 @@ bool gMegaLoad = false;
 bool gStk500 = true;
 bool gDongle = false;
 bool gBootLoadAllowed = true;
+bool gUseRtsToReset = false;
 
 // We can program the serial <=> i2c dongle, which is connected to the
 // serial port, or we can program a device on the i2c bus. To avoid confusion
@@ -242,6 +244,12 @@ int main( int argc, char **argv )
                 break;
             }
 
+            case 'r':
+            {
+                gUseRtsToReset = true;
+                break;
+            }
+
             case 's':
             {
                 gStk500 = true;
@@ -305,6 +313,8 @@ int main( int argc, char **argv )
     {
         return 1;
     }
+    gSerialPort.UseRTStoReset( gUseRtsToReset );
+    gSerialPort.ResetTarget();
 
     // Put stdin in raw mode
 
