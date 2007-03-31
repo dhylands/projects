@@ -58,6 +58,10 @@
 #define INT_PIN     PINB
 #define INT_MASK    ( 1 << 1 )
 
+#define RESET_DDR   DDRD
+#define RESET_PORT  PORTD
+#define RESET_MASK  ( 1 << 2 )
+
 #define SetDirectionIn(x)   x ## _DDR &= ~ x ## _MASK
 #define SetDirectionOut(x)  x ## _DDR |=   x ## _MASK
 
@@ -80,6 +84,68 @@
 
 //***************************************************************************
 /**
+*   Activates the SS signal that goes to the slave
+*/
+
+static inline void ActivateSlave( void )
+{
+    // SS is active low
+
+    SS_PORT &= ~SS_MASK;
+
+} // ActivateSlave
+
+//***************************************************************************
+/**
+*   Deactivates the SS signal that goes to the slave
+*/
+
+static inline void DeactivateSlave( void )
+{
+    // SS is active low
+
+    SS_PORT |= SS_MASK;
+
+} // DeactivateSlave
+
+#if SPI_BIT_BANG
+
+//***************************************************************************
+/**
+*   Functions for manipulating SCK, MOSI and MISO
+*/
+
+static inline void SPI_ClockLow( void )
+{
+    SCK_PORT &= ~SCK_MASK;
+}
+
+static inline void SPI_ClockHigh( void )
+{
+    SCK_PORT |= ~SCK_MASK;
+}
+
+static inline void SPI_DataOut( uint8_t bit )
+{
+    if ( bit )
+    {
+        MOST_PORT |= MOSI_MASK;
+    }
+    else
+    {
+        MOSI_PORT &= ~MOSI_MASK;
+    }
+}
+
+static inline uint8_t SPI_DataIn( uint8_t )
+{
+    return ( MISO_PORT & MISO_MASK ) != 0;  
+}
+
+#endif
+
+//***************************************************************************
+/**
 *   Initialize the SPI for Master mode
 */
 
@@ -87,7 +153,9 @@ static void SPI_MasterInit( void )
 {
 #if SPI_BIT_BANG
 
+    // SCK idles low
 
+    SPI_ClockLow();
 
 #else
     // The Airborne WLAN only supports mode = 1
@@ -104,7 +172,7 @@ static void SPI_MasterInit( void )
          | ( 1 << SPR0 );
 #endif
 
-    SS_PORT |= SS_MASK;
+    DeactivateSlave();
 
 } // SPI_MasterInit
 
@@ -115,6 +183,21 @@ static void SPI_MasterInit( void )
 
 static uint8_t SPI_XferByte( uint8_t b )
 {
+#if SPI_BIT_BANG
+
+    uint8_t i;
+
+    for ( i = 0; i < 8; i++ )
+    {
+        SPI_DataOut( b & 0x80 );
+        SPI_ClockHigh();
+        b <<= 1;
+        SPI_ClockLow();
+        b |= SPI_DataIn();
+    }
+
+    return b;
+#else
     // Kick off the transmission
 
     SPDR = b;
@@ -129,6 +212,7 @@ static uint8_t SPI_XferByte( uint8_t b )
     // Read (and return) the read byte
 
     return SPDR;
+#endif
 
 } // SPI_XferByte
 
@@ -157,12 +241,12 @@ static uint8_t WLN_ReadStatus( void )
 {
     uint8_t status;
 
-    SS_PORT &= ~SS_MASK;
+    ActivateSlave();
 
     SPI_XferByte( WLN_CMD_READ_CONFIG );
     status = SPI_XferByte( 0 );
 
-    SS_PORT |= SS_MASK;
+    DeactivateSlave();
 
     return status;
 
@@ -179,14 +263,14 @@ static void WLN_ReadData( void )
     uint8_t lenLo;
     uint8_t data;
 
-    SS_PORT &= ~SS_MASK;
+    ActivateSlave();
 
     SPI_XferByte( WLN_CMD_READ_DATA );
     lenHi = SPI_XferByte( 0 );
     lenLo = SPI_XferByte( 0 );
     data  = SPI_XferByte( 0 );
 
-    SS_PORT |= SS_MASK;
+    DeactivateSlave();
 
     Log( "ReadData: 0x%02x 0x%02x 0x%02x\n", lenHi, lenLo, data );
 
@@ -249,11 +333,17 @@ int main( void )
 
             if ( UART0_IsCharAvailable() )
             {
-                char    ch = 
-                UART0_GetChar();
+                char    ch = UART0_GetChar();
+
+                if ( ch == '*' )
+                {
+                    Log( "Reset\n" );
+
+                    SetDirectionOut( RESET );
+                    RESET_PORT &= ~RESET_MASK;
+                }
 
                 Log( "Read: '%c'\n", ch );
-
                 WLN_ReadData();
             }
         }
