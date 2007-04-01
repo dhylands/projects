@@ -25,6 +25,7 @@
 #include <avr/io.h>
 #include <stdint.h>
 
+#include "Delay.h"
 #include "Log.h"
 #include "Timer.h"
 #include "UART.h"
@@ -35,7 +36,7 @@
 
 #define LED_DDR     DDRC
 #define LED_PORT    PORTC
-#define LED_MASK    ( 1 << 5  )
+#define LED_MASK    ( 1 << 5 )
 
 #define SS_DDR      DDRB
 #define SS_PORT     PORTB
@@ -47,6 +48,7 @@
 
 #define MISO_DDR    DDRB
 #define MISO_PORT   PORTB
+#define MISO_PIN    PINB
 #define MISO_MASK   ( 1 << 4 )
 
 #define SCK_DDR     DDRB
@@ -62,8 +64,9 @@
 #define RESET_PORT  PORTD
 #define RESET_MASK  ( 1 << 2 )
 
-#define SetDirectionIn(x)   x ## _DDR &= ~ x ## _MASK
-#define SetDirectionOut(x)  x ## _DDR |=   x ## _MASK
+#define TRIGGER_DDR     DDRC
+#define TRIGGER_PORT    PORTC
+#define TRIGGER_MASK    ( 1 << 4 )
 
 #define WLN_CMD_READ_CONFIG     0x40
 #define WLN_CMD_WRITE_DATA      0x80
@@ -71,10 +74,13 @@
 
 #define WLN_STATUS_TX_DATA_AVAIL    0x80
 #define WLN_STATUS_RX_SPACE_AVAIL   0x40
-#define WLN_STATUS_TX_IRQ           0x20
-#define WLN_STATUS_RX_IRQ           0x10
+#define WLN_STATUS_RX_IRQ           0x20
+#define WLN_STATUS_TX_IRQ           0x10
 
-#define SPI_BIT_BANG    0
+#define SetDirectionIn(x)   x ## _DDR &= ~ x ## _MASK; x ## _PORT &= ~ x ##_MASK
+#define SetDirectionOut(x)  x ## _DDR |=   x ## _MASK
+
+#define SPI_BIT_BANG    1
 
 /* ---- Private Variables ------------------------------------------------- */
 
@@ -122,14 +128,14 @@ static inline void SPI_ClockLow( void )
 
 static inline void SPI_ClockHigh( void )
 {
-    SCK_PORT |= ~SCK_MASK;
+    SCK_PORT |= SCK_MASK;
 }
 
 static inline void SPI_DataOut( uint8_t bit )
 {
     if ( bit )
     {
-        MOST_PORT |= MOSI_MASK;
+        MOSI_PORT |= MOSI_MASK;
     }
     else
     {
@@ -137,9 +143,9 @@ static inline void SPI_DataOut( uint8_t bit )
     }
 }
 
-static inline uint8_t SPI_DataIn( uint8_t )
+static inline uint8_t SPI_DataIn( void )
 {
-    return ( MISO_PORT & MISO_MASK ) != 0;  
+    return ( MISO_PIN & MISO_MASK ) != 0;  
 }
 
 #endif
@@ -183,20 +189,30 @@ static void SPI_MasterInit( void )
 
 static uint8_t SPI_XferByte( uint8_t b )
 {
+    uint8_t b_in = b;
+
 #if SPI_BIT_BANG
+
+    // According to the photo in the DPAC datasheet, CPOL = 0, CPHA = 1,
+    // the output is driven on the rising edge, and sampled on the
+    // falling edge.
 
     uint8_t i;
 
     for ( i = 0; i < 8; i++ )
     {
+        us_spin( 10 );
+
         SPI_DataOut( b & 0x80 );
         SPI_ClockHigh();
+
+        us_spin( 10 );
+
         b <<= 1;
+        b |= ( SPI_DataIn() & 0x01 );
         SPI_ClockLow();
-        b |= SPI_DataIn();
     }
 
-    return b;
 #else
     // Kick off the transmission
 
@@ -211,8 +227,12 @@ static uint8_t SPI_XferByte( uint8_t b )
 
     // Read (and return) the read byte
 
-    return SPDR;
+    b = SPDR;
 #endif
+
+    Log( "Xfer sent: 0x%02x rcvd: 0x%02x\n", b_in, b );
+
+    return b;
 
 } // SPI_XferByte
 
@@ -261,22 +281,67 @@ static void WLN_ReadData( void )
 {
     uint8_t lenHi;
     uint8_t lenLo;
-    uint8_t data;
+    uint8_t data[8];
+    uint8_t i;
+    uint8_t len;
+
+    TRIGGER_PORT |= TRIGGER_MASK;
+    us_spin( 10 );
 
     ActivateSlave();
 
     SPI_XferByte( WLN_CMD_READ_DATA );
     lenHi = SPI_XferByte( 0 );
     lenLo = SPI_XferByte( 0 );
-    data  = SPI_XferByte( 0 );
+
+    if (( lenHi == 0 ) && ( lenLo <= sizeof( data )))
+    {
+        len = lenLo;
+    }
+    else
+    {
+        len = sizeof( data );
+    }
+    for ( i = 0; i < len; i++ )
+    {
+        data[ i ] = SPI_XferByte( 0 );
+    }
 
     DeactivateSlave();
+    TRIGGER_PORT &= ~TRIGGER_MASK;
 
-    Log( "ReadData: 0x%02x 0x%02x 0x%02x\n", lenHi, lenLo, data );
-
+    Log( "ReadData: Hi:0x%02x Lo:0x%02x Data", lenHi, lenLo );
+    for ( i = 0; i < len; i++ )
+    {
+        Log( " 0x%02x", data[ i ]);
+    }
+    Log( "\n" );
 
 } // WLN_ReadData
 
+//***************************************************************************
+/**
+*   WLN_WriteByte
+*/
+
+static void WLN_WriteByte( uint8_t b )
+{
+    uint8_t lenHi;
+    uint8_t lenLo;
+
+    ActivateSlave();
+
+    SPI_XferByte( WLN_CMD_WRITE_DATA );
+    lenHi = SPI_XferByte( 0 );
+    lenLo = SPI_XferByte( 0 );
+    SPI_XferByte( b );
+
+    DeactivateSlave();
+
+    Log( "WriteData: LenHi:0x%02x LenLo:0x%02x Data:0x%02x\n", lenHi, lenLo, b );
+
+
+} // WLN_WriteByte
 
 //***************************************************************************
 /**
@@ -287,6 +352,7 @@ int main( void )
 {
     uint8_t delay;
     uint8_t counter;
+    uint8_t doStatus = 1;
 
     InitTimer();
     InitUART();
@@ -298,6 +364,9 @@ int main( void )
     SetDirectionOut( SCK );
     SetDirectionOut( SS );
     SetDirectionIn(  INT );
+    SetDirectionOut( TRIGGER );
+
+    TRIGGER_PORT &= ~TRIGGER_MASK;
 
     SPI_MasterInit();
 
@@ -312,14 +381,15 @@ int main( void )
     {
         LED_PORT ^= LED_MASK;
 
-#if 1
-        if ( counter == 0 )
+        if ( doStatus )
         {
-            uint8_t status = WLN_ReadStatus();
-            WLN_PrintStatus( status );
+            if ( counter == 0 )
+            {
+                uint8_t status = WLN_ReadStatus();
+                WLN_PrintStatus( status );
+            }
+            counter = ( counter + 1 ) & 0x03;
         }
-        counter = ( counter + 1 ) & 0x03;
-#endif
 
         // Tick rate is 100/sec so waiting for 50 waits for 1/2 sec
 
@@ -335,16 +405,38 @@ int main( void )
             {
                 char    ch = UART0_GetChar();
 
-                if ( ch == '*' )
+                switch ( ch )
                 {
-                    Log( "Reset\n" );
+                    case '!':
+                    {
+                        doStatus = !doStatus;
+                        Log( "Turning status %s\n", doStatus ? "on" : "off" );
+                        break;
+                    }
 
-                    SetDirectionOut( RESET );
-                    RESET_PORT &= ~RESET_MASK;
+                    case '*':
+                    {
+                        Log( "Reset\n" );
+
+                        SetDirectionOut( RESET );
+                        RESET_PORT &= ~RESET_MASK;
+                        break;
+                    }
+
+                    case ' ':
+                    {
+                        WLN_ReadData();
+                        break;
+                    }
+
+                    default:
+                    {
+                        Log( "Read: '%c'\n", ch );
+                        WLN_WriteByte( ch );
+                        break;
+                    }
                 }
 
-                Log( "Read: '%c'\n", ch );
-                WLN_ReadData();
             }
         }
     }
