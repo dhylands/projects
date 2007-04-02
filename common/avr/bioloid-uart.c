@@ -222,7 +222,7 @@ ISR( USART0_TX_vect )
 	// receiver.
 
 	UCSR0B &= ~(( 1 << TXEN0 ) | ( 1 << TXCIE0 ));
-	UCSR0B |=   ( 1 << RXEN0 );
+	UCSR0B |=  (( 1 << RXEN0 ) | ( 1 << RXCIE0 ));
 
 } // USART0_TX_vect
 
@@ -244,8 +244,8 @@ ISR( USART1_TX_vect )
 	// that we can go ahead and disable the transmitter and re-enable the
 	// receiver.
 
-	UCSR1B &= ~(( 1 << TXEN1) | ( 1 << TXCIE1 ));
-	UCSR1B |=   ( 1 << RXEN1 );
+	UCSR1B &= ~(( 1 << TXEN1 ) | ( 1 << TXCIE1 ));
+	UCSR1B |=  (( 1 << RXEN1 ) | ( 1 << RXCIE1 ));
 
 } // USART1_TX_vect
 
@@ -377,7 +377,7 @@ int  UART0_PutChar( char ch )
     // and disable the receiver.
 
 #if !CFG_BLD_UART0_RCV_TX
-    UCSR0B &= ~( 1 << RXEN0 );
+    UCSR0B &= ~(( 1 << RXEN0 ) | ( 1 << RXCIE0 ));
 #endif
     UCSR0B |= (( 1 << TXEN0 ) | ( 1 << UDRIE0 ));
 
@@ -402,7 +402,7 @@ int  UART1_PutChar( char ch )
     // and disable the receiver.
 
 #if !CFG_BLD_UART1_RCV_TX
-    UCSR1B &= ~( 1 << RXEN1 );
+    UCSR1B &= ~(( 1 << RXEN1 ) | ( 1 << RXCIE1 ));
 #endif
     UCSR1B |= (( 1 << TXEN1 ) | ( 1 << UDRIE1 ));
 
