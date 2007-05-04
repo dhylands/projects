@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <assert.h>
    
 #include <Log.h>
 
@@ -34,11 +33,9 @@
 
 #define  YYDEBUG  1
 
-int	   gDebugYacc = 0;
-
 #define	DBG(fmt,args...)	if ( gDebugYacc ) Log( fmt, ## args );
 
-int	   gIndent	= 0;
+BOOL     gDebugYacc;
 BOOL     gParsedOk = TRUE;
 
 #define	MAX_INPUTS	100
@@ -226,7 +223,7 @@ idleAction	: IDLE IDENTIFIER
 					 * The idle action was specified, make it entry 1
 					 */
 
-					assert( gSM.numActions == 0 );
+					ASSERT( gSM.numActions == 0 );
 					gSM.numActions = 2;
 					gSmAction[ 0 ].name = NULL;
 					gSmAction[ 1 ].name = strdup( $2 );
@@ -239,7 +236,7 @@ idleAction	: IDLE IDENTIFIER
 					 * No idle action specified, make a NULL one anyway
 					 */
 
-					assert( gSM.numActions == 0 );
+					ASSERT( gSM.numActions == 0 );
 					gSM.numActions = 1;
 					gSmAction[ 0 ].name = NULL;
 
@@ -547,7 +544,7 @@ void AddInput( char *inputStr, char *actionStr,
 	 * Add the action and the branch
 	 */
 
-	assert( actionStr != NULL );
+	ASSERT( actionStr != NULL );
 
 	gCurrState.input[ i ].dflt = FALSE;
 	gCurrState.input[ i ].actionStr = strdup( actionStr );
@@ -555,7 +552,7 @@ void AddInput( char *inputStr, char *actionStr,
 	gCurrState.input[ i ].branch = branch;
 	if ( branch == BranchId )
 	{
-		assert( nextStateStr != NULL );
+		ASSERT( nextStateStr != NULL );
 		gCurrState.input[ i ].nextStateStr = strdup( nextStateStr );
 	}
 	else

@@ -1,6 +1,6 @@
 ###########################################################################
 #
-#	Makefile to build boothost
+#	Makefile to build the state machine compiler (smc)
 #
 ###########################################################################
 
@@ -15,18 +15,28 @@ MK_SRC_FILES = \
 
 include ../../rules/mkRules.mk
 
-%_tab.c: %.y
+smc_tab.c: smc.y
 	$(ECHO) "Creating parser from $< ..."
 	$(RM) -f $@
 	$(Q)bison -d -o $@ $<
 
-%_lex.c: %.l %_tab.c
+smc_lex.c: smc.l smc_tab.c
 	$(ECHO) "Creating lexical analyzer from $< ..."
 	$(RM) -f $@
 	$(Q)flex -o $@ $<
 
-clean: clean-local
+target: stm-test
 
-clean-local:
-	$(RM) -f smc_tab.* smc_lex.c
+.PHONY: stm-test
+
+stm-test: cruise-sm.c stm-test.c
+	$(MAKE) -f stm-test.mk	
+
+cruise-sm.c : cruise.smc $(call MK_ELF_NAME, $(MK_ELF_TARGET))
+	$(ECHO) "Compiling state machine $< ..."
+	$(call MK_ELF_NAME, $(MK_ELF_TARGET)) $<
+
+squeaky-clean: svn-clean
+	$(ECHO) "Removing genenrated sources..."
+	$(RM) -f smc_tab.[ch] smc_lex.c cruise-sm.[ch]
 	

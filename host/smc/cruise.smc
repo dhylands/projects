@@ -12,9 +12,9 @@
 
 name  cruise_control 
 
-InputPrefix		inCcon
-ActionPrefix	acCcon
-StatePrefix		stCcon
+InputPrefix	ccin_
+ActionPrefix	ccac_
+StatePrefix	ccst_
 
 ;
 ;  Define the input Events to the State Machine
@@ -35,40 +35,40 @@ inputs	; input events to the state machine
 ;   Define the States and the Transitions
 ;
 
-state cruise_off		; cruise control is not engaged
+state cruise_off	; cruise control is not engaged
 [
-	enable_cruise		: read_rotation_rate	branch maintain_speed
+    enable_cruise	: read_rotation_rate	branch maintain_speed
 ]
 
 
 state maintain_speed	; maintain constant speed
 [
-	start_incr_speed	: enab_increase_spd		branch increasing_speed
-	apply_brake			: dis_maint_const_spd	branch cruise_interrupted
-	disable_cruise		: dis_maint_const_spd	branch cruise_off
+    start_incr_speed	: enab_increase_spd	branch increasing_speed
+    apply_brake		: dis_maint_const_spd	branch cruise_interrupted
+    disable_cruise	: dis_maint_const_spd	branch cruise_off
 ]
 
 
 state increasing_speed	; increase vehicle speed 
 [
-	stop_incr_speed		: enab_maint_const_spd	branch maintain_speed 
-	apply_brake			: dis_increase_spd		branch cruise_interrupted
-	disable_cruise		: dis_increase_spd		branch cruise_off
+    stop_incr_speed	: enab_maint_const_spd	branch maintain_speed 
+    apply_brake		: dis_increase_spd	branch cruise_interrupted
+    disable_cruise	: dis_increase_spd	branch cruise_off
 ]
 
 
 state cruise_interrupted; cruise control temporarily disengaged
 [
-	resume_speed		: enab_ret_to_prev_spd	branch resuming_speed
-	disable_cruise		: do_nothing			branch cruise_off
+    resume_speed	: enab_ret_to_prev_spd	branch resuming_speed
+    disable_cruise	: do_nothing		branch cruise_off
 ]
 
 
 state resuming_speed	; prepare to maintain constant speed
 [
-	apply_brake			: dis_ret_to_prev_spd	branch cruise_interrupted
-	prev_speed_reached	: enab_maint_const_spd	branch maintain_speed
-	disable_cruise		: dis_ret_to_prev_spd	branch cruise_off
+    apply_brake		: dis_ret_to_prev_spd	branch cruise_interrupted
+    prev_speed_reached	: enab_maint_const_spd	branch maintain_speed
+    disable_cruise	: dis_ret_to_prev_spd	branch cruise_off
 ]
 
 

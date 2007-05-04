@@ -29,11 +29,15 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <Log.h>
+
+#include "stm.h"
 #include "smc.h"
 
 /* ---- Public Variables -------------------------------------------------- */
 
 extern	BOOL	parsedOk;
+extern  FILE   *yyin;
 
 /* ---- Private Constants and Types --------------------------------------- */
 
@@ -87,6 +91,8 @@ int main( int argc, char **argv )
 	char   *cpp_argv[ 20 ];
     size_t  cpp_len;
     char   *cpp_cmdline;
+
+    LogInit( stdout );
 
 	smcName = NULL;
 
@@ -164,21 +170,21 @@ int main( int argc, char **argv )
     {
         s = base;
     }
-    if (( s = strrchr( s,  '.' )) == NULL )
+    if (( s = strrchr( s,  '.' )) != NULL )
     {
         *s = '\0';
     }
-    cFname = malloc( strlen( base ) + 4 );
+    cFname = malloc( strlen( base ) + 6 );
     strcpy( cFname, base );
-    strcat( cFname, ".sm" );
+    strcat( cFname, "-sm.c" );
     
-    hFname = malloc( strlen( base ) + 5 );
+    hFname = malloc( strlen( base ) + 6 );
     strcpy( hFname, base );
-    strcat( hFname, ".inp" );
+    strcat( hFname, "-sm.h" );
 
-    pp_fname = malloc( strlen( base ) + 4 );
+    pp_fname = malloc( strlen( base ) + 7 );
 	strcpy( pp_fname, base );
-	strcat( pp_fname, ".pp" );
+	strcat( pp_fname, "-sm.pp" );
 
 	/*
 	 * See if the file is accessible
@@ -264,6 +270,7 @@ int main( int argc, char **argv )
 		fprintf( stderr, "Unable to open file %s\n", pp_fname );
 		exit( 1 );
 	}
+    yyin = curr_fs;
 	curr_fname = pp_fname;
 
 	/*
@@ -435,10 +442,13 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	int		actionIdx;
 	int		inputIdx;
 	int		stateIdx;
-	int		wordIdx;
-	int		numWords;
+	int		byteIdx;
+	int		numBytes;
 	time_t	currTime = time( (time_t)NULL );
-	unsigned data[ 130 ];
+	uint8_t *data;
+
+    numBytes = STM_CalcBytesPerState( sm );
+    data = malloc( numBytes );
 
 	fprintf( fs, "/************************************"
 	              "************************************\n" );
@@ -459,50 +469,60 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	fprintf( fs, " ************************************"
 	              "************************************/\n" );
 	fprintf( fs, "\n" );
-	fprintf( fs, "#include \"mk3.h\"\n" );
 	fprintf( fs, "#include \"stm.h\"\n" );
 	fprintf( fs, "#include \"%s\"\n", hFname );
 	fprintf( fs, "\n" );
-	fprintf( fs, "#define STATIC\n" );
-	fprintf( fs, "\n" );
-	fprintf( fs, "STATIC STM_Input %s_inputQueue[ %d ];\n",
+    fprintf( fs, "#if !defined( NULL )\n" );
+    fprintf( fs, "#   define NULL 0\n" );
+    fprintf( fs, "#endif\n" );
+    fprintf( fs, "\n" );
+	fprintf( fs, "static STM_Input %s_inputQueue[ %d ];\n",
 				 sm->name, sm->queueLen );
 	fprintf( fs, "\n" );
 
-	numWords = (( sm->numInputs + 1 ) * 2 + 3 ) / 4;
-	fprintf( fs, "STATIC Uns       %s_stateData[ %d * %d ] =\n",
-				 sm->name, sm->numStates, numWords );
+	fprintf( fs, "static uint8_t %s_stateData[ %d * %d ] =\n",
+				 sm->name, sm->numStates, numBytes );
 	fprintf( fs, "{\n" );
-
-#define	SetByte( idx, val )	\
-		( data[ (idx) / 4 ] |= ( val << ( 8 * ( 3 - ( (idx) % 4 )))))
 
 	for ( stateIdx = 0; stateIdx < sm->numStates; stateIdx++ )
 	{
+        int         width;
 		SMC_State  *st = &sm->state[ stateIdx ];
-		unsigned    enterAction = st->enterAction;
-		unsigned    exitAction = st->exitAction;
 
-		memset( data, 0, sizeof( data ));
-		SetByte( 0, enterAction );
-		SetByte( 1, exitAction );
+        memset( data, 0, numBytes );
+
+		data[ STM_EnterOffset() ] = st->enterAction;
+		data[ STM_ExitOffset() ] = st->exitAction;
 
 		for ( inputIdx = 0; inputIdx < sm->numInputs; inputIdx++ )
 		{
 			SMC_StateInput *si = &st->stateInput[ inputIdx ];
-			unsigned        action = si->action;
-			unsigned        nextState = si->nextState;
 
-			SetByte( inputIdx * 2 + 2, action );
-			SetByte( inputIdx * 2 + 3, nextState );
+			data[ STM_ActionOffset( inputIdx )] = si->action;
+			data[ STM_NextStateOffset( inputIdx )] = si->nextState;
 		}
 
 		fprintf( fs, "    /* S%02d */ ", stateIdx );
 
-		fprintf( fs, "0x%08xuL", data[ 0 ] );
-		for ( wordIdx = 1; wordIdx < numWords; wordIdx++ )
+        width = 1;
+        for ( byteIdx = 1; byteIdx < numBytes; byteIdx++ )
+        {
+            if (( data[ byteIdx ] > 10 ) && ( width < 2 ))
+            {
+                width = 2;
+            }
+            else
+            if (( data[ byteIdx ] > 100 ) && ( width < 3 ))
+            {
+                width = 3;
+            }
+        }
+
+
+		fprintf( fs, "%*d", width, data[ 0 ] );
+		for ( byteIdx = 1; byteIdx < numBytes; byteIdx++ )
 		{
-			fprintf( fs, ", 0x%08xuL", data[ wordIdx ] );
+			fprintf( fs, ", %*d", width, data[ byteIdx ] );
 		}
 		fprintf( fs, "%s\n", ( stateIdx + 1 ) < sm->numStates ? "," : "" );
 	}
@@ -511,7 +531,7 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 
 	fprintf( fs, "};\n" );
 	fprintf( fs, "\n" );
-	fprintf( fs, "STATIC STM_Action %s_action[ %d ] =\n",
+	fprintf( fs, "static STM_Action %s_action[ %d ] =\n",
 				 sm->name, sm->numActions );
 	fprintf( fs, "{\n" );
 	for ( actionIdx = 0; actionIdx < sm->numActions; actionIdx++ )
@@ -531,10 +551,10 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	}
 	fprintf( fs, "};\n" );
 	fprintf( fs, "\n" );
-	fprintf( fs, "#if defined( DEBUG )\n" );
+	fprintf( fs, "#if defined( STM_DEBUG )\n" );
 	fprintf( fs, "\n" );
 
-	fprintf( fs, "STATIC Char     *%s_actionStr[ %d ] =\n",
+	fprintf( fs, "static char     *%s_actionStr[ %d ] =\n",
 				 sm->name, sm->numActions );
 	fprintf( fs, "{\n" );
 	for ( actionIdx = 0; actionIdx < sm->numActions; actionIdx++ )
@@ -547,7 +567,7 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	fprintf( fs, "};\n" );
 	fprintf( fs, "\n" );
 	
-	fprintf( fs, "STATIC Char     *%s_inputStr[ %d ] =\n",
+	fprintf( fs, "static char     *%s_inputStr[ %d ] =\n",
 				 sm->name, sm->numInputs );
 	fprintf( fs, "{\n" );
 	for ( inputIdx = 0; inputIdx < sm->numInputs; inputIdx++ )
@@ -559,7 +579,7 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	fprintf( fs, "};\n" );
 	fprintf( fs, "\n" );
 
-	fprintf( fs, "STATIC Char     *%s_stateStr[ %d ] =\n",
+	fprintf( fs, "static char     *%s_stateStr[ %d ] =\n",
 				 sm->name, sm->numStates );
 	fprintf( fs, "{\n" );
 	for ( stateIdx = 0; stateIdx < sm->numStates; stateIdx++ )
@@ -574,7 +594,7 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	fprintf( fs, "#endif\n" );
 	fprintf( fs, "\n" );
 
-	fprintf( fs, "STATIC STM_StateMachineObj %sSmObj =\n", sm->name );
+	fprintf( fs, "STM_StateMachine %sSm =\n", sm->name );
 	fprintf( fs, "{\n" );
 	fprintf( fs, "    %5d,  /* numActions           */\n", sm->numActions );
 	fprintf( fs, "    %5d,  /* numInputs            */\n", sm->numInputs );
@@ -585,30 +605,24 @@ void GenStmSmCsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *cFname,
 	fprintf( fs, "    %5d,  /* queuePutIdx          */\n", 0 );
 	fprintf( fs, "    %5d,  /* queueGetIdx          */\n", 0 );
 	fprintf( fs, "    %5d,  /* queueMax             */\n", sm->queueLen );
-	fprintf( fs, "    %5d,  /* entryWords           */\n", numWords );
+    fprintf( fs, "    %5d,  /* stateBytes           */\n", numBytes );
 	fprintf( fs, "    %s_stateData,\n", sm->name );
 	fprintf( fs, "    %s_action,\n", sm->name );
-	fprintf( fs, "    NULL,   /* actionProc	          */\n" );
+	fprintf( fs, "    NULL,   /* actionProc           */\n" );
 	fprintf( fs, "    NULL    /* userParm             */\n" );
 	fprintf( fs, "\n" );
-	fprintf( fs, "#if defined( DEBUG )\n" );
-	fprintf( fs, "\n" );
+	fprintf( fs, "#if defined( STM_DEBUG )\n" );
 	fprintf( fs, "    ,\n" );
 	fprintf( fs, "    STM_MAGIC,\n" );
 	fprintf( fs, "    \"%s\",\n", sm->name );
 	fprintf( fs, "    %s_actionStr,\n", sm->name );
 	fprintf( fs, "    %s_inputStr,\n", sm->name );
 	fprintf( fs, "    %s_stateStr,\n", sm->name );
-	fprintf( fs, "    FALSE,  /* dbgActions           */\n" );
-	fprintf( fs, "    FALSE,  /* dbgInputs            */\n" );
-	fprintf( fs, "    FALSE   /* dbgStates            */\n" );
-	fprintf( fs, "\n" );
+	fprintf( fs, "    0,  /* FALSE - dbgActions       */\n" );
+	fprintf( fs, "    0,  /* FALSE - dbgInputs        */\n" );
+	fprintf( fs, "    0   /* FALSE - dbgStates        */\n" );
 	fprintf( fs, "#endif\n" );
-	fprintf( fs, "\n" );
 	fprintf( fs, "};\n" );
-
-	fprintf( fs, "\n" );
-	fprintf( fs, "STM_StateMachine %sSm = &%sSmObj;\n", sm->name, sm->name );
 }
 
 /************************************************************************
@@ -642,10 +656,6 @@ void GenStmSmHsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *hFname 
 	fprintf( fs, " ************************************"
 	              "************************************/\n" );
 	fprintf( fs, "\n" );
-	fprintf( fs, "#if !defined( MK3_H )\n" );
-	fprintf( fs, "#    include \"mk3.h\"\n" );
-	fprintf( fs, "#endif\n" );
-	fprintf( fs, "\n" );
 	fprintf( fs, "#if !defined( STM_H )\n" );
 	fprintf( fs, "#    include \"stm.h\"\n" );
 	fprintf( fs, "#endif\n" );
@@ -668,7 +678,7 @@ void GenStmSmHsrc( SMC_StateMachine *sm, FILE *fs, char *smcFname, char *hFname 
 
 	for ( actionIdx = 1; actionIdx < sm->numActions; actionIdx++ )
 	{
-		fprintf( fs, "extern Void %s%s( Void );\n",
+		fprintf( fs, "void %s%s( void );\n",
 				 sm->actionPrefix != NULL ? sm->actionPrefix : "",
 				 sm->action[ actionIdx ].name );
 	}
@@ -723,45 +733,49 @@ int	yygetc( void )
 	int		ln;
 	char	*s1, *s2;
 
-	if ( *curr_ptr == '\0' )
-	{
-		/*
-		 * We've run out of line, go and get another one
-		 */
+    if ( verbose )
+    {
+        Log( "yygetc called\n" );
+    }
+    if ( *curr_ptr == '\0' )
+    {
+        /*
+         * We've run out of line, go and get another one
+         */
 
-		if ( fgets( line, sizeof( line ), curr_fs ) == NULL )
-		{
-			return -1;
-		}
+        if ( fgets( line, sizeof( line ), curr_fs ) == NULL )
+        {
+            return -1;
+        }
 
-		/*
-		 * Skip over the filename
-		 */
+        /*
+         * Skip over the filename
+         */
 
-		if ((( s1 = strchr( line, ' ' )) != NULL )
-		&&  (( ln = (int)strtol( s1, &s2, 10 )) != 0 )
-		&&	( *s2 == ':' ))
-		{
-			/*
-			 * The line looks like the right format use it
-			 */
+        if ((( s1 = strchr( line, ' ' )) != NULL )
+        &&  (( ln = (int)strtol( s1, &s2, 10 )) != 0 )
+        &&	( *s2 == ':' ))
+        {
+            /*
+             * The line looks like the right format use it
+             */
 
-			*s1 = '\0';
-			curr_fname = line;
-			curr_lineno = ln;
-			curr_ptr = ++s2;
-		}
-		else
-		{
-			curr_ptr = line;
-			curr_lineno = 0;
-		}
+            *s1 = '\0';
+            curr_fname = line;
+            curr_lineno = ln;
+            curr_ptr = ++s2;
+        }
+        else
+        {
+            curr_ptr = line;
+            curr_lineno = 0;
+        }
 
-		/*
-		 * Note: There is always at least 1 space after the ':'
-		 *		 so we don't have to fetch more than one line.
-		 */
-	}
+        /*
+         * Note: There is always at least 1 space after the ':'
+         *		 so we don't have to fetch more than one line.
+         */
+    }
 	return *curr_ptr++;
 }
 

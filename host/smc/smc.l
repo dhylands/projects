@@ -34,7 +34,7 @@
  * each line produced by the pre-processor.
  */
 
-#undef	yygetc
+//#undef	yygetc
 
 int   yygetc( void );
 
