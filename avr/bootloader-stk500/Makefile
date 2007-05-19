@@ -9,8 +9,17 @@ MK_AVR_MCU          = m168
 MK_AVR_FREQ         = 8MHz
 #MK_AVR_MCU          = m168
 #MK_AVR_FREQ         = 8MHz
-MK_AVR_PROGRAMMER  ?= avrdude
+MK_AVR_PROGRAMMER  ?= stk500
 MK_stk500_PORT		= COM1
+
+all:
+
+# For Stinger we set the LED up to the green LED
+# and we set SW_OPT to be empty so we don't have an override switch
+
+Stinger:
+	$(MAKE) MK_AVR_MCU=m8 MK_AVR_FREQ=16MHz LED_PORT_m8=B LED_PIN_m8=3 SW_OPT=
+
 
 MK_HEX_TARGET       = Boot-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
 MK_SRC_FILES        = start.c boot.c
@@ -76,6 +85,8 @@ SW_PORT         = PORT$(SW_PORT_$(MK_AVR_MCU))
 SW_PIN          = PIN$(SW_PORT_$(MK_AVR_MCU))
 SW              = P$(SW_PORT_$(MK_AVR_MCU))$(SW_PIN_$(MK_AVR_MCU))
 
+SW_OPT			= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
+
 # Check to make sure that something has been assigned for various paramters
            
 ifeq ($(BOOT_START_$(MK_AVR_MCU)),)
@@ -104,10 +115,7 @@ DEFS = \
     -DLED_DDR=$(LED_DDR) \
     -DLED_PORT=$(LED_PORT) \
     -DLED=$(LED) \
-    -DSW_DDR=$(SW_DDR) \
-    -DSW_PORT=$(SW_PORT) \
-    -DSW=$(SW) \
-    -DSW_PIN=$(SW_PIN) \
+	$(SW_OPT) \
     -DBAUD_RATE=38400
 
 CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions
@@ -115,4 +123,5 @@ CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions
 LDFLAGS += -Wl,--section-start=.text=$(BOOT_START),-e,boot,--defsym,zero_addr=0 -nostdlib
 
 include ../../rules/mkRules.mk
+
 

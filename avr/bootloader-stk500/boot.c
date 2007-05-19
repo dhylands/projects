@@ -242,12 +242,18 @@ void boot(char bCalled)
 	}
 	else
 	{
-	    bAppStart = (pgm_read_byte_near(0x00) != 0xFF && SWInput());	// Forced override into bootloader.
+	    bAppStart = (pgm_read_byte_near(0x00) != 0xFF ) && SWInput();	// Forced override into bootloader.
 
 	    if (bAppStart)
-	    	i = 30;	// 3 seconds
+        {
+            i = 30;	// 3 seconds
+            //putch( 'A' );
+        }
 	    else
-	    	i = 6;	// 1/2 second
+        {
+            i = 6;	// 1/2 second
+            //putch( 'R' );
+        }
 
         while(( bAppStart == 0 ) || i--)
         {
