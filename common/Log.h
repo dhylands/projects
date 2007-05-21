@@ -84,6 +84,10 @@ extern "C"
 {
 #endif
 
+#if CFG_LOG_ALLOW_DEFERRED_NL
+extern  int gDeferredNewline;
+#endif
+
 /***************************************************************************
 *
 *   Log Buffer support

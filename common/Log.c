@@ -61,6 +61,9 @@ int gQuiet = 0;
 volatile    LOG_Buffer_t    LOG_gBuffer;
 
 #endif
+#if CFG_LOG_ALLOW_DEFERRED_NL
+int         gDeferredNewline = 0;
+#endif
 
 // ---- Private Variables ---------------------------------------------------
 
@@ -172,6 +175,14 @@ void vLog
 {
     // For now we call printf directly. A better way would be to install
     // a callback which does the real work
+
+#if CFG_LOG_ALLOW_DEFERRED_NL
+    if ( gDeferredNewline && ( *fmt != '\r' ))
+    {
+        gDeferredNewline = 0;
+        Log( "\r\n" );
+    }
+#endif
 
 #if defined( AVR )
 #   if CFG_LOG_USE_STDIO
