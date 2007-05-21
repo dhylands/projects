@@ -149,7 +149,9 @@ MK_GEN_DIRS = obj lib bin
 # 	dependancy files will be placed. 
 #
 
+ifeq ($(MK_OBJ_DIR),)
 MK_OBJ_DIR = ./obj/$(MK_OS_DIR)$(MK_REL_EXT)
+endif
 
 #--------------------------------------------------------------------------
 #
@@ -157,7 +159,9 @@ MK_OBJ_DIR = ./obj/$(MK_OS_DIR)$(MK_REL_EXT)
 # 	be placed.
 #
 
+ifeq ($(MK_LIB_DIR),)
 MK_LIB_DIR = ./lib/$(MK_OS_DIR)$(MK_REL_EXT)
+endif
 
 #--------------------------------------------------------------------------
 #
@@ -165,7 +169,9 @@ MK_LIB_DIR = ./lib/$(MK_OS_DIR)$(MK_REL_EXT)
 #	files will be placed.
 #
 
+ifeq ($(MK_BIN_DIR),)
 MK_BIN_DIR = ./bin/$(MK_OS_DIR)$(MK_REL_EXT)
+endif
 
 #--------------------------------------------------------------------------
 #
