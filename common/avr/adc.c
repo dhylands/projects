@@ -85,7 +85,11 @@ ISR( ADC_vect )
 
     // Setup the mux for the next channel
 
-    ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 ))) | ( gAdcChannel & 7 );
+    ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 ))) | ( gAdcChannel & 7 )
+#if CFG_ADC_8_BIT
+          | ( 1 << ADLAR ) 
+#endif
+          ;
 
     // Start the next conversion
 
@@ -159,7 +163,7 @@ void ADC_Init( uint8_t prescalar )
     // Start off on channel 0
 
     ADMUX = ADMUX_REF_AVCC
-#if ( CFG_ADC_POLL == 0 )
+#if defined( ADATE ) && ( CFG_ADC_POLL == 0 )
           | ( 1 << ADATE )
 #endif
 #if CFG_ADC_8_BIT

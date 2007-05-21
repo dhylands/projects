@@ -99,6 +99,7 @@ extern "C"
 #   endif
 
 #   define  CFG_USE_UART0               CFG_USE_UART
+#   define  CFG_UART0_BAUD_RATE         CFG_UART_BAUD_RATE
 #   define  CFG_UART0_RX_BUFFER_SIZE    CFG_UART_RX_BUFFER_SIZE
 #   define  CFG_UART0_TX_BUFFER_SIZE    CFG_UART_TX_BUFFER_SIZE
 #   define  CFG_UART0_LF_TO_CRLF        CFG_UART_LF_TO_CRLF

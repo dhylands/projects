@@ -529,7 +529,16 @@ void InitUART( void )
 
     UCSR0A = ( 1 << U2X0 );
     UCSR0B = (( 1 << RXCIE0 ) | ( 1 << RXEN0 ) | ( 1 << TXEN0 ));
-    UCSR0C = ( UART0_DATA_BIT_8 | UART0_PARITY_NONE | UART0_STOP_BIT_1 );
+
+#if defined( URSEL )
+#   define  URSEL_INIT  ( 1 << URSEL )
+#elif defined( URSEL0 )
+#   define  URSEL_INIT  ( 1 << URSEL0 )
+#else
+#   define  URSEL_INIT  0
+#endif
+
+    UCSR0C = URSEL_INIT | UART0_DATA_BIT_8 | UART0_PARITY_NONE | UART0_STOP_BIT_1;
 
 #endif
 
@@ -552,7 +561,16 @@ void InitUART( void )
 
     UCSR1A = ( 1 << U2X1 );
     UCSR1B = (( 1 << RXCIE1 ) | ( 1 << RXEN1 ) | ( 1 << TXEN1 ));
-    UCSR1C = ( UART1_DATA_BIT_8 | UART1_PARITY_NONE | UART1_STOP_BIT_1 );
+
+#if defined( URSEL )
+#   define  URSEL_INIT  ( 1 << URSEL )
+#elif defined( URSEL1 )
+#   define  URSEL_INIT  ( 1 << URSEL1 )
+#else
+#   define  URSEL_INIT  0
+#endif
+
+    UCSR1C = URSEL_INIT | UART1_DATA_BIT_8 | UART1_PARITY_NONE | UART1_STOP_BIT_1;
 
 #endif
 
