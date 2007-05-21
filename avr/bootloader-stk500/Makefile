@@ -5,21 +5,33 @@
 ###########################################################################
 
 MK_OS               = avr
-MK_AVR_MCU          = m168
-MK_AVR_FREQ         = 8MHz
-#MK_AVR_MCU          = m168
-#MK_AVR_FREQ         = 8MHz
 MK_AVR_PROGRAMMER  ?= stk500
 MK_stk500_PORT		= COM1
 
+ifeq ($(TARGET),)
+
+# No TARGET specified, so use some default
+
+MK_AVR_MCU          = m168
+MK_AVR_FREQ         = 8MHz
 all:
+
+else
 
 # For Stinger we set the LED up to the green LED
 # and we set SW_OPT to be empty so we don't have an override switch
 
-Stinger:
-	$(MAKE) MK_AVR_MCU=m8 MK_AVR_FREQ=16MHz LED_PORT_m8=B LED_PIN_m8=3 SW_OPT=
+Stinger_MCU			= m8
+Stinger_FREQ		= 16MHz
+Stinger_LED			= B 3
+Stinger_SW			=
 
+MK_AVR_MCU			= $($(TARGET)_MCU)
+MK_AVR_FREQ			= $($(TARGET)_FREQ)
+MK_OBJ_DIR			= ./obj/$(TARGET)
+MK_BIN_DIR			= ./bin/$(TARGET)
+
+endif
 
 MK_HEX_TARGET       = Boot-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
 MK_SRC_FILES        = start.c boot.c
@@ -38,60 +50,18 @@ BOOT_START_m128 = 0x1F000
 MK_AVR_FUSES_m168   = FA DF E2	# 1k bootloader
 MK_AVR_FUSES_m128   = FF C2 BF	# 4k bootloader
                       
+ifeq ($(TARGET),)
+
 # Setup the default status LED. We use SS, except on the ATMega8/48/88/168 
 # where SS is shared with OC1B which is normally used as a motor control
 
-LED_PORT_m8     = D
-LED_PIN_m8      = 7
-
-LED_PORT_m16    = B
-LED_PIN_m16     = 4
-
-LED_PORT_m168   = D
-LED_PIN_m168    = 7
-
-LED_PORT_m32    = B
-LED_PIN_m32     = 4
+LED_m8			= D 7
+LED_m16			= B 4
+LED_m168		= D 7
+LED_m32			= B 4
 
 # G.4 is Red LED on robsotix				   
-LED_PORT_m128   = G
-LED_PIN_m128    = 4
-
-LED_PORT        = PORT$(LED_PORT_$(MK_AVR_MCU))
-LED_DDR         = DDR$(LED_PORT_$(MK_AVR_MCU))
-LED             = P$(LED_PORT_$(MK_AVR_MCU))$(LED_PIN_$(MK_AVR_MCU))
-
-# By default, the SW is on the MISO pin. This figures out where it is for the
-# various processors
-
-SW_PORT_m8      = B
-SW_PIN_m8       = 4
-
-SW_PORT_m16     = B
-SW_PIN_m16      = 6
-
-SW_PORT_m168    = B
-SW_PIN_m168     = 4
-
-SW_PORT_m32     = B
-SW_PIN_m32      = 6
-
-# B.1 is SCK - PDI and RxD are the same pin				   
-SW_PORT_m128    = B
-SW_PIN_m128     = 1
-
-SW_DDR          = DDR$(SW_PORT_$(MK_AVR_MCU))
-SW_PORT         = PORT$(SW_PORT_$(MK_AVR_MCU))
-SW_PIN          = PIN$(SW_PORT_$(MK_AVR_MCU))
-SW              = P$(SW_PORT_$(MK_AVR_MCU))$(SW_PIN_$(MK_AVR_MCU))
-
-SW_OPT			= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
-
-# Check to make sure that something has been assigned for various paramters
-           
-ifeq ($(BOOT_START_$(MK_AVR_MCU)),)
-$(error Need to set BOOT_START for $(MK_AVR_MCU))
-endif
+LED_m128   		= G 4
 
 ifeq ($(LED_PORT_$(MK_AVR_MCU)),)
 $(error Need to set LED_PORT for $(MK_AVR_MCU))
@@ -101,6 +71,37 @@ ifeq ($(LED_PIN_$(MK_AVR_MCU)),)
 $(error Need to set LED_PIN for $(MK_AVR_MCU))
 endif
 
+LED_PORT        = PORT$(word 1, $(LED_$(MK_AVR_MCU)))
+LED_DDR         = DDR$(word 1, $(LED_$(MK_AVR_MCU)))
+LED             = P$(word 1, $(LED_$(MK_AVR_MCU)))$(word 2, $(LED_$(MK_AVR_MCU)))
+LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED=$(LED)
+
+else
+
+ifeq ($($(TARGET)_LED),)
+LED_OPT			=
+else
+
+LED_PORT		= PORT$(word 1, $($(TARGET)_LED))
+LED_DDR			= DDR$(word 1, $($(TARGET)_LED))
+LED				= P$(word 1, $($(TARGET)_LED))$(word 2, $($(TARGET)_LED))
+LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED=$(LED)
+
+endif
+endif
+
+ifeq ($(TARGET),)
+# By default, the SW is on the MISO pin. This figures out where it is for the
+# various processors
+
+SW_m8			= B 4
+SW_m16     		= B 6
+SW_m168    		= B 4
+SW_m32     		= B 6
+
+# B.1 is SCK - PDI and RxD are the same pin				   
+SW_m128    		= B 1
+
 ifeq ($(SW_PORT_$(MK_AVR_MCU)),)
 $(error Need to set SW_PORT for $(MK_AVR_MCU))
 endif
@@ -109,14 +110,36 @@ ifeq ($(SW_PIN_$(MK_AVR_MCU)),)
 $(error Need to set SW_PIN for $(MK_AVR_MCU))
 endif
 
+SW_DDR          = DDR$(SW_PORT_$(MK_AVR_MCU))
+SW_PORT         = PORT$(SW_PORT_$(MK_AVR_MCU))
+SW_PIN          = PIN$(SW_PORT_$(MK_AVR_MCU))
+SW              = P$(SW_PORT_$(MK_AVR_MCU))$(SW_PIN_$(MK_AVR_MCU))
+SW_OPT			= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
+
+else
+
+ifeq ($($(TARGET)_SW),)
+SW_OPT			=
+else
+
+SW_DDR          = DDR$(word 1, $($(TARGET)_SW))
+SW_PORT         = PORT$(word 1, $($(TARGET)_SW))
+SW_PIN          = PIN$(word 1, $($(TARGET)_SW))
+SW              = P$(word 1, $($(TARGET)_SW))$(word 2, $($(TARGET)_SW))
+SW_OPT			= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
+
+endif
+endif
+
+# Check to make sure that something has been assigned for various paramters
+           
+ifeq ($(BOOT_START_$(MK_AVR_MCU)),)
+$(error Need to set BOOT_START for $(MK_AVR_MCU))
+endif
+
 BOOT_START = $(BOOT_START_$(MK_AVR_MCU))
 
-DEFS = \
-    -DLED_DDR=$(LED_DDR) \
-    -DLED_PORT=$(LED_PORT) \
-    -DLED=$(LED) \
-	$(SW_OPT) \
-    -DBAUD_RATE=38400
+DEFS = $(LED_OPT) $(SW_OPT) -DBAUD_RATE=38400
 
 CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions
 
