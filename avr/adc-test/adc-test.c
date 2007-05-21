@@ -80,7 +80,11 @@ int main(void)
     {
         LED_PORT ^= LED_MASK;
 
-        Log( "ADC 0: %4d  1: %4d\n", ADC_Read( 0 ), ADC_Read( 1 ));
+        Log( "ADC %4d %4d %4d %4d %4d %4d %4d %4d\n", 
+             ADC_Read( 0 ), ADC_Read( 1 ),
+             ADC_Read( 2 ), ADC_Read( 3 ),
+             ADC_Read( 4 ), ADC_Read( 5 ),
+             ADC_Read( 6 ), ADC_Read( 7 ));
 
         // Tick rate is 100/sec so waiting for 100 waits for 1 sec
 
