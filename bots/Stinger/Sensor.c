@@ -11,6 +11,7 @@
 #include "Stinger.h"
 #include "adc.h"
 #include "Debug.h"
+#include "Delay.h"
 #include "Log.h"
 #include "Sensor.h"
 
@@ -63,6 +64,11 @@ void InitSensors( void )
         ClearBits( DDRD, pins );    // Configure inputs
         ClearBits( PORTD, pins );   // Disable pullups
     }
+    ADC_Init( ADC_PRESCALAR_AUTO );
+
+    // Delay for a short time to allow the ADC to initialize
+
+    ms_spin( 1 );
 }
 
 uns8 PgmSelect( void )
@@ -108,15 +114,15 @@ void ReadSensors( void )
 {  
    // Read the line sensors
 
-   gLineLO  = a2d( LineLeftOutside );
-   gLineLI  = a2d( LineLeftInside );
-   gLineRI  = a2d( LineRightInside );
-   gLineRO  = a2d( LineRightOutside );
+   gLineLO  = ADC_Read( LineLeftOutside );
+   gLineLI  = ADC_Read( LineLeftInside );
+   gLineRI  = ADC_Read( LineRightInside );
+   gLineRO  = ADC_Read( LineRightOutside );
 
    // Read the Eye sensors
 
-   gEyeR = a2d( EyeR );
-   gEyeL = a2d( EyeL );
+   gEyeR = ADC_Read( EyeR );
+   gEyeL = ADC_Read( EyeL );
 
    gPortD = PIND;
 

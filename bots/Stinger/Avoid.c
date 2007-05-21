@@ -14,6 +14,7 @@
 #include "Log.h"
 #include "Motor.h"
 #include "Sensor.h"
+#include "Timer.h"
 
 // ---- Private Constants and Types -----------------------------------------
 // ---- Private Variables ---------------------------------------------------

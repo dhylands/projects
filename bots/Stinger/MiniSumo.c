@@ -93,15 +93,13 @@ int main( void )
 
     InitUART();
 
-    ADC_Init( ADC_PRESCALAR_AUTO );
     InitSensors();
     InitLED();
 
-    DBG( "******************************\n" );
-    DBG( "**                          **\n" );
-    DBG( "** Stinger MiniSumo Program **\n" );
-    DBG( "**                          **\n" );
-    DBG( "******************************\n\n" );
+
+    Log( "**\n" );
+    Log( "** Stinger MiniSumo Program **\n" );
+    Log( "**\n" );
 
     InitTimer();
     InitMotors();

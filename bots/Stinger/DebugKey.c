@@ -9,11 +9,13 @@
 #define  DEBUG 1
 
 #include "Stinger.h"
+#include "Debug.h"
 #include "DebugKey.h"
 #include "Delay.h"
+#include "Log.h"
 #include "Motor.h"
-#include "Puts.h"
 #include "Sensor.h"
+#include "Timer.h"
 #include "Uart.h"
 
 #if DEBUG

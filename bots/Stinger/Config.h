@@ -14,7 +14,7 @@
 #define CFG_LOG_USE_STDIO           0
 #define CFG_LOG_ALLOW_DEFERRED_NL   1
 
-#define CFG_ADC_8_BIT               0
+#define CFG_ADC_8_BIT               1
 #define CFG_ADC_POLL                0
 #define CFG_ADC_AVERAGE             1
 
