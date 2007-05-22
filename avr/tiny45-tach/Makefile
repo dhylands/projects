@@ -7,7 +7,7 @@
 MK_OS				= avr
 MK_AVR_MCU			= t25
 MK_AVR_FREQ			= 1MHz
-MK_AVR_PROGRAMMER  ?= stk500
+MK_AVR_PROGRAMMER  ?= avrdude
 					  
 MK_HEX_TARGET	= tiny45-tach
 MK_SRC_FILES	= tiny45-tach.c
