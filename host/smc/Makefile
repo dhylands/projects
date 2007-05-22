@@ -15,7 +15,7 @@ MK_SRC_FILES = \
 
 include ../../rules/mkRules.mk
 
-smc_tab.c: smc.y
+smc_tab.c: smc_tab.y
 	$(ECHO) "Creating parser from $< ..."
 	$(RM) -f $@
 	$(Q)bison -d -o $@ $<

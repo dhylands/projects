@@ -110,7 +110,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 23 "smc.y"
+#line 23 "smc_tab.y"
 
 
 #include <stdio.h>
@@ -196,7 +196,7 @@ extern	int	yylex( void );
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 88 "smc.y"
+#line 88 "smc_tab.y"
 {
 	long	 num;
 	char	*str;
@@ -1465,7 +1465,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 115 "smc.y"
+#line 115 "smc_tab.y"
     {
 					int		i;
 
@@ -1489,7 +1489,7 @@ yyreduce:
     break;
 
   case 3:
-#line 136 "smc.y"
+#line 136 "smc_tab.y"
     {
 					gSM.input = gSmInput;
 					gSM.action = gSmAction;
@@ -1506,7 +1506,7 @@ yyreduce:
     break;
 
   case 4:
-#line 150 "smc.y"
+#line 150 "smc_tab.y"
     {
 					gParsedOk = FALSE;
 					YYABORT;
@@ -1514,7 +1514,7 @@ yyreduce:
     break;
 
   case 6:
-#line 160 "smc.y"
+#line 160 "smc_tab.y"
     {
 					gSM.name = strdup( (yyvsp[(2) - (2)].str) );
 					DBG( "Parsed SM %s\n", gSM.name );
@@ -1522,7 +1522,7 @@ yyreduce:
     break;
 
   case 11:
-#line 175 "smc.y"
+#line 175 "smc_tab.y"
     {
 					gSM.actionPrefix = strdup( (yyvsp[(2) - (2)].str) );
 					DBG( "Parsed ActionPrefix %s\n", gSM.actionPrefix );
@@ -1530,7 +1530,7 @@ yyreduce:
     break;
 
   case 12:
-#line 180 "smc.y"
+#line 180 "smc_tab.y"
     {
 					gSM.inputPrefix = strdup( (yyvsp[(2) - (2)].str) );
 					DBG( "Parsed InputPrefix %s\n", gSM.inputPrefix );
@@ -1538,7 +1538,7 @@ yyreduce:
     break;
 
   case 13:
-#line 185 "smc.y"
+#line 185 "smc_tab.y"
     {
 					gSM.statePrefix = strdup( (yyvsp[(2) - (2)].str) );
 					DBG( "Parsed StatePrefix %s\n", gSM.statePrefix );
@@ -1546,7 +1546,7 @@ yyreduce:
     break;
 
   case 14:
-#line 190 "smc.y"
+#line 190 "smc_tab.y"
     {
 					gSM.queueLen = (yyvsp[(2) - (2)].num);
 					DBG( "Parsed InputQueue %ld\n", gSM.queueLen );
@@ -1554,14 +1554,14 @@ yyreduce:
     break;
 
   case 15:
-#line 197 "smc.y"
+#line 197 "smc_tab.y"
     {
 					gNumIds = 0;
 				;}
     break;
 
   case 16:
-#line 201 "smc.y"
+#line 201 "smc_tab.y"
     {
 					int		i;
 
@@ -1581,7 +1581,7 @@ yyreduce:
     break;
 
   case 18:
-#line 221 "smc.y"
+#line 221 "smc_tab.y"
     {
 					/*
 					 * The idle action was specified, make it entry 1
@@ -1597,7 +1597,7 @@ yyreduce:
     break;
 
   case 19:
-#line 234 "smc.y"
+#line 234 "smc_tab.y"
     {
 					/*
 					 * No idle action specified, make a NULL one anyway
@@ -1612,14 +1612,14 @@ yyreduce:
     break;
 
   case 22:
-#line 252 "smc.y"
+#line 252 "smc_tab.y"
     {
 					gCurrState = gDefaultState;
 				;}
     break;
 
   case 23:
-#line 256 "smc.y"
+#line 256 "smc_tab.y"
     {
 					int		i;
 
@@ -1674,7 +1674,7 @@ yyreduce:
     break;
 
   case 24:
-#line 310 "smc.y"
+#line 310 "smc_tab.y"
     {
 					gParsingDefaultState = FALSE;
 					AddState( (yyvsp[(1) - (1)].str) );
@@ -1687,7 +1687,7 @@ yyreduce:
     break;
 
   case 25:
-#line 320 "smc.y"
+#line 320 "smc_tab.y"
     {
 					gParsingDefaultState = TRUE;
 					DBG( "Parsed Default State\n" );
@@ -1695,7 +1695,7 @@ yyreduce:
     break;
 
   case 26:
-#line 325 "smc.y"
+#line 325 "smc_tab.y"
     {
 					char	stateName[ 10 ];
 
@@ -1712,7 +1712,7 @@ yyreduce:
     break;
 
   case 31:
-#line 349 "smc.y"
+#line 349 "smc_tab.y"
     {
 					/*
 					 * This action is performed every time the state is entered
@@ -1724,7 +1724,7 @@ yyreduce:
     break;
 
   case 33:
-#line 361 "smc.y"
+#line 361 "smc_tab.y"
     {
 					/*
 					 * This action is performed every time the state is exited
@@ -1736,14 +1736,14 @@ yyreduce:
     break;
 
   case 35:
-#line 372 "smc.y"
+#line 372 "smc_tab.y"
     {
 					gNumIds = 0;
 				;}
     break;
 
   case 36:
-#line 376 "smc.y"
+#line 376 "smc_tab.y"
     {
 					int		i;
 
@@ -1758,7 +1758,7 @@ yyreduce:
     break;
 
   case 37:
-#line 388 "smc.y"
+#line 388 "smc_tab.y"
     {
 					int		i;
 
@@ -1775,7 +1775,7 @@ yyreduce:
     break;
 
   case 38:
-#line 404 "smc.y"
+#line 404 "smc_tab.y"
     {
 					int		i;
 
@@ -1801,7 +1801,7 @@ yyreduce:
     break;
 
   case 40:
-#line 430 "smc.y"
+#line 430 "smc_tab.y"
     {
 					strncpy( gCurrActionStr, (yyvsp[(1) - (1)].str), sizeof( gCurrActionStr ) - 1 );
 					gCurrActionStr[ sizeof( gCurrActionStr ) - 1 ] = '\0';
@@ -1810,7 +1810,7 @@ yyreduce:
     break;
 
   case 41:
-#line 436 "smc.y"
+#line 436 "smc_tab.y"
     {
 					strcpy( gCurrActionStr, "" );
 					DBG( "Parsed action IDLE\n" );
@@ -1818,7 +1818,7 @@ yyreduce:
     break;
 
   case 42:
-#line 443 "smc.y"
+#line 443 "smc_tab.y"
     {
 					gCurrBranch = NoBranch;
 					DBG( "Parsed NoBranch\n" );
@@ -1826,7 +1826,7 @@ yyreduce:
     break;
 
   case 43:
-#line 448 "smc.y"
+#line 448 "smc_tab.y"
     {
 					gCurrBranch = BranchPrevious;
 					DBG( "Parsed BranchPrevious\n" );
@@ -1834,7 +1834,7 @@ yyreduce:
     break;
 
   case 44:
-#line 453 "smc.y"
+#line 453 "smc_tab.y"
     {
 					gCurrBranch = BranchNext;
 					DBG( "Parsed BranchNext\n" );
@@ -1842,7 +1842,7 @@ yyreduce:
     break;
 
   case 45:
-#line 458 "smc.y"
+#line 458 "smc_tab.y"
     {
 					gCurrBranch = BranchId;
 					strncpy( gCurrNextStateStr, (yyvsp[(2) - (2)].str), sizeof( gCurrNextStateStr ) - 1 );
@@ -1852,7 +1852,7 @@ yyreduce:
     break;
 
   case 48:
-#line 471 "smc.y"
+#line 471 "smc_tab.y"
     {
 					AddId( (yyvsp[(1) - (1)].str) );
 					if ( !gParsedOk )
@@ -2078,7 +2078,7 @@ yyreturn:
 }
 
 
-#line 480 "smc.y"
+#line 480 "smc_tab.y"
 
 
 /************************************************************************
