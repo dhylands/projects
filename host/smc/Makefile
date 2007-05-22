@@ -20,7 +20,7 @@ smc_tab.c: smc_tab.y
 	$(RM) -f $@
 	$(Q)bison -d -o $@ $<
 
-smc_lex.c: smc.l smc_tab.c
+smc_lex.c: smc_lex.l smc_tab.c
 	$(ECHO) "Creating lexical analyzer from $< ..."
 	$(RM) -f $@
 	$(Q)flex -o $@ $<

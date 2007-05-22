@@ -516,7 +516,7 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "smc.l"
+#line 1 "smc_lex.l"
 /****************************************************************************
 *
 *   Copyright (c) 2007 Dave Hylands     <dhylands@gmail.com>
@@ -538,7 +538,7 @@ char *yytext;
 *   @brief  Implements the lexical anaylzer for the state machine compiler.
 *
 *****************************************************************************/
-#line 24 "smc.l"
+#line 24 "smc_lex.l"
 
 #include <Log.h>
 
@@ -740,7 +740,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 74 "smc.l"
+#line 74 "smc_lex.l"
 
 
 #line 747 "smc_lex.c"
@@ -828,92 +828,92 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 76 "smc.l"
+#line 76 "smc_lex.l"
 { PARSE(ACTION_PREFIX); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 77 "smc.l"
+#line 77 "smc_lex.l"
 { PARSE(BRANCH); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 78 "smc.l"
+#line 78 "smc_lex.l"
 { PARSE(DEFAULT); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 79 "smc.l"
+#line 79 "smc_lex.l"
 { PARSE(ELSE); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 80 "smc.l"
+#line 80 "smc_lex.l"
 { PARSE(ENTER); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 81 "smc.l"
+#line 81 "smc_lex.l"
 { PARSE(EXIT); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 82 "smc.l"
+#line 82 "smc_lex.l"
 { PARSE(IDLE); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 83 "smc.l"
+#line 83 "smc_lex.l"
 { PARSE(INPUTS); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 84 "smc.l"
+#line 84 "smc_lex.l"
 { PARSE(INPUT_PREFIX); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 85 "smc.l"
+#line 85 "smc_lex.l"
 { PARSE(INPUT_QUEUE); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 86 "smc.l"
+#line 86 "smc_lex.l"
 { PARSE(NAME); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 87 "smc.l"
+#line 87 "smc_lex.l"
 { PARSE(NEXT); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 88 "smc.l"
+#line 88 "smc_lex.l"
 { PARSE(NO_BRANCH); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 89 "smc.l"
+#line 89 "smc_lex.l"
 { PARSE(PREVIOUS); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 90 "smc.l"
+#line 90 "smc_lex.l"
 { PARSE(STATE); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 91 "smc.l"
+#line 91 "smc_lex.l"
 { PARSE(STATE_PREFIX); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 93 "smc.l"
+#line 93 "smc_lex.l"
 { PARSE_CHR(*yytext); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 95 "smc.l"
+#line 95 "smc_lex.l"
 {
 							   yylval.num = atol( (char *)yytext );
 							   PARSE_TXT(NUMBER);
@@ -921,7 +921,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 100 "smc.l"
+#line 100 "smc_lex.l"
 {
 							   yylval.str = strdup( (char *)yytext );
 							   PARSE_TXT(IDENTIFIER);
@@ -929,29 +929,29 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 105 "smc.l"
+#line 105 "smc_lex.l"
 ;	// Skip comments
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 106 "smc.l"
+#line 106 "smc_lex.l"
 ;	// Skip comments
 	YY_BREAK
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
-#line 108 "smc.l"
+#line 108 "smc_lex.l"
 ;	/* Skip white space (we treat commas as white
 							      space to make the parsing easier). */
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 112 "smc.l"
+#line 112 "smc_lex.l"
 yyerror( "Unknown character" );
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 114 "smc.l"
+#line 114 "smc_lex.l"
 ECHO;
 	YY_BREAK
 #line 958 "smc_lex.c"
@@ -1921,7 +1921,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 114 "smc.l"
+#line 114 "smc_lex.l"
 
 
 
