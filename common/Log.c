@@ -37,14 +37,16 @@
 
 #undef  Log
 #undef  LogError
+#unded  LogAssertFailed
 #undef  vLog
 
-#define Log         Log_P
-#define LogError    LogError_P
-#define vLog        vLog_P
-#define LogBuf      LogBuf_P
+#define Log             Log_P
+#define LogError        LogError_P
+#define LogAssertFailed LogAssertFailed_P
+#define vLog            vLog_P
+#define LogBuf          LogBuf_P
 
-#define char        prog_char
+#define char            prog_char
 
 #else
 
@@ -105,6 +107,11 @@ void DefaultLogFunc( int logLevel, const char *fmt, va_list args )
     if ( logLevel == LOG_LEVEL_ERROR )
     {
         fprintf( fs, "ERROR: " );
+    }
+    else
+    if ( logLevel == LOG_LEVEL_ASSERT )
+    {
+        fprintf( fs, "ASSERT: " );
     }
     vfprintf( fs, fmt, args );
     fflush( fs );
@@ -205,6 +212,45 @@ void vLog
 
 //***************************************************************************
 /**
+*   Generic logging function
+*/
+
+void vLogFunc
+(
+    int         logLevel,   ///< Type of log
+    const char *fmt,        ///< printf style format specified
+    va_list     args        ///< variable list of arguments
+)
+{
+    if ( gLogFunc != NULL )
+    {
+        gLogFunc( logLevel, fmt, args );
+    }
+
+} // vLogFunc
+
+//***************************************************************************
+/**
+*   Generic logging function
+*/
+
+void LogFunc
+(
+    int         logLevel,   ///< Type of log
+    const char *fmt,        ///< printf style format specified
+    ...                     ///< variable list of arguments
+)
+{
+    va_list args;
+
+    va_start( args, fmt );
+    vLogFunc( logLevel, fmt, args );
+    va_end( args );
+
+} // LogFunc
+
+//***************************************************************************
+/**
 *   Logs an error.
 */
 
@@ -214,14 +260,9 @@ void vLogError
     va_list     args    ///< variable list of arguments
 )
 {
-    if ( gLogFs != NULL )
-    {
-        if ( gLogFunc != NULL )
-        {
-            gLogFunc( LOG_LEVEL_ERROR, fmt, args );
-        }
-    }
-}
+    vLogFunc( LOG_LEVEL_ERROR, fmt, args );
+
+} // vLogError
 
 #endif
 
@@ -246,11 +287,39 @@ void LogError
     va_end( args );
 #else
     va_start( args, fmt );
-    vLogError( fmt, args );
+    vLogFunc( LOG_LEVEL_ERROR, fmt, args );
     va_end( args );
 #endif
 
 } // LogError
+
+/***************************************************************************/
+/**
+*   Logs an assertion failure
+*/
+
+void LogAssertFailed
+(
+    const char *expr,
+    const char *fileName,
+    unsigned    lineNum,
+    const char *function
+)
+{
+#if defined( AVR )
+    Log_P( PSTR( "ASSERT failed: " ));
+    Log_P( fileName );
+    Log_P( PSTR( ": %d: " ), lineNum );
+    Log_P( function );
+    Log_P( PSTR( " Assertion '" ));
+    Log_P( expr );
+    Log_P( PStR( "' failed.\n" ));
+#else
+    LogFunc( LOG_LEVEL_ASSERT, "%s: %d: %s Assertion '%s' failed.\n", 
+             fileName, lineNum, function, expr );
+#endif
+
+} // LogAssertFailed
 
 /***************************************************************************/
 /**

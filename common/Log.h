@@ -32,7 +32,6 @@
 // ---- Include Files -------------------------------------------------------
 
 #include <stdarg.h>
-#include <stdio.h>
 
 #if !defined( CONFIG_H )
 #   include "Config.h"
@@ -76,8 +75,13 @@
 
 #define  Log( fmt, args... )
 #define  LogError( fmt, args... )
+#define  LogAssertFailed( exprStr, file, lineNum, function )
+
+#define  ASSERT(expr)   ((void)0)
 
 #else
+
+#define  ASSERT(expr)   ((expr) ? ((void)0) : LogAssertFailed( #expr, __FILE__, __LINE__, __FUNCTION__ ), ((void)0))
 
 #if defined( __cplusplus )
 extern "C"
@@ -174,6 +178,8 @@ void LogBufDump( void );
 */
 
 #if CFG_LOG_USE_STDIO
+#include <stdio.h>
+
 extern FILE *gLogFs;
 
 void LogInit( FILE *logFs );
@@ -183,16 +189,19 @@ void LogInit( FILE *logFs );
 
 void Log_P( const prog_char *fmt, ... );
 void LogError_P( const prog_char *fmt, ... );
+void LogAssertFailed_P( const char *exprStr, const char *file, unsigned lineNum, const char *function );
 void vLog_P( const prog_char *fmt, va_list args );
 
 #define Log( fmt, args... )         Log_P( PSTR( fmt ), ## args )
 #define LogError( fmt, args... )    LogError_P( PSTR( fmt ), ## args )
+#define LogAssertFailed( exprStr, file, lineNum, function )    LogAssertFailed_P( PSTR( expr ), PSTR( file ), lineNum, PSTR( function ))
 #define vLog( fmt, va_list, args )  vLog_P( PSTR( fmt ), args )
 
 #else   // AVR
 
 #define LOG_LEVEL_NORMAL    0
 #define LOG_LEVEL_ERROR     1
+#define LOG_LEVEL_ASSERT    2
 
 typedef void (*LogFunc_t)( int logLevel, const char *fmt, va_list args );
 
@@ -202,11 +211,16 @@ extern  int     gQuiet;
 
 void Log( const char *fmt, ... );
 void LogError( const char *fmt, ... );
+void LogAssertFailed( const char *expr, const char *file, unsigned lineNum, const char *function );
 void vLog( const char *fmt, va_list args );
 void vLogError( const char *fmt, va_list args );
 
+void LogFunc( int logLevel, const char *fmt, ... );
+void vLogFunc( int logLevel, const char *fmt, va_list args );
+
 #define Log_P( fmt, args... )       Log( fmt, ## args )
 #define LogError_P( fmt, args... )  LogError( fmt, ## args )
+#define LogAssertFailed_P( expr, file, lineNum, function )  LogAssertFailed( expr, file, line, function )
 #define vLog_P( fmt, args )         vLog( fmt, args )
 
 #define LogDebug( fmt, args... )    do { if ( gDebug )   { Log( fmt, ## args ); }} while (0)
