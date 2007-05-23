@@ -651,16 +651,24 @@ void InitUART(void)
     UCSRB = _BV(TXEN)|_BV(RXEN);
 #endif
 }
-void DelayMS(uint16_t delay)
+
+#define LOOPS_PER_MS ( CFG_CPU_CLOCK / 1000 / 4)
+
+void DelayMS(uint16_t ms)
 {
-	asm volatile(
-	"\tldi	R26, lo8(%0/4000)\n"
-	"\tldi	R27, hi8(%0/4000)\n"
-	"\tsbiw	R26, 1\n"
-	"\tbrne	.-4\n"
-	"\tsbiw	R24, 1\n"
-	"\tbrne	.-12\n"
-	:: "i" (F_CPU) );
+    /* the inner loop takes 4 cycles per iteration */
+    __asm__ __volatile__ (
+            "1:                     \n"
+            "       ldi r26, %3     \n"
+            "       ldi r27, %2     \n"
+            "2:     sbiw r26, 1     \n"
+            "       brne 2b         \n"
+            "       sbiw %1, 1      \n"
+            "       brne 1b         \n"
+            : "+w" (ms)
+            : "w" (ms), "i" (LOOPS_PER_MS >> 8), "i" (0xff & LOOPS_PER_MS)
+            : "r26", "r27"
+            );
 }
 
 
