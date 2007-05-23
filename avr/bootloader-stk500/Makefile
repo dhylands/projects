@@ -12,8 +12,8 @@ ifeq ($(TARGET),)
 
 # No TARGET specified, so use some default
 
-MK_AVR_MCU          = m168
-MK_AVR_FREQ         = 8MHz
+MK_AVR_MCU          = m16
+MK_AVR_FREQ         = 4MHz
 all:
 
 else
@@ -47,6 +47,7 @@ BOOT_START_m168 = 0x3C00
 BOOT_START_m32  = 0x7C00
 BOOT_START_m128 = 0x1F000
 
+MK_AVR_FUSES_m8     = FF D8 E4	# 1k bootloader
 MK_AVR_FUSES_m168   = FA DF E2	# 1k bootloader
 MK_AVR_FUSES_m128   = FF C2 BF	# 4k bootloader
                       
@@ -63,12 +64,8 @@ LED_m32			= B 4
 # G.4 is Red LED on robsotix				   
 LED_m128   		= G 4
 
-ifeq ($(LED_PORT_$(MK_AVR_MCU)),)
+ifeq ($(LED_$(MK_AVR_MCU)),)
 $(error Need to set LED_PORT for $(MK_AVR_MCU))
-endif
-
-ifeq ($(LED_PIN_$(MK_AVR_MCU)),)
-$(error Need to set LED_PIN for $(MK_AVR_MCU))
 endif
 
 LED_PORT        = PORT$(word 1, $(LED_$(MK_AVR_MCU)))
@@ -102,18 +99,18 @@ SW_m32     		= B 6
 # B.1 is SCK - PDI and RxD are the same pin				   
 SW_m128    		= B 1
 
-ifeq ($(SW_PORT_$(MK_AVR_MCU)),)
+ifeq ($(SW_$(MK_AVR_MCU)),)
 $(error Need to set SW_PORT for $(MK_AVR_MCU))
 endif
 
-ifeq ($(SW_PIN_$(MK_AVR_MCU)),)
+ifeq ($(SW_$(MK_AVR_MCU)),)
 $(error Need to set SW_PIN for $(MK_AVR_MCU))
 endif
 
-SW_DDR          = DDR$(SW_PORT_$(MK_AVR_MCU))
-SW_PORT         = PORT$(SW_PORT_$(MK_AVR_MCU))
-SW_PIN          = PIN$(SW_PORT_$(MK_AVR_MCU))
-SW              = P$(SW_PORT_$(MK_AVR_MCU))$(SW_PIN_$(MK_AVR_MCU))
+SW_DDR          = DDR$(word 1, $(SW_$(MK_AVR_MCU)))
+SW_PORT         = PORT$(word 1, $(SW_$(MK_AVR_MCU)))
+SW_PIN          = PIN$(word 1, $(SW_$(MK_AVR_MCU)))
+SW              = P$(word 1, $(SW_$(MK_AVR_MCU)))$(word 2, $(SW_$(MK_AVR_MCU)))
 SW_OPT			= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
 
 else
