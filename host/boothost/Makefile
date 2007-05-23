@@ -24,6 +24,14 @@ MK_SRC_FILES = \
 	StrMaxCat.cpp		\
 	StrMaxCpy.cpp
 
+#PTHREADS_DIR = ../../../pthreads-w32-2-8-0/pthreads.2 												 
+#PTS += -mno-cygwin -I $(PTHREADS_DIR)
+					   
+#CFLAGS += $(OPTS)
+#CXXFLAGS += $(OPTS)
+
+#LDFLAGS += -L $(PTHREADS_DIR)
+									  
 LDLIBS += -lpthread
 
 include ../../rules/mkRules.mk

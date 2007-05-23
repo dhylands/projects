@@ -27,12 +27,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <sys/unistd.h>
 #include <pthread.h>
 #include <getopt.h>
-#include <termios.h>
 #include <signal.h>
+
+// unix is defined for cywin builds as well as linux builds
+                 
+#if defined( unix )
+#include <sys/ioctl.h>
+#include <termios.h>
+#endif
 
 //#include "BootLoader.h"
 #include "DumpMem.h"
@@ -121,7 +126,9 @@ FILE           *gLogFs2;
 
 volatile bool   gQuit = 0;
 
+#if defined( unix )
 struct termios gTio_org;
+#endif
 
 // ---- Private Function Prototypes -----------------------------------------
 
@@ -321,6 +328,7 @@ int main( int argc, char **argv )
     setbuf( stdin, NULL );
     setbuf( stdout, NULL );
 
+#if defined( unix )
     sigemptyset( &termSig );
     sigaddset( &termSig, SIGINT );
     sigaddset( &termSig, SIGTERM );
@@ -345,6 +353,7 @@ int main( int argc, char **argv )
         LogError( "Unable to update terminal settings\n" );
         return 1;
     }
+#endif
 
     const char *bootLoaderType = "*** Unknown ***";
 
@@ -385,6 +394,8 @@ int main( int argc, char **argv )
         return 1;
     }
 
+#if defined( unix )
+
     // Wait for a termmination signal
 
     if (( rc = sigwait( &termSig, &sig )) != 0 )
@@ -405,6 +416,9 @@ int main( int argc, char **argv )
     {
         LogError( "Unable to restore terminal settings\n" );
     }
+#endif
+
+#if defined( __CYGWIN__ )
 
     // Under Windows closing the serial port and stdin will cause the reads
     // to unblock. Under linux, this isn't required, but it doesn't hurt 
@@ -412,14 +426,22 @@ int main( int argc, char **argv )
 
     gSerialPort.Close();
     fclose( stdin );
+#endif
 
     // Unblock the termination signals so the user can kill us if we hang up
     // waiting for the reader threads to exit.
 
+#if defined( unix )
     pthread_sigmask( SIG_UNBLOCK, &termSig, NULL );
+#endif
 
     pthread_join( readSerialThreadId, NULL );
     pthread_join( readStdinThreadId, NULL );
+
+#if !defined( __CYGWIN__ )
+    gSerialPort.Close();
+    fclose( stdin );
+#endif
 
     if ( gVerbose )
     {
@@ -585,6 +607,7 @@ void *ReadSerialThread( void *param )
             state = state( buf[ i ]);
         }
     }
+
     LogDebug( "ReadSerialThread ending\n" );
     gReadSerialThreadRunning = false;
 
