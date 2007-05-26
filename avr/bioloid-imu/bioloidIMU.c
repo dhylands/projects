@@ -42,7 +42,7 @@
 /* ---- Private Variables ------------------------------------------------ */
 
 uint8_t gMyId;
-uint8_t gControlTable [NUM_IMU_CONTROL_ENTRIES];
+uint8_t gControlTable [NUM_CONTROL_ENTRIES];
 
 
 /* ---- Functions -------------------------------------------------------- */
@@ -174,7 +174,7 @@ static uint8_t IsAddressLegalToWrite (uint8_t address, uint8_t value)
 static uint8_t IsAddressLegalToRead (uint8_t address)
 {
 	// Handle past end of readable area
-	if (address > MAX_IMU_CONTROL_ENTRY)
+	if (address > MAX_CONTROL_ENTRY)
 		return (FALSE);
 
 	return (TRUE);
@@ -190,6 +190,7 @@ static uint8_t ReadControlTableByte (uint8_t address)
 {
 	// this function doesn't do much, but it is here in case we need to do something
 	// fancy in the future...
+	// Log ("READ - [%2d] = %3d\n", address, gControlTable [address]);
 	return (gControlTable [address]);
 }
 
@@ -534,6 +535,7 @@ int main (void)
 
 	Log ("*****\n");
 	Log ("***** Bioloid IMU Sensor\n");
+	Log ("***** Copyright 2007 HUVrobotics\n");
 	Log ("*****\n");
 
 	while (1)	// outer loop is once every 10 ms
@@ -544,7 +546,7 @@ int main (void)
 			if (UART0_IsCharAvailable ())
 			{
 				uint8_t ch = UART0_GetChar ();
-				//Log ("Got: %3d\n", ch);
+				// Log ("Got: %3d\n", ch);
 				BLD_ProcessChar (&inst, ch);
 			}
 		}
