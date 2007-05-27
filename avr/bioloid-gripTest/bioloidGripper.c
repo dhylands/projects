@@ -39,6 +39,9 @@
 
 /* ---- Private Variables ------------------------------------------------ */
 
+#define MAX_FINGER 540
+#define MIN_FINGER 65
+
 /* ---- Functions -------------------------------------------------------- */
 
 
@@ -64,13 +67,15 @@ static void ledOff (void)
 
 int main (void)
 {
-	speed_t index;
+//	speed_t wrist;
+//	speed_t finger;
+	uint16_t fingerPosition;
 
 	// initialize the hardware stuff we use
 	InitTimer ();
-	InitTimerUART ();
 	ADC_Init (ADC_PRESCALAR_AUTO);
 	InitMotors ();
+	InitTimerUART ();
 
 	// set the LED port for output
 	LED_DDR |= LED_MASK;
@@ -85,19 +90,47 @@ int main (void)
 	Log ("***** Copyright 2007 HUVrobotics\n");
 	Log ("*****\n");
 
+	SetMotorSpeed (SPEED_OFF, SPEED_OFF);
+
+	fingerPosition = ADC_Read (7);
+	Log ("Speed = 0... Position = %4d\n", fingerPosition);
 	SetMotorSpeed (SPEED_OFF, 0);
+	while (fingerPosition < MAX_FINGER)
+	{
+		fingerPosition = ADC_Read (7);
+	}
+
+	SetMotorSpeed (SPEED_OFF, SPEED_OFF);
 	ms_spin (1000);
+
+	fingerPosition = ADC_Read (7);
+	Log ("Speed = 255... Position = %4d\n", fingerPosition);
+	SetMotorSpeed (SPEED_OFF, 255);
+	while (fingerPosition > MIN_FINGER)
+	{
+		fingerPosition = ADC_Read (7);
+	}
+
+	SetMotorSpeed (SPEED_OFF, SPEED_OFF);
+	Log ("Done... Position = %4d\n", fingerPosition);
+
+/*	ms_spin (1000);
 	ledOn ();
-	SetMotorSpeed (255, 0);
+	for (wrist = SPEED_OFF; wrist < 255; wrist++) {
+		SetMotorSpeed (wrist, SPEED_OFF);
+		ms_spin (25);}
 	ms_spin (1000);
 	ledOff ();
-	SetMotorSpeed (SPEED_OFF, 0);
+	SetMotorSpeed (SPEED_OFF, SPEED_OFF);
 	ms_spin (1000);
 	ledOn ();
-	SetMotorSpeed (0, 0);
+	for (wrist = SPEED_OFF; wrist > 0; wrist--) {
+		SetMotorSpeed (wrist, SPEED_OFF);
+		ms_spin (25);}
 	ms_spin (1000);
 	ledOff ();
-	SetMotorSpeed (SPEED_OFF, 0);
+	SetMotorSpeed (SPEED_OFF, SPEED_OFF);
+*/
 
 	return 0;
 }

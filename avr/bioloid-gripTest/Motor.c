@@ -38,7 +38,7 @@ extern void InitMotors( void )
 #define CHAN_B_NON_INVERTING_PWM	( 1 << COM1B1 ) | ( 0 << COM1B0 )
 #define PWM_8_BIT_MODE			  ( 0 << WGM11 )  | ( 1 << WGM10 )
 
-	TCCR0A = CHAN_A_NON_INVERTING_PWM | CHAN_B_NON_INVERTING_PWM | PWM_8_BIT_MODE;
+	TCCR1A = CHAN_A_NON_INVERTING_PWM | CHAN_B_NON_INVERTING_PWM | PWM_8_BIT_MODE;
 
 #define T1_PRESCALAR_8  ( 0 << CS22 ) | ( 1 << CS21 ) | ( 0 << CS20 )
 

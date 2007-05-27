@@ -31,7 +31,7 @@
 
 #define CFG_ADC_8_BIT               0
 #define CFG_ADC_POLL                0
-#define CFG_ADC_AVERAGE             1
+#define CFG_ADC_AVERAGE             5
 
 //#define CFG_USE_UART0               1
 //#define CFG_UART0_BAUD_RATE         1000000
