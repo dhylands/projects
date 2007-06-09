@@ -495,7 +495,7 @@ void UART1_Write( const void *data, uint8_t len )
 
     while ( len > 0 )
     {
-        UART0_PutChar( *p++ );
+        UART1_PutChar( *p++ );
         len--;
     }
 
