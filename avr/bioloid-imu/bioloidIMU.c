@@ -237,6 +237,7 @@ static void OutputResponse (uint8_t errorCode, uint8_t forceResponse)
 	if (!forceResponse && (gControlTable [CONTROL_STATUS_RETURN_LEVEL] != BLD_STATUS_RETURN_LEVEL_ALL))
 		return;
 
+	// Log ("OutputResponse\n");
 	us_spin (gControlTable [CONTROL_RETURN_DELAY_TIME] * 2);
 	UART0_PutChar (0xFF);
 	UART0_PutChar (0xFF);
@@ -278,6 +279,7 @@ static void HandleReadCommand (BLD_Packet_t *packet, uint8_t isBroadcast)
 //		Reponse packet looks like this:
 //		HEADER HEADER ID LENGTH ERROR PARAM(s) CHECKSUM
 
+	// Log ("OutputResponse - READ_DATA\n");
 	us_spin (gControlTable [CONTROL_RETURN_DELAY_TIME] * 2);
 	crc = gMyId + length + 2;
 	UART0_PutChar (0xFF);
@@ -389,7 +391,7 @@ static void PacketReceived (BLD_Instance_t *inst, BLD_Packet_t *packet, BLD_Erro
 		//else
 		//	Log ("Got packet for ID: %3d\n", packet->m_id);
 	}
-	else
+	else if (packet->m_id == gMyId)
 	{
 		Log ("CRC Error\n");
 		OutputResponse (BLD_ERROR_CHECKSUM, FALSE);
