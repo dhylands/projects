@@ -1,0 +1,75 @@
+Index: newlib-lpc/uart1_int.c
+===================================================================
+--- newlib-lpc/uart1_int.c	2007-07-03 11:25:38.000000000 -0700
++++ newlib-lpc/uart1_int.c	2007-07-03 11:24:20.000000000 -0700
+@@ -221,6 +221,19 @@
+  return ret;
+ }
+ 
++/********************* uart0_chars_waiting *******************************/
++/*  uart1_chars_waiting -- Query to see if any chars are waiting.	*/
++/*  int *serial_waiting	-- Where to place count of characters waiting.	*/
++/*			Note that for this version the only valid	*/
++/*			numbers here are 0 and 1.			*/
++/*  Returns 0 if successful.						*/
++static int uart1_chars_waiting( 
++    int *serial_waiting)
++{
++    *serial_waiting = ( receive_buffer_first != receive_buffer_last );
++    return 0;
++}
++
+ /********************* uart1_ioctl **************************************/
+ /*  uart1_ioctl -- Provides ioctl functions for serial port.  Really	*/
+ /* just sets the uarts line characteristics, baud rate,	bits per 	*/
+@@ -264,6 +277,9 @@
+     case INTERRUPT_SETUP:
+          return( uart1_interrupt_setup( r, ptr));
+ 
++     case UART_CHAR_WAITING:
++          return( uart1_chars_waiting( ptr));
++
+     default:
+          r->_errno = ENOSYS;	/*  Request not understood.		*/
+ 	 return -1;
+Index: newlib-lpc/uart0_int.c
+===================================================================
+--- newlib-lpc/uart0_int.c	2007-07-03 11:25:33.000000000 -0700
++++ newlib-lpc/uart0_int.c	2007-07-03 11:24:56.000000000 -0700
+@@ -221,6 +221,19 @@
+  return ret;
+ }
+ 
++/********************* uart0_chars_waiting *******************************/
++/*  uart0_chars_waiting -- Query to see if any chars are waiting.	*/
++/*  int *serial_waiting	-- Where to place count of characters waiting.	*/
++/*			Note that for this version the only valid	*/
++/*			numbers here are 0 and 1.			*/
++/*  Returns 0 if successful.						*/
++static int uart0_chars_waiting( 
++    int *serial_waiting)
++{
++    *serial_waiting = ( receive_buffer_first != receive_buffer_last );
++    return 0;
++}
++
+ /********************* uart0_ioctl **************************************/
+ /*  uart0_ioctl -- Provides ioctl functions for serial port.  Really	*/
+ /* just sets the uarts line characteristics, baud rate,	bits per 	*/
+@@ -264,13 +277,15 @@
+     case INTERRUPT_SETUP:
+          return( uart0_interrupt_setup( r, ptr));
+ 
++    case UART_CHAR_WAITING:
++         return( uart0_chars_waiting( ptr));
++
+     default:
+          r->_errno = ENOSYS;	/*  Request not understood.		*/
+ 	 return -1;
+     }
+ }
+ 
+-
+ /************************** uart0_read **********************************/
+ /*  Reads from uart0 (polled fashion).					*/
+ /*  struct _reent *r	-- re-entrancy structure, used by newlib to 	*/

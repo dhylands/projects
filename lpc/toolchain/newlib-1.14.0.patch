@@ -1,0 +1,13 @@
+Index: newlib-1.14.0/newlib/configure.host
+===================================================================
+--- newlib-1.14.0/newlib/configure.host	2005-12-12 03:25:07.000000000 -0800
++++ newlib-1.14.0/newlib/configure.host	2007-06-12 12:26:10.000000000 -0700
+@@ -506,7 +506,7 @@
+ 	;;
+   arm-*-*)
+ 	syscall_dir=syscalls
+-	newlib_cflags="${newlib_cflags} -DABORT_PROVIDED -DHAVE_GETTIMEOFDAY"
++	newlib_cflags="${newlib_cflags} -DABORT_PROVIDED -DHAVE_GETTIMEOFDAY -DREENTRANT_SYSCALLS_PROVIDED"
+ # If newlib is supplying syscalls, select which debug protocol is being used.
+ # ARM_RDP_MONITOR selects the Demon monitor.
+ # ARM_RDI_MONITOR selects the Angel monitor.
