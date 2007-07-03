@@ -62,7 +62,7 @@ $(MK_OBJ_DIR)/%.o : %.cpp $(MK_OBJ_DIR)/%.d
 
 $(MK_OBJ_DIR)/%.o : %.s
 	$(ECHO) "Assembling $< ..."
-	$(Q)$(COMPILE.s) $(DEP_OUTPUT_OPTION) $(OUTPUT_OPTION) $<
+	$(Q)$(COMPILE.s) -c $(DEP_OUTPUT_OPTION) $(OUTPUT_OPTION) $<
 
 #--------------------------------------------------------------------------
 #
@@ -165,7 +165,7 @@ $(MK_HEX_TARGET): mkdir_bin mkdir_obj $(call MK_HEX_NAME, $(MK_HEX_TARGET))
 
 $(call MK_HEX_NAME, $(MK_HEX_TARGET)) : $(call MK_ELF_NAME, $(MK_HEX_TARGET))
 	$(ECHO) "Creating $@ ..."
-	$(Q)$(OBJCOPY) -j .text -j .data -O ihex $< $@
+	$(Q)$(OBJCOPY) $(MK_OBJCOPY_SECTS) -O ihex $< $@
 	$(ECHO)
 
 MK_LINK_TARGET += $(MK_HEX_TARGET)
@@ -215,7 +215,7 @@ endif
 
 $(call MK_ELF_NAME, $(MK_LINK_TARGET)) : $(MK_OBJ_FILES)
 	$(ECHO) "Linking $@ ..."
-	$(Q)$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@ $(LD_CRTFLAGS)
+	$(Q)$(LINK.o) $(CRT_FILES) $^ $(LOADLIBES) $(LDLIBS) -o $@ $(LD_CRTFLAGS)
 	$(ECHO)
 ifneq ($(MK_PRINT_ELF_SIZE),)
 	$(Q)$(MK_PRINT_ELF_SIZE)

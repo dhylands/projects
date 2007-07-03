@@ -31,6 +31,7 @@ MK_HEX_EXT		= .hex
 endif
 
 AR		= $(MK_CROSS_COMPILE)ar
+AS		= $(MK_CROSS_COMPILE)gcc
 CC		= $(MK_CROSS_COMPILE)gcc
 CXX		= $(MK_CROSS_COMPILE)g++
 OBJCOPY	= $(MK_CROSS_COMPILE)objcopy

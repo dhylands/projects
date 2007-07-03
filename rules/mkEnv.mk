@@ -93,7 +93,7 @@ endif
 # 	mkRules_$(MK_OS).mk
 #
 
-MK_SUPPORTED_OS = avr cortex-m3 cygwin gumstix linux none win32
+MK_SUPPORTED_OS = avr cortex-m3 cygwin gumstix linux lpc none win32
 
 ifeq ($(filter $(MK_OS),$(MK_SUPPORTED_OS)),)
 $(warning Unsupported value for MK_OS: '$(MK_OS)')

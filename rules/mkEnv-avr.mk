@@ -41,6 +41,7 @@ CFLAGS += -Os
 CXXFLAGS += -Os
 
 MK_PRINT_BIN_SIZE	= avr-mem.sh $@ $(MK_AVR_MCU_LONG)
+MK_OBJCOPY_SECTS	= -j .text -j .data
 
 vpath %.c   $(MK_COMMON_AVR_DIR)
 vpath %.cpp $(MK_COMMON_AVR_DIR)
