@@ -24,7 +24,7 @@ CXXFLAGS += -Os
 LOADLIBES	+= -lc -lnewlib-lpc
 LDFLAGS += -nostartfiles -Wl,-T,$(MK_COMMON_LPC_DIR)/lpc210x.ld
 
-CRT_FILES = $(call MK_OBJ_NAME, crt0)
+MK_CRT_FILES = $(call MK_OBJ_NAME, crt0)
 
 MK_OBJCOPY_SECTS	=
 

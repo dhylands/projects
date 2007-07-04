@@ -213,9 +213,9 @@ endif
 # Link executable (aka .elf) file from object files
 #
 
-$(call MK_ELF_NAME, $(MK_LINK_TARGET)) : $(MK_OBJ_FILES)
+$(call MK_ELF_NAME, $(MK_LINK_TARGET)) : $(MK_CRT_FILES) $(MK_OBJ_FILES)
 	$(ECHO) "Linking $@ ..."
-	$(Q)$(LINK.o) $(CRT_FILES) $^ $(LOADLIBES) $(LDLIBS) -o $@ $(LD_CRTFLAGS)
+	$(Q)$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@ $(LD_CRTFLAGS)
 	$(ECHO)
 ifneq ($(MK_PRINT_ELF_SIZE),)
 	$(Q)$(MK_PRINT_ELF_SIZE)
