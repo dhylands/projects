@@ -54,6 +54,11 @@ CFLAGS += \
 	-Wstrict-prototypes \
 	-Wmissing-declarations
 
+ifeq ($(MK_ADD_SYMBOLS),1)
+CFLAGS += -ggdb
+LDFLAGS += -ggdb
+endif
+
 LDFLAGS += -Wl,-Map,$(basename $@).map
 
 DEP_OUTPUT_OPTION = -MMD -MF $(@:.o=.d)
