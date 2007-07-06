@@ -90,6 +90,9 @@ int main( void)
 
  IOCLR = YELLOW_LED;
  puts( "flasher.c Hello World\r\n");		/*  It's alive !!		*/
+
+ printf( "Test done with printf %d\n", 1234 );
+
  IOSET = YELLOW_LED;
  
 
