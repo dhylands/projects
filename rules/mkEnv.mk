@@ -62,7 +62,7 @@ space := $(empty) $(empty)
 #	MK_HOST_OS describes the OS that the make system is running on.
 #
 
-MK_SUPPORTED_HOST_OS = cygwin linux
+MK_SUPPORTED_HOST_OS = cygwin linux mingw
 
 ifeq ($(MK_HOST_OS),)
 MK_HOST_UNAME = $(shell uname -s)
@@ -72,10 +72,14 @@ endif
 ifeq ($(MK_HOST_UNAME),Linux)
 export MK_HOST_OS = linux
 endif
+ifeq ($(findstring MINGW32_NT,$(MK_HOST_UNAME)),MINGW32_NT)
+export MK_HOST_OS = mingw
+endif
 endif
 
 ifeq ($(filter $(MK_HOST_OS),$(MK_SUPPORTED_HOST_OS)),)
 $(warning Unsupported value for MK_HOST_OS: '$(MK_HOST_OS)')
+$(warning MK_HOST_UNAME = '$(MK_HOST_UNAME)')
 $(warning MK_OS must be one of the following:)
 $(warning $(space))
 $(foreach os,$(MK_SUPPORTED_HOST_OS),$(warning $(space)  $(os)))
