@@ -30,6 +30,7 @@ ifeq ($(MK_$(MK_AVR_PROGRAMMER)_CMD_FUSE),)
 	$(error Programmer $(MK_AVR_PROGRAMMER) doesn't support programming fuses)
 endif
 	$(MK_$(MK_AVR_PROGRAMMER)_CMD_FUSE)
+endif
 
 read-fuses:
 	$(ECHO) "Reading fuses ..."
@@ -37,9 +38,6 @@ ifeq ($(MK_$(MK_AVR_PROGRAMMER)_RD_FUSE),)
 	$(error Programmer $(MK_AVR_PROGRAMMER) doesn't support reading fuses)
 endif
 	$(MK_$(MK_AVR_PROGRAMMER)_RD_FUSE)
-
-	
-endif
 
 .PHONY: download d d_target fuses
 
