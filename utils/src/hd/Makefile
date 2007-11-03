@@ -5,7 +5,7 @@
 ###########################################################################
 
 MK_OS			= host
-MK_BIN_TARGET 	= hd
+MK_ELF_TARGET 	= hd
 
 MK_SRC_FILES = hd.c
 

@@ -31,7 +31,7 @@ uint32_t    gResidueTable[ 256 ];
 *   Builds the lookup table for processing 8-bits at a time.
 */
 
-void BuildResidueTable( void )
+static void BuildResidueTable( void )
 {
     uint32_t    polynomial = 0xedb88320uL;
     uint32_t    byteVal;
@@ -98,7 +98,7 @@ int main( int argc, char **argv )
 
             fclose( fs );
 
-            printf( "0x%08lx %s\n", crc, fileName );
+            printf( "0x%08x %s\n", crc, fileName );
         }
     }
     return 0;

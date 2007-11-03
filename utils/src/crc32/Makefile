@@ -5,7 +5,7 @@
 ###########################################################################
 
 MK_OS			= host
-MK_BIN_TARGET 	= crc32
+MK_ELF_TARGET 	= crc32
 
 MK_SRC_FILES = crc32.c
 
