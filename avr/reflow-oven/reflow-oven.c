@@ -19,6 +19,8 @@
 #include "Delay.h"
 #include "Timer.h"
 #include "adc.h"
+#include "UART.h"
+#include <stdlib.h>
 
 #define LED_DDR        DDRB
 #define LED_PORT       PORTB
@@ -30,16 +32,18 @@
 
 #define THERMOCOUPLE_CHANNEL 0
 
+#define TEMPERATURE_BUFFER_COUNT 20
+
 // Define the hysteresis parameters.
 #define LOW_TRIGGER_OFFSET	2
 #define HIGH_TRIGGER_OFFSET	1
 
 // Define the profile parameters.
-#define PREHEATING_TEMPERATURE	130
-#define DRYING_TEMPERATURE		140
+#define PREHEATING_TEMPERATURE	145
+#define DRYING_TEMPERATURE		150
 #define DRYING_TIME				90
-#define HEATING_TEMPERATURE		218
-#define REFLOW_TEMPERATURE		220
+#define HEATING_TEMPERATURE		233
+#define REFLOW_TEMPERATURE		235
 #define REFLOW_TIME				45
 
 // Define the states.
@@ -58,6 +62,33 @@ uint16_t gCurrentTemperature = 0;
 uint16_t gSetPointTemperature = 0;
 uint16_t gTurnOnTemperature = 0;
 uint16_t gTurnOffTemperature = 0;
+
+uint16_t gTemperatureBuffer [TEMPERATURE_BUFFER_COUNT];
+
+//////////////////////////////////////////////////////////////////////////
+
+static int compareNumbers (uint16_t *num1, uint16_t *num2)
+{
+	if (*num1 <  *num2)
+		return -1;
+	if (*num1 == *num2)
+		return  0;
+	return  1;
+}
+
+/*
+static int compareNumbers (void *void_num1, void *void_num2)
+{
+	uint16_t *num1 = (uint16_t *)void_num1;
+	uint16_t *num2 = (uint16_t *)void_num2;
+	
+	if (*num1 < *num2)
+		return -1;
+	if (*num1 == *num2)
+		return 0;
+	return 1;
+}
+*/
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -81,9 +112,47 @@ static uint16_t convertToTemperature( uint16_t sensorInput ) {
 	// Scale the temperature up into tenths of degrees, and cast it into
 	// 16 bits.
 	conversion = conversion / 100;
+
 	temperature = conversion;
 
 	return( temperature );
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+// aquireTemperature
+//
+// Answer a temperature (in degrees C) taken by reading the temperature
+//	probe a number of times (TEMPERATURE_BUFFER_COUNT), and taking
+//	the median measurement. Since this is an oven, we discard any measurements
+//	that are zero...
+//
+
+static uint16_t aquireTemperature (void) {
+	uint16_t value;
+	uint16_t temperature;
+	uint8_t index;
+
+	// Read the analog input for the temperature a bunch of times, and buffer them.
+	for (index = 0; index < TEMPERATURE_BUFFER_COUNT; index++)
+	{
+		while ((value = ADC_Read (THERMOCOUPLE_CHANNEL)) == 0);
+		temperature = convertToTemperature (value);
+		value = (temperature + 5) / 10;
+		gTemperatureBuffer [index] = value;
+		printf ("Temp [%2d]: %4d\n", index, value);
+		ms_spin (20);
+	}
+
+	// sort the buffer so we can take the median value
+	qsort (gTemperatureBuffer, TEMPERATURE_BUFFER_COUNT, sizeof (uint16_t), (void *)compareNumbers);
+
+	for (index = 0; index < TEMPERATURE_BUFFER_COUNT; index++)
+		printf ("Sort [%2d]: %3d\n", index, gTemperatureBuffer [index]);
+
+	value = gTemperatureBuffer [TEMPERATURE_BUFFER_COUNT * 3 / 4];
+
+	return (value);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -359,8 +428,6 @@ static void processCurrentState (void) {
 
 int main(void)
 {
-	uint16_t value;
-	uint16_t temperature;
 
     InitTimer();
 	ADC_Init (ADC_PRESCALAR_AUTO);
@@ -368,16 +435,23 @@ int main(void)
     LED_DDR |= LED_MASK;
     RELAY_DDR |= RELAY_MASK;
 
+    InitUART();
+    fdevopen( UART0_PutCharStdio, UART0_GetCharStdio );
+
+    printf ("Reflow Oven\n");
+    printf ("HUVrobotics.com\n");
+
 	// Start with the Oven relay off.
 	turnOffOven ();
-	turnOffLED ();
+	turnOnLED ();
 
     LCD_Init( 2, 16 );
 	LCD_PutStr ("Reflow Oven\n");
 	LCD_PutStr ("HUVrobotics.com");
 
-	ms_spin (3000);
+	ms_spin (2000);
 
+	turnOffLED ();
 	LCD_Clear ();
 	// Start the procedure by preheating the oven.
 	setPreheatingState ();
@@ -386,10 +460,7 @@ int main(void)
 	// Perform the main loop of updating the currentTemperature and remainingTime,
 	// then doing what is appropriate, depending on the currentState.
 	do {
-		// Read the analog input for the temperature.
-		while ((value = ADC_Read (THERMOCOUPLE_CHANNEL)) == 0);
-		temperature = convertToTemperature (value);
-		gCurrentTemperature = (temperature + 5) / 10;
+		gCurrentTemperature = aquireTemperature ();
 
 		// If the remainingTime has not already expired, decrement it.
 		if (gRemainingTime > 0)
@@ -402,7 +473,7 @@ int main(void)
 		ms_spin (100);
 		turnOffLED ();
 		// Delay appropriately to make this loop run at 1 Hz.
-		ms_spin (890);
+		ms_spin (300);
 
 	} while (1);
 

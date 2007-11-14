@@ -16,10 +16,10 @@
 #if !defined( CONFIG_H )
 #define CONFIG_H
 
-#define CFG_USE_UART0   0
+#define CFG_USE_UART0   1
 #define CFG_USE_UART1   0
 
-#define CFG_UART0_BAUD_RATE         38400
+#define CFG_UART0_BAUD_RATE         19200
 #define CFG_UART0_RX_BUFFER_SIZE    128
 #define CFG_UART0_TX_BUFFER_SIZE    128
 #define CFG_UART0_LF_TO_CRLF        1
