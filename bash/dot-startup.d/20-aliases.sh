@@ -15,6 +15,7 @@ alias a='alias'
 a  dir='ls'
 a  h='history|tail -24'
 a  home='cd ~'
+a  open='gnome-open'
 
 a  findname='find . ! \( \( -iname "backup" -o -iname "obj" -o -iname "lib" \) -prune \)'
 a  findsrc='findname \( -iname "*.[ch]" -o -iname "*.[ch]xx" -o -iname "*.[ch]pp" -o -iname "*.cc" -o -iname "*.s" -o -iname "*.asm" \)'
