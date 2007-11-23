@@ -464,15 +464,10 @@ sub GetImageDimensions
    #
    # Assembled-Maze-1.jpg JPEG 1600x1200 DirectClass 8-bit 217kb 0.4u 0:01
    #
-   # We need to run cygpath to get rid of symbolic links.
-   # We convert the backslashes to forward slashes to make the quoting easier.
-   #
 
-   my $winImgPath = `cygpath -w $imgPath`;
-   $winImgPath =~ s=\\=/=g;
-   $winImgPath =~ s=\n==;
+   $imgPath =~ s=\n==;
    
-   my $identifyStr = `identify $winImgPath`;
+   my $identifyStr = `identify $imgPath`;
 
    $identifyStr =~ m/\S*\s*\S*\s*([0-9]*)x([0-9]*)/;
 
@@ -498,15 +493,10 @@ sub GetMovieDuration
    #
    # Assembled-Maze-1.jpg JPEG 1600x1200 DirectClass 8-bit 217kb 0.4u 0:01
    #
-   # We need to run cygpath to get rid of symbolic links.
-   # We convert the backslashes to forward slashes to make the quoting easier.
-   #
 
-   my $winMoviePath = `cygpath -w $moviePath`;
-   $winMoviePath =~ s=\\=/=g;
-   $winMoviePath =~ s=\n==;
+   $moviePath =~ s=\n==;
    
-   my $durationStr = `mpgtx -i $winMoviePath | grep Duration`;
+   my $durationStr = `mpgtx -i $moviePath | grep Duration`;
 
    chomp( $durationStr );
    $durationStr =~ s/.*Duration:\s*//;
