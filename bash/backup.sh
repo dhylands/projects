@@ -51,8 +51,6 @@ echo "$(date): Started daily rsnapshot" >> ${LOG}
 nice /usr/bin/rsnapshot daily >> ${LOG}
 echo "$(date): Finished daily rsnapshot" >> ${LOG}
 
-echo $(find ${BACKUP_DIR}/ -maxdepth 1 -name weekly.0) >> ${LOG}
-
 weekStamp=$(find ${BACKUP_DIR}/ -maxdepth 1 -name weekly.0 -printf '%T@\n')
 
 if [ $(( $weekStamp + $weekSecs + $weekSecs )) -lt $currTime ]
