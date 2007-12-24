@@ -369,16 +369,19 @@ StatePtrProxy StateProcessChar( char ch )
 
                 break; 
             }
-#if 0
-            // Log Character but don't switch states
-
-            StateLog( ch );
-#else
-            LogError( "InSync: unexpected character received: 0x%02x\n", ch );
-            LogError( "Switching to logging mode\n" );
-
-            return StateLog;
-#endif
+            if ( ch != 0x00 )
+            {
+    #if 0
+                // Log Character but don't switch states
+    
+                StateLog( ch );
+    #else
+                LogError( "InSync: unexpected character received: 0x%02x\n", ch );
+                LogError( "Switching to logging mode\n" );
+    
+                return StateLog;
+    #endif
+            }
             break;
         }
 
