@@ -1,0 +1,102 @@
+#! /bin/sh
+
+# clcleanup version 1.3
+
+# Copyright (C) 1998, 2000, 2001, Free Software Foundation
+
+# This script is Free Software, and it can be copied, distributed and
+# modified as defined in the GNU General Public License.  A copy of
+# its license can be downloaded from http://www.gnu.org/copyleft/gpl.html
+
+# Written by Alexandre Oliva <oliva@lsd.ic.unicamp.br>
+
+# This script translates a patch with ChangeLog entries in unified
+# (-u) or context (-c) diff format into one that contains plain-text
+# entries.  It can be used to submit diffs that include ChangeLog
+# entries, so that they do not depend on the current top of the
+# ChangeLog files, but it can also be used by whoever is going to
+# install the diff, in the common case of a patch containing ChangeLog
+# entries in patch format, instead of plain-text.
+
+# usage: clcleanup [-v] [-h] [patch.diff... | < patch.diff] > patch.clean
+#    or: cvs diff -uN | fixpatch | clcleanup > mypatch.diff
+
+# -v  --version     print version information
+# -h,-?  --help     print short or long help message
+
+# fixpatch is a perl script that inserts the appropriate directory name
+# in Index: lines
+
+name=clcleanup
+repeat="test $# -gt 0"
+while $repeat; do
+    case "$1" in
+    -v|--version)
+	sed '/^# '$name' version /,/^# Written by/ { s/^# //; p; }; d' < $0
+	exit 0
+	;;
+    -\?|-h)
+	sed '/^# usage:/,/# -h/ { s/^# //; p; }; d' < $0 &&
+	echo
+	echo "run \`$name --help | more' for full usage"
+	exit 0
+	;;
+    --help)
+	sed '/^# '$name' version /,/^[^#]/ { /^[^#]/ d; s/^# //; p; }; d' < $0
+	exit 0
+	;;
+    --)
+	shift
+	repeat=false
+	;;
+    *)
+	repeat=false
+	;;
+    esac
+done
+
+exec awk '
+/^Index:/ { skipping=0; }
+/^Index:.*ChangeLog/ { skipping=1; author=""; print; }
+skipping!=0 && author=="" && /^[\+ ][^	]* [A-Za-z][-A-Za-z. ]*  *<.*@.*>/ {
+    author=$0;
+    # ugh!  awk on Solaris 2.5 will not parse match()
+    while (author !~ /^[A-Za-z][-A-Za-z. ]*  *<.*@.*>/)
+        author=substr(author, 2);
+    print "from  " author;
+    next; }
+skipping!=0 && /^((by|from)  *)?[A-Za-z].*<.*@.*>/ { # cleaned up already
+    skipping=0;
+    print;
+    next;
+}
+skipping!=0 && (/^\+/ && ! /^\+\+\+ /) {
+    thisline=substr($0, 2);
+    if (thisline ~ /^ /)
+	thisline=substr(thisline, 2);
+    # ugh!  awk on Solaris 2.5 will not parse match()
+    if (thisline ~ /^[ 	]/) {
+	while (thisline ~ /^[ 	]/)
+	    thisline=substr(thisline, 2);
+	if (thisline ~ /./)
+	    print "	"thisline;
+	else
+	    print thisline;
+    } else print thisline;
+    ++skipping;
+    next;
+}
+skipping!=0 {
+    next;
+}
+/^([1-9][0-9]*-[0-1][0-9]-[0-3][0-9]|[A-Z][a-z]* [A-Z][a-z]* [ 1-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-6][0-9] [1-9][0-9]*)[ 	][ 	]*[A-Za-z][-A-Za-z. ]*  *<.*@.*>/ {
+    author=$0;
+    # ugh!  awk on Solaris 2.5 will not parse match()
+    while (author !~ /^[A-Za-z][-A-Za-z. ]*  *<.*@.*>/)
+        author=substr(author, 2);
+    print "Index: ChangeLog";
+    print "from  " author;
+    next;
+}
+{ print }
+' ${1+"$@"}
