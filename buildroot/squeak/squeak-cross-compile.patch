@@ -1,0 +1,44 @@
+The configure script checks some of the parameters by running stuff locally.
+When cross-compiling, this doesn't work. The following mods work on 32 bit
+ARM processors and make configure work without having to compile stuff.
+
+--- Squeak-3.6-3/platforms/unix/config/configure.ac	2008-01-10 09:40:27.000000000 -0800
++++ Squeak-3.6-3/platforms/unix/config/configure.ac	2008-01-10 09:41:04.000000000 -0800
+@@ -135,10 +135,12 @@
+ 
+ # Check size assumptions of basic data types
+ 
+-AC_REQUIRE_SIZEOF(int,    4)
+-AC_REQUIRE_SIZEOF(time_t, 4)
+-AC_REQUIRE_SIZEOF(double, 8)
+-AC_CHECK_INT64_T
++#AC_REQUIRE_SIZEOF(int,    4)
++#AC_REQUIRE_SIZEOF(time_t, 4)
++#AC_REQUIRE_SIZEOF(double, 8)
++#AC_CHECK_INT64_T
++SQUEAK_INT64_T="long long"
++AC_DEFINE_UNQUOTED(squeakInt64, long long)
+ 
+ # libtool configuration
+ 
+@@ -234,8 +236,9 @@
+ CFLAGS="$CFLAGS_32 $CFLAGS"
+ 
+ AC_C_BYTEORDER
+-AC_C_DOUBLE_ALIGNMENT
+-AC_C_DOUBLE_ORDER
++#AC_C_DOUBLE_ALIGNMENT
++#AC_C_DOUBLE_ORDER
++AC_DEFINE(DOUBLE_WORD_ORDER)
+ 
+ case $host_os in
+   darwin*)
+@@ -316,7 +319,7 @@
+ 
+ # Configure plugins
+ 
+-disabled_plugins=""
++disabled_plugins="vm-display-fbdev SqueakFFIPrims"
+ rm -f plugins.exc
+ sinclude(acplugins.m4)
+ 

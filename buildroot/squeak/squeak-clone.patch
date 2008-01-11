@@ -1,0 +1,57 @@
+Squeak creates a function called clone which is used in the VM. Unfortunately,
+uClibc also declares a function called clone. This patch causes squeak to
+rename it's clone to something else that doesn't conflict.
+
+Index: Squeak-3.6-3/src/vm/interp.c
+===================================================================
+--- Squeak-3.6-3/src/vm/interp.c	2008-01-10 21:55:51.000000000 -0800
++++ Squeak-3.6-3/src/vm/interp.c	2008-01-10 21:50:28.000000000 -0800
+@@ -1063,7 +1063,7 @@
+ int classSmallInteger(void);
+ int classString(void);
+ int cleanUpContexts(void);
+-int clone(int oop);
++int sq_clone(int oop);
+ int commonAt(int stringy);
+ int commonAtPut(int stringy);
+ int commonVariableatcacheIndex(int rcvr, int index, int atIx);
+@@ -2423,7 +2423,7 @@
+ /*	Return a shallow copy of the given object. */
+ /*	Assume: Oop is a real object, not a small integer. */
+ 
+-int clone(int oop) {
++int sq_clone(int oop) {
+ register struct foo * foo = &fum;
+     int remappedOop;
+     int fromIndex;
+@@ -11831,7 +11831,7 @@
+     int newCopy;
+     int sp;
+ 
+-	newCopy = clone(longAt(foo->stackPointer));
++	newCopy = sq_clone(longAt(foo->stackPointer));
+ 	/* begin pop:thenPush: */
+ 	longAtput(sp = foo->stackPointer - ((1 - 1) * 4), newCopy);
+ 	foo->stackPointer = sp;
+Index: Squeak-3.6-3/platforms/Cross/vm/sqVirtualMachine.c
+===================================================================
+--- Squeak-3.6-3/platforms/Cross/vm/sqVirtualMachine.c	2008-01-10 21:49:09.000000000 -0800
++++ Squeak-3.6-3/platforms/Cross/vm/sqVirtualMachine.c	2008-01-10 21:49:55.000000000 -0800
+@@ -104,7 +104,7 @@
+ 
+ 
+ /* InterpreterProxy methodsFor: 'instance creation' */
+-int clone(int oop);
++int sq_clone(int oop);
+ int instantiateClassindexableSize(int classPointer, int size);
+ int makePointwithxValueyValue(int xValue, int yValue);
+ int popRemappableOop(void);
+@@ -251,7 +251,7 @@
+ 	
+ 
+ 	/* InterpreterProxy methodsFor: 'instance creation' */
+-	VM->clone = clone;
++	VM->clone = sq_clone;
+ 	VM->instantiateClassindexableSize = instantiateClassindexableSize;
+ 	VM->makePointwithxValueyValue = makePointwithxValueyValue;
+ 	VM->popRemappableOop = popRemappableOop;

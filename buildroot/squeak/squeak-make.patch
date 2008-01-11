@@ -1,0 +1,16 @@
+Since we're cross compiling, we can't actually run the interpreter on the
+host. This modification just prevents the makefile from try to run squeak.
+
+--- Squeak-3.6-3/platforms/unix/config/Makefile.in	2008-01-10 18:09:22.000000000 -0800
++++ Squeak-3.6-3/platforms/unix/config/Makefile.in	2008-01-10 18:09:48.000000000 -0800
+@@ -56,8 +56,8 @@
+ 	@echo
+ 	@size $(squeak)
+ 	@echo
+-	@./$(squeak) -version
+-	@echo
++	#@./$(squeak) -version
++	#@echo
+ 
+ version.o : version.c
+ 	$(COMPILE) version.o version.c

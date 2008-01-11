@@ -38,6 +38,6 @@ fi
 echo Index: $1
 echo ===================================================================
 NAME4SED=`echo $1 |sed 's/\\//\\\\\\//g'`
-diff -u2N $1.orig $1 |sed s/$NAME4SED\\.orig/$NAME4SED/g
+diff -uN -U 2 $1.orig $1 |sed s/$NAME4SED\\.orig/$NAME4SED/g
 
 # END (getdiff.sh)

@@ -1,0 +1,8 @@
+config BR2_PACKAGE_SQUEAK
+	bool "squeak"
+	default n
+	help
+	  Object Oriented Programming Language.
+	  based on Smalltalk.
+
+	  http://www.squeak.org/
