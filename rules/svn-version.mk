@@ -14,9 +14,13 @@
 # is detected.
 #
 
-svn-revision := $(shell svnversion)
+ifeq ($(findstring not found,$(shell type svnversion$(MK_EXE_EXT) 2>&1)),not found)
+svn-revision := 0
+else
+svn-revision = $(shell svnversion)
 ifeq ($(strip $(svn-revision)),exported)
 svn-revision := 0
+endif
 endif
 
 ifeq ($(verbose),1)
