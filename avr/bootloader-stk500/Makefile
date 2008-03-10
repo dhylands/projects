@@ -21,10 +21,15 @@ else
 # For Stinger we set the LED up to the green LED
 # and we set SW_OPT to be empty so we don't have an override switch
 
-Stinger_MCU			= m8
+Stinger_MCU		= m8
 Stinger_FREQ		= 16MHz
-Stinger_LED			= B 3
-Stinger_SW			=
+Stinger_LED		= B 3
+Stinger_SW		=
+
+robostix_MCU		= m128
+robostix_FREQ		= 16MHz
+robostix_LED		= G 4
+robostix_SW		= B 1
 
 MK_AVR_MCU			= $($(TARGET)_MCU)
 MK_AVR_FREQ			= $($(TARGET)_FREQ)
