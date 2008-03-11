@@ -91,11 +91,11 @@ extern "C"
 #   endif
 
 #   if !defined( CFG_UART_RX_BUFFER_SIZE )
-#       error CFG_UART_RX_BUFFER_SIZE isn't defined.
+#       error CFG_UART_RX_BUFFER_SIZE isnt defined.
 #   endif
 
 #   if !defined( CFG_UART_TX_BUFFER_SIZE )
-#       error CFG_UART_TX_BUFFER_SIZE isn't declared.
+#       error CFG_UART_TX_BUFFER_SIZE isnt declared.
 #   endif
 
 #   define  CFG_USE_UART0               CFG_USE_UART
@@ -163,11 +163,11 @@ extern "C"
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_UART0_RX_BUFFER_SIZE )
-#   error CFG_UART0_RX_BUFFER_SIZE isn't defined.
+#   error CFG_UART0_RX_BUFFER_SIZE isnt defined.
 #endif
 
 #if (( CFG_UART0_RX_BUFFER_SIZE > 0 ) && (( CFG_UART0_RX_BUFFER_SIZE & ( CFG_UART0_RX_BUFFER_SIZE - 1 )) != 0 ))
-#   error CFG_UART0_RX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_UART0_RX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_UART0_RX_BUFFER_SIZE > 128 )
@@ -208,11 +208,11 @@ void UART0_SetRxHandler( void (*rxHandler)( uint8_t ch ));
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_UART0_TX_BUFFER_SIZE )
-#   error CFG_UART0_TX_BUFFER_SIZE isn't declared.
+#   error CFG_UART0_TX_BUFFER_SIZE isnt declared.
 #endif
 
 #if (( CFG_UART0_TX_BUFFER_SIZE & ( CFG_UART0_TX_BUFFER_SIZE - 1 )) != 0 )
-#   error CFG_UART0_TX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_UART0_TX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_UART0_TX_BUFFER_SIZE > 128 )
@@ -259,11 +259,11 @@ void UART0_Write( const void *data, uint8_t len );
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_UART1_RX_BUFFER_SIZE )
-#   error CFG_UART1_RX_BUFFER_SIZE isn't defined.
+#   error CFG_UART1_RX_BUFFER_SIZE isnt defined.
 #endif
 
 #if (( CFG_UART1_RX_BUFFER_SIZE > 0 ) && (( CFG_UART1_RX_BUFFER_SIZE & ( CFG_UART1_RX_BUFFER_SIZE - 1 )) != 0 ))
-#   error CFG_UART1_RX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_UART1_RX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_UART1_RX_BUFFER_SIZE > 128 )
@@ -304,11 +304,11 @@ void UART1_SetRxHandler( void (*rxHandler)( uint8_t ch ));
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_UART1_TX_BUFFER_SIZE )
-#   error CFG_UART1_TX_BUFFER_SIZE isn't declared.
+#   error CFG_UART1_TX_BUFFER_SIZE isnt declared.
 #endif
 
 #if (( CFG_UART1_TX_BUFFER_SIZE & ( CFG_UART1_TX_BUFFER_SIZE - 1 )) != 0 )
-#   error CFG_UART1_TX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_UART1_TX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_UART1_TX_BUFFER_SIZE > 128 )

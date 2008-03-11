@@ -62,11 +62,11 @@
 #if CFG_BLD_USE_UART0
 
 #if !defined( CFG_BLD_UART0_RX_BUFFER_SIZE )
-#   error CFG_BLD_UART0_RX_BUFFER_SIZE isn't defined.
+#   error CFG_BLD_UART0_RX_BUFFER_SIZE isnt defined.
 #endif
 
 #if (( CFG_BLD_UART0_RX_BUFFER_SIZE & ( CFG_BLD_UART0_RX_BUFFER_SIZE - 1 )) != 0 )
-#   error CFG_BLD_UART0_RX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_BLD_UART0_RX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_BLD_UART0_RX_BUFFER_SIZE > 128 )
@@ -94,11 +94,11 @@ extern  volatile BLD_UART0_RxBuffer_t BLD_gUart0RxBuf;
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_BLD_UART0_TX_BUFFER_SIZE )
-#   error CFG_BLD_UART0_TX_BUFFER_SIZE isn't declared.
+#   error CFG_BLD_UART0_TX_BUFFER_SIZE isnt declared.
 #endif
 
 #if (( CFG_BLD_UART0_TX_BUFFER_SIZE & ( CFG_BLD_UART0_TX_BUFFER_SIZE - 1 )) != 0 )
-#   error CFG_BLD_UART0_TX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_BLD_UART0_TX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_BLD_UART0_TX_BUFFER_SIZE > 128 )
@@ -129,11 +129,11 @@ void UART0_SetBaudRate( uint32_t baudRate );
 #if CFG_BLD_USE_UART1
 
 #if !defined( CFG_BLD_UART1_RX_BUFFER_SIZE )
-#   error CFG_BLD_UART1_RX_BUFFER_SIZE isn't defined.
+#   error CFG_BLD_UART1_RX_BUFFER_SIZE isnt defined.
 #endif
 
 #if (( CFG_BLD_UART1_RX_BUFFER_SIZE > 0 ) && (( CFG_BLD_UART1_RX_BUFFER_SIZE & ( CFG_BLD_UART1_RX_BUFFER_SIZE - 1 )) != 0 ))
-#   error CFG_BLD_UART1_RX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_BLD_UART1_RX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_BLD_UART1_RX_BUFFER_SIZE > 128 )
@@ -161,11 +161,11 @@ extern  volatile BLD_UART1_RxBuffer_t BLD_gUart1RxBuf;
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_BLD_UART1_TX_BUFFER_SIZE )
-#   error CFG_BLD_UART1_TX_BUFFER_SIZE isn't declared.
+#   error CFG_BLD_UART1_TX_BUFFER_SIZE isnt declared.
 #endif
 
 #if (( CFG_BLD_UART1_TX_BUFFER_SIZE & ( CFG_BLD_UART1_TX_BUFFER_SIZE - 1 )) != 0 )
-#   error CFG_BLD_UART1_TX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_BLD_UART1_TX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_BLD_UART1_TX_BUFFER_SIZE > 128 )

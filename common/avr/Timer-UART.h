@@ -65,11 +65,11 @@ extern "C"
 //---------------------------------------------------------------------------
 
 #if !defined( CFG_TIMER_UART_TX_BUFFER_SIZE )
-#   error CFG_TIMER_UART_TX_BUFFER_SIZE isn't declared.
+#   error CFG_TIMER_UART_TX_BUFFER_SIZE isnt declared.
 #endif
 
 #if (( CFG_TIMER_UART_TX_BUFFER_SIZE & ( CFG_TIMER_UART_TX_BUFFER_SIZE - 1 )) != 0 )
-#   error CFG_TIMER_UART_TX_BUFFER_SIZE isn't a power of 2.
+#   error CFG_TIMER_UART_TX_BUFFER_SIZE isnt a power of 2.
 #endif
 
 #if ( CFG_TIMER_UART_TX_BUFFER_SIZE > 128 )
