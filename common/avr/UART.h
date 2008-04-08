@@ -78,6 +78,7 @@ extern "C"
 //      int  UARTx_PutChar( char ch );
 //      void UARTx_PutStr( const char *s );
 //      void UARTx_Write( const void *data, uint8_t len );
+//      void InitUART( void );
 //
 //  Note: To allow the code to be compatible with single UART processors
 //        CFG_USE_UART can be defined instead of CFG_USE_UARTx and then
