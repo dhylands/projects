@@ -37,7 +37,7 @@
 
 #define LED_DDR DDRD
 #define LED_PORT PORTD
-#define LED_MASK (1 << 3)
+#define LED_MASK (1 << 5)
 
 /* ---- Private Variables ------------------------------------------------ */
 
@@ -104,7 +104,7 @@ static void InitializeControlTable (uint8_t forceOverwrite)
 	// NOTE - These are the hardware defaults...
 	gControlTable [CONTROL_MODEL_NUMBER_LOW] = 11;
 	gControlTable [CONTROL_MODEL_NUMBER_HIGH] = 67;
-	gControlTable [CONTROL_FIRMWARE_VERSION] = 1;
+	gControlTable [CONTROL_FIRMWARE_VERSION] = 2;
 	gControlTable [CONTROL_ID] = 121;
 	gControlTable [CONTROL_BAUD_RATE] = 1;
 	gControlTable [CONTROL_RETURN_DELAY_TIME] = 250;
@@ -409,21 +409,21 @@ static void UpdateSensorValues (void)
 {
 	uint16_t value;
 
-	value = ADC_Read (PRESSURE_FRONT_RIGHT_CHANNEL);
-	gControlTable [CONTROL_FRONT_RIGHT_LOW] = (value & 0xFF);
-	gControlTable [CONTROL_FRONT_RIGHT_HIGH] = (value >> 8);
+	value = ADC_Read (PRESSURE_FRONT_OUTSIDE_CHANNEL);
+	gControlTable [CONTROL_FRONT_OUTSIDE_LOW] = (value & 0xFF);
+	gControlTable [CONTROL_FRONT_OUTSIDE_HIGH] = (value >> 8);
 
-	value = ADC_Read (PRESSURE_FRONT_LEFT_CHANNEL);
-	gControlTable [CONTROL_FRONT_LEFT_LOW] = (value & 0xFF);
-	gControlTable [CONTROL_FRONT_LEFT_HIGH] = (value >> 8);
+	value = ADC_Read (PRESSURE_FRONT_INSIDE_CHANNEL);
+	gControlTable [CONTROL_FRONT_INSIDE_LOW] = (value & 0xFF);
+	gControlTable [CONTROL_FRONT_INSIDE_HIGH] = (value >> 8);
 
-	value = ADC_Read (PRESSURE_REAR_LEFT_CHANNEL);
-	gControlTable [CONTROL_REAR_LEFT_LOW] = (value & 0xFF);
-	gControlTable [CONTROL_REAR_LEFT_HIGH] = (value >> 8);
+	value = ADC_Read (PRESSURE_REAR_INSIDE_CHANNEL);
+	gControlTable [CONTROL_REAR_INSIDE_LOW] = (value & 0xFF);
+	gControlTable [CONTROL_REAR_INSIDE_HIGH] = (value >> 8);
 
-	value = ADC_Read (PRESSURE_REAR_RIGHT_CHANNEL);
-	gControlTable [CONTROL_REAR_RIGHT_LOW] = (value & 0xFF);
-	gControlTable [CONTROL_REAR_RIGHT_HIGH] = (value >> 8);
+	value = ADC_Read (PRESSURE_REAR_OUTSIDE_CHANNEL);
+	gControlTable [CONTROL_REAR_OUTSIDE_LOW] = (value & 0xFF);
+	gControlTable [CONTROL_REAR_OUTSIDE_HIGH] = (value >> 8);
 }
 
 
@@ -473,8 +473,8 @@ int main (void)
 	LED_PORT &= ~LED_MASK;
 
 	Log ("*****\n");
-	Log ("***** Bioloid Foot Pressure Sensor\n");
-	Log ("***** Copyright 2007 HUVrobotics\n");
+	Log ("***** Bioloid Foot Pressure Sensor (Rev. 2)\n");
+	Log ("***** Copyright 2008 HUVrobotics\n");
 	Log ("*****\n");
 
 	while (1)	// outer loop is once every 10 ms

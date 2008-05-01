@@ -19,9 +19,9 @@
 #define CFG_TIMER_UART_TX_BUFFER_SIZE   64
 #define CFG_TIMER_UART_BAUD_RATE    19200
 #define CFG_TIMER_UART_LF_TO_CRLF   1
-#define CFG_TIMER_UART_DDR          DDRB
-#define CFG_TIMER_UART_PORT         PORTB
-#define CFG_TIMER_UART_MASK         ( 1 << 7 )
+#define CFG_TIMER_UART_DDR          DDRD
+#define CFG_TIMER_UART_PORT         PORTD
+#define CFG_TIMER_UART_MASK         ( 1 << 4 )
 
 #define CFG_LOG_TO_BUFFER           1
 #define CFG_LOG_NUM_BUFFER_ENTRIES  32
