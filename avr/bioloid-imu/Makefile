@@ -14,6 +14,6 @@ MK_AVR_PROGRAMMER  ?= stk500
 MK_AVR_FUSES_m168   = FB DF FF
 
 MK_HEX_TARGET	= bioloidIMU
-MK_SRC_FILES	= bioloidIMU.c bioloid-pkt.c Delay.c adc.c Log.c StrPrintf.o Timer-UART.c bioloid-uart.c Timer.c
+MK_SRC_FILES	= bioloidIMU.c bioloid-pkt.c Delay.c adc.c StrPrintf.o bioloid-uart.c Timer.c
 
 include ../../rules/mkRules.mk

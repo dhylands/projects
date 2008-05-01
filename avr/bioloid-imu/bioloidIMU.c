@@ -37,7 +37,7 @@
 
 #define LED_DDR DDRD
 #define LED_PORT PORTD
-#define LED_MASK (1 << 5)
+#define LED_MASK (1 << 2)
 
 /* ---- Private Variables ------------------------------------------------ */
 
@@ -103,7 +103,7 @@ static void InitializeControlTable (uint8_t forceOverwrite)
 	// NOTE - These are the hardware defaults...
 	gControlTable [CONTROL_MODEL_NUMBER_LOW] = 10;
 	gControlTable [CONTROL_MODEL_NUMBER_HIGH] = 67;
-	gControlTable [CONTROL_FIRMWARE_VERSION] = 1;
+	gControlTable [CONTROL_FIRMWARE_VERSION] = 2;
 	gControlTable [CONTROL_ID] = 120;
 	gControlTable [CONTROL_BAUD_RATE] = 1;
 	gControlTable [CONTROL_RETURN_DELAY_TIME] = 250;
@@ -228,8 +228,8 @@ static void WriteControlTableByte (uint8_t address, uint8_t value)
 
 static void OutputResponse (uint8_t errorCode, uint8_t forceResponse)
 {
-	if (errorCode != BLD_ERROR_NONE)
-		Log ("ERROR Response: 0x%02x\n", errorCode);
+	//if (errorCode != BLD_ERROR_NONE)
+	//	Log ("ERROR Response: 0x%02x\n", errorCode);
 
 	// we don't call this routine for READ_DATA, so we don't send a response unless
 	// the status return level is set to ALL... However, if forceResponse is true, then
@@ -374,7 +374,7 @@ static void PacketReceived (BLD_Instance_t *inst, BLD_Packet_t *packet, BLD_Erro
 
 		        case BLD_CMD_RESET:
 		        {
-		            Log ("got RESET command\n");
+		            // Log ("got RESET command\n");
 					InitializeControlTable (TRUE);
 					OutputResponse (BLD_ERROR_NONE, FALSE);
 		            break;
@@ -383,7 +383,7 @@ static void PacketReceived (BLD_Instance_t *inst, BLD_Packet_t *packet, BLD_Erro
 		        default:
 		        {
 					// there are other commands that we don't care about....
-		            Log ("ID:0x%02x Cmd: 0x%02x *** Unknown ***\n", packet->m_id, packet->m_cmd);
+		            // Log ("ID:0x%02x Cmd: 0x%02x *** Unknown ***\n", packet->m_id, packet->m_cmd);
 		            break;
 		        }
 			}
@@ -393,7 +393,7 @@ static void PacketReceived (BLD_Instance_t *inst, BLD_Packet_t *packet, BLD_Erro
 	}
 	else if (packet->m_id == gMyId)
 	{
-		Log ("CRC Error\n");
+		// Log ("CRC Error\n");
 		OutputResponse (BLD_ERROR_CHECKSUM, FALSE);
 	}
 
@@ -453,7 +453,7 @@ static void UpdateLED (void)
 /**
 *   Dump the IMU part of the control table over the log (DEBUG function)
 */
-
+/*
 static void LogControlTableIMUValues (void)
 {
 	uint16_t value;
@@ -485,13 +485,13 @@ static void LogControlTableIMUValues (void)
 	Log (" Yaw: %4d\n\n", value);
 
 }
-
+*/
 
 //***************************************************************************
 /**
 *   Dump the control table over the log (DEBUG function)
 */
-
+/*
 static void LogControlTable (void)
 {
 	uint8_t index;
@@ -502,7 +502,7 @@ static void LogControlTable (void)
 		Log ("%2d : %3d\n", index, gControlTable [index]);
 	Log ("Done\n");
 }
-
+*/
 
 //***************************************************************************
 /**
@@ -517,7 +517,7 @@ int main (void)
 	// initialize the hardware stuff we use
 	InitTimer ();
 	BLD_InitUART ();
-	InitTimerUART ();
+//	InitTimerUART ();
 	ADC_Init (ADC_PRESCALAR_AUTO);
 
 	// initialize the packet parser
@@ -535,10 +535,10 @@ int main (void)
 	ms_spin (500);
 	LED_PORT &= ~LED_MASK;
 
-	Log ("*****\n");
-	Log ("***** Bioloid IMU Sensor\n");
-	Log ("***** Copyright 2007 HUVrobotics\n");
-	Log ("*****\n");
+//	Log ("*****\n");
+//	Log ("***** Bioloid IMU Sensor\n");
+//	Log ("***** Copyright 2007 HUVrobotics\n");
+//	Log ("*****\n");
 
 	while (1)	// outer loop is once every 10 ms
 	{
