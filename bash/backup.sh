@@ -23,7 +23,7 @@ BACKUP_DIR=/var/cache/rsnapshot
 SSID=$(/sbin/iwconfig eth1 | grep ESSID | sed -e 's/^.*ESSID://' -e 's/ .*//' -e 's/"//g')
 
 echo "====================================================" >> ${LOG}
-if [ "${SSID}" != "Seeker-WLAN" ]
+if [ "${SSID}" != "Blue-Heron" ]
 then
     echo "$(date): Not on home network" >> ${LOG}
     echo "  SSID = ${SSID}" >> ${LOG}
@@ -48,7 +48,7 @@ currTime=$(date '+%s')
 #
 
 echo "$(date): Started daily rsnapshot" >> ${LOG}
-nice /usr/bin/rsnapshot daily >> ${LOG}
+nice /usr/bin/rsnapshot -v daily >> ${LOG} 2>&1
 echo "$(date): Finished daily rsnapshot" >> ${LOG}
 
 weekStamp=$(find ${BACKUP_DIR}/ -maxdepth 1 -name weekly.0 -printf '%T@\n')
@@ -60,7 +60,7 @@ then
     # and daily.6 is already a week old
 
     echo "$(date): Started weekly rsnapshot" >> ${LOG}
-    nice /usr/bin/rsnapshot weekly >> ${LOG}
+    nice /usr/bin/rsnapshot -v weekly >> ${LOG} 2>&1
     echo "$(date): Finished weekly rsnapshot" >> ${LOG}
 fi
 
@@ -72,7 +72,7 @@ then
     # weekly.4 will become monthly.0
 
     echo "$(date): Started monthly rsnapshot" >> ${LOG}
-    nice /usr/bin/rsnapshot monthly >> ${LOG}
+    nice /usr/bin/rsnapshot -v monthly >> ${LOG} 2>&1
     echo "$(date): Finished monthly rsnapshot" >> ${LOG}
 fi
 
