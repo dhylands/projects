@@ -270,13 +270,14 @@ int main( int argc, char **argv )
 
     while ( 1 )
     {
-        static  char    seqEntry[5][9] = 
+        static  char    seqEntry[6][9] = 
         {
             { 255, 255,   5, 5, 3, 30,  44,   1, 167 },
             { 255, 255,   5, 5, 3, 30, 255,   1, 212 },
             { 255, 255,   5, 5, 3, 30, 188,   2,  22 },
             { 255, 255, 120, 4, 3, 25,   1, 102 },
-            { 255, 255, 120, 4, 3, 25,   0, 103 }
+            { 255, 255, 120, 4, 3, 25,   0, 103 },
+            { 255, 255, 254, 2, 1, 254 }
         };
         char *seq;
 
@@ -297,6 +298,16 @@ int main( int argc, char **argv )
             {
                 seq = &seqEntry[ ch - 'a' ][ 0 ];
                 if ( write( gPortFd, seq, 9 ) != 9 )
+                {
+                    fprintf( stderr, "Write to serial port failed: %s\n", strerror( errno ));
+                }
+                break;
+            }
+           	
+            case 'f':
+            {
+                seq = &seqEntry[ ch - 'a' ][ 0 ];
+                if ( write( gPortFd, seq, 6 ) != 6 )
                 {
                     fprintf( stderr, "Write to serial port failed: %s\n", strerror( errno ));
                 }
