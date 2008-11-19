@@ -71,15 +71,16 @@ struct BLD_Instance_s;
 typedef struct BLD_Instance_s BLD_Instance_t;
 
 typedef void (*BLD_PacketReceived)( BLD_Instance_t *instance, BLD_Packet_t *pkt, BLD_Error_t err );
+typedef void (*BLD_SendChar)( uint8_t ch );
 
 struct BLD_Instance_s
 {
     BLD_ID_t            m_id;       ///< Our ID on the Bioloid bus, 0xFF if we're just monitoring
     BLD_State_t         m_state;
     BLD_Length_t        m_paramIdx; 
-    BLD_Packet_t        m_pkt;
-    BLD_PacketReceived  m_pktRcvd;
-
+    BLD_Packet_t        m_pkt;      ///< Contains the packet that was actually received
+    BLD_PacketReceived  m_pktRcvd;  ///< Ptr to Fn called when a packet is successfully received
+    BLD_SendChar        m_sendChar; ///< Ptr to Fn called to send out a character
 };
 
 /*
@@ -159,6 +160,7 @@ struct BLD_Instance_s
 
 void BLD_Init( BLD_Instance_t *instance );
 void BLD_ProcessChar( BLD_Instance_t *instance, uint8_t ch );
+void BLD_SendStatus( BLD_Instance_t *instance, uint8_t error, const void *param, uint8_t paramLen );
 
 /** @} */
 

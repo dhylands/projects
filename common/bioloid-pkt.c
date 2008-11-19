@@ -109,6 +109,10 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
             break;
         }
 
+        // NOTE: In the future, we should decode the SYNC_WRITE
+        //       packet so that we only need to keep the portion that
+        //       belongs to our ID
+
         case BLD_STATE_COMMAND_RCVD: // We've received the command, ch is a param byte or checksum
         {
             if (( inst->m_paramIdx + 2 ) >= inst->m_pkt.m_length )
@@ -149,6 +153,55 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
 
 } // BLD_ProcessChar
 
+//***************************************************************************
+/**
+*   Sends out a status packet.
+*
+*   The format of a status packet looks like the following:
+*
+*       0xff 0xff ID Len Error [Param1 ... ParamN] ChkSum
+*/
+
+void BLD_SendStatus
+(
+    BLD_Instance_t *inst,       ///< Instance data 
+    uint8_t         errCode,    ///< Error bitmask to send
+    const void     *param,      ///< Pointer to parameter data to send. May be NULL if paramLen is zero
+    uint8_t         paramLen    ///< Number of bytes of parameter data to send
+)
+{
+    const uint8_t  *data;
+    uint8_t         checksum;
+    uint8_t         paramIdx;
+    BLD_SendChar    sendChar = inst->m_sendChar;
+
+    // Send out the preamble
+
+    sendChar( 0xff );
+    sendChar( 0xff );
+    sendChar( inst->m_id );
+    checksum = inst->m_id;
+
+    // The length sent in the packet is the number of parameter bytes + 2
+
+    sendChar( paramLen + 2 );
+    checksum += ( paramLen + 2 );
+
+    sendChar( errCode );
+    checksum += errCode;
+
+    data = param;
+    for ( paramIdx = 0; paramIdx < paramLen; paramIdx++ )
+    {
+        checksum += *data;
+        sendChar( *data++ );
+    }
+
+    // Finally send out the checksum
+
+    sendChar( checksum );
+
+} // BLD_SendStatus
 
 /** @} */
 
