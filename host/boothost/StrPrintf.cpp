@@ -1,11 +1,15 @@
 /****************************************************************************
 *
-*     Copyright (c) 2003 Dave Hylands
-*           All Rights Reserved
+*   Copyright (c) 2003 - 2008 Dave Hylands     <dhylands@gmail.com>
 *
-*	Permission is granted to any individual or institution to use, copy, or
-*	redistribute this software so long as it is not sold for profit, and that
-*	this copyright notice is retained.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License version 2 as
+*   published by the Free Software Foundation.
+*
+*   Alternatively, this software may be distributed under the terms of BSD
+*   license.
+*
+*   See README and COPYING for more details.
 *
 ****************************************************************************/
 /**
