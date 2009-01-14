@@ -80,7 +80,7 @@
 *
 *   For example:
 *   @code
-*   CBUF< uint8_t, 64, char >   myQ;
+*   volatile CBUF< uint8_t, 64, char >   myQ;
 *   @endcode
 *
 ****************************************************************************/
