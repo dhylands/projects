@@ -81,11 +81,23 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
             {
                 nextState = BLD_STATE_2ND_FF_RCVD;
             }
+            else
+            {
+                nextState = BLD_STATE_IDLE;
+            }
             break;
         }
 
         case BLD_STATE_2ND_FF_RCVD:  // We've received the 2nd 0xFF, ch is the ID
         {
+            if ( ch == 0xFF )
+            {
+                // 0xFF is invalid as an ID, so just stay in this state until we receive
+                // a non-0xFF
+                
+                nextState = BLD_STATE_2ND_FF_RCVD;
+                break;
+            }
             inst->m_pkt.m_id = ch;
             inst->m_pkt.m_crc = ch;
             nextState = BLD_STATE_ID_RCVD;
