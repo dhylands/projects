@@ -140,7 +140,8 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
                     // CRC failed
 
                     err = BLD_ERROR_CHECKSUM;
-
+                    LogError( "Rcvd Checksum: 0x%02x Expecting: 0x%02x\n",
+                              ch, inst->m_pkt.m_crc );
                 }
 
                 if ( inst->m_pktRcvd != NULL )

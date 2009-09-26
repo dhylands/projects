@@ -50,6 +50,7 @@
  || defined (__AVR_ATmega48__) \
  || defined (__AVR_ATmega88__) \
  || defined (__AVR_ATmega168__) \
+ || defined (__AVR_ATmega328P__) \
 
 #define TIMER0_CLOCK_SEL_NONE       (( 0 << CS02 ) | ( 0 << CS01 ) | ( 0 << CS00 ))
 #define TIMER0_CLOCK_SEL_DIV_1      (( 0 << CS02 ) | ( 0 << CS01 ) | ( 1 << CS00 ))
