@@ -91,7 +91,7 @@ volatile UART1_TxBuffer_t gUart1TxBuf;
 
 #if CFG_USE_UART0
 
-SIGNAL( SIG_USART0_RECV )
+ISR( USART0_RX_vect )
 {
     uint8_t ch = UDR0;   // Read the character from the UART
 
@@ -109,7 +109,7 @@ SIGNAL( SIG_USART0_RECV )
     }
 #endif
 
-} // SIG_USART0_RECV
+} // USART0_RX_vect
 
 #endif  // CFG_USE_UART0
 
@@ -117,7 +117,7 @@ SIGNAL( SIG_USART0_RECV )
 
 #if CFG_USE_UART1
 
-SIGNAL( SIG_USART1_RECV )
+ISR( USART1_RX_vect )
 {
     uint8_t ch = UDR1;   // Read the character from the UART
 
@@ -135,7 +135,7 @@ SIGNAL( SIG_USART1_RECV )
     }
 #endif
 
-} // SIG_USART1_RECV
+} // USART1_RX_vect
 
 #endif  // CFG_USE_UART1
 
@@ -146,7 +146,7 @@ SIGNAL( SIG_USART1_RECV )
 
 #if ( CFG_USE_UART0 && ( CFG_UART0_TX_BUFFER_SIZE > 0 ))
 
-SIGNAL( SIG_USART0_DATA )
+ISR( USART0_UDRE_vect )
 {
     if ( CBUF_IsEmpty( gUart0TxBuf ))
     {
@@ -161,7 +161,7 @@ SIGNAL( SIG_USART0_DATA )
         UDR0 = CBUF_Pop( gUart0TxBuf );
     }
 
-}  // SIG_USART0_DATA
+}  // USART0_UDRE_vect
 
 #endif  // ( CFG_USE_UART0 && ( CFG_UART0_TX_BUFFER_SIZE > 0 ))
 
@@ -169,7 +169,7 @@ SIGNAL( SIG_USART0_DATA )
 
 #if ( CFG_USE_UART1 && ( CFG_UART1_TX_BUFFER_SIZE > 0 ))
 
-SIGNAL( SIG_USART1_DATA )
+ISR( USART1_UDRE_vect )
 {
     if ( CBUF_IsEmpty( gUart1TxBuf ))
     {

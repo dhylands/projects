@@ -150,6 +150,14 @@ extern "C"
 
 #endif
 
+#if 1
+
+#if defined( USART_RX_vect )
+#   define  USART0_RX_vect      USART_RX_vect
+#   define  USART0_UDRE_vect    USART_UDRE_vect
+#endif
+
+#else
 #if defined( SIG_UART_RECV )
 #   define SIG_USART0_RECV SIG_UART_RECV
 #   define SIG_USART0_DATA SIG_UART_DATA
@@ -159,6 +167,7 @@ extern "C"
 #elif !defined( SIG_USART0_RECV )
 #   define SIG_USART0_RECV SIG_USART_RECV
 #   define SIG_USART0_DATA SIG_USART_DATA
+#endif
 #endif
 
 //---------------------------------------------------------------------------
