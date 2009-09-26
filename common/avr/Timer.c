@@ -73,7 +73,7 @@ volatile msTick_t   gMsTickCount = 0;
 *  Timer 0 interrupt handler
 */
 
-SIGNAL(SIG_OVERFLOW0)        /* signal handler for tcnt0 overflow interrupt */
+ISR( TIMER0_OVF_vect )/* signal handler for tcnt0 overflow interrupt */
 {
 
     // With CFG_TIMER_MICRO_TICK set to 1, gTickCount will increment once
