@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*   Copyright (c) 2007 Dave Hylands     <dhylands@gmail.com>
+*   Copyright (c) 2009 Dave Hylands     <dhylands@gmail.com>
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License version 2 as
