@@ -221,7 +221,7 @@ int main( int argc, char **argv )
 
     LogInit( stdout );
 
-    while (( opt = getopt_long( argc, argv, "b:dhmp:sv", gLongOption, NULL )) > 0 )
+    while (( opt = getopt_long( argc, argv, "b:dhmp:rsv", gLongOption, NULL )) > 0 )
     {
         switch ( opt )
         {
@@ -884,6 +884,9 @@ void Usage()
     fprintf( stderr, "  Download a program via serial/i2c\n" );
     fprintf( stderr, "\n" );
     fprintf( stderr, "  -b, --baud=baud   Set the baudrate used\n" );
+    fprintf( stderr, "  -p, --port=name   Set the serial port to use\n" );
+    fprintf( stderr, "  -r, --rts-reset   Use the RTS pin to reset the processor\n" );
+    fprintf( stderr, "  -d, --debug       Enable debug features\n" );
     fprintf( stderr, "  -h, --help        Display this message\n" );
     fprintf( stderr, "  -m, --megaload    Use megaload 2.3 protocol\n" );
     fprintf( stderr, "  -s, --stk500      Use stk500 bootloader protocol (default)\n" );
