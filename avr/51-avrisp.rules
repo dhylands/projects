@@ -1,2 +1,4 @@
-#AVRISP mkII
+i# This worked on some early version of ubuntu (or SUSE I can't remember)
+# It doesn't work under ubuntu 9.04
+# AVRISP mkII
 SUBSYSTEM=="usb_device",SYSFS{idVendor}=="03eb",SYSFS{idProduct}=="2104",MODE="0666"

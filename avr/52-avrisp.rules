@@ -1,0 +1,3 @@
+# This works under ubuntu 9.04
+# Set permissions for the AVRIspMKII programmer granting read- and write-access for every user
+ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2104", MODE="0666"
