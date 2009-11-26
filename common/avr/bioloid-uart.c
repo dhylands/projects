@@ -72,6 +72,18 @@
 #define BLD_UART1_RX_MASK   ( 1 << 2 )
 #define BLD_UART1_TX_MASK   ( 1 << 3 )
 
+#elif defined( __AVR_ATmega164P__ )
+
+#define BLD_UART0_DDR       DDRD
+#define BLD_UART0_PORT      PORTD
+#define BLD_UART0_RX_MASK   ( 1 << 0 )
+#define BLD_UART0_TX_MASK   ( 1 << 1 )
+
+#define BLD_UART1_DDR       DDRD
+#define BLD_UART1_PORT      PORTD
+#define BLD_UART1_RX_MASK   ( 1 << 2 )
+#define BLD_UART1_TX_MASK   ( 1 << 3 )
+
 #else
 #   error   Processor not yet supported
 #endif
