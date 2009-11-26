@@ -6,7 +6,7 @@
 
 ifeq ($(TARGET),)
 
-TARGETS = bioloid-rs bioloid-128
+TARGETS = bioloid-128
 
 all $(MAKECMDGOALS): $(TARGETS)
 
@@ -20,7 +20,7 @@ else
 
 
 MK_OS			= avr
-MK_AVR_MCU		= m128
+MK_AVR_MCU		= m164p
 MK_AVR_FREQ		= 16MHz
 MK_AVR_PROGRAMMER  ?= stk500
 

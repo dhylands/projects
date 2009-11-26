@@ -130,9 +130,11 @@ int main( void )
     PORTB   = 0xFF;
     PORTC   = 0xFF;
     PORTD   = 0xFF;
+#if defined( PORTG )
     PORTE   = 0xFF;
     PORTF   = 0xFF;
     PORTG   = 0xFF;
+#endif
 
     // TOSC1 & TOSC2 are connected to the Red/Blue LEDs so we need to set
     // AS0 to 0. AS0 is the only writable bit.
