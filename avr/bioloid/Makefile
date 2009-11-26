@@ -2,6 +2,10 @@
 #
 # bioloid Makefile
 #
+# NOTE: This program was an early investigation program and was used for
+#	developing common/bioloid-uart.c. User avr/bioloid-serial instead
+#	(it uses bioloid-uart.c)
+#
 ###########################################################################
 
 ifeq ($(TARGET),)
