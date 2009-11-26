@@ -59,7 +59,8 @@ CFLAGS += -ggdb
 LDFLAGS += -ggdb
 endif
 
-LDFLAGS += -Wl,-Map,$(basename $@).map
+LDFLAGS_RDYNAMIC = -rdynamic
+LDFLAGS += -Wl,-Map,$(basename $@).map $(LDFLAGS_RDYNAMIC)
 
 DEP_OUTPUT_OPTION = -MMD -MF $(@:.o=.d)
 

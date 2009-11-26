@@ -48,6 +48,9 @@ vpath %.cpp $(MK_COMMON_AVR_DIR)
 
 include $(MK_RULES_DIR)/mkEnv-gcc.mk
 
+# avr-gcc doesn't use rdynamic
+LDFLAGS_RDYNAMIC =
+
 MK_avrdude	 		= avrdude
 MK_avrdude_PORT		?= usb
 MK_avrdude_PROG    	?= avrispmkII
