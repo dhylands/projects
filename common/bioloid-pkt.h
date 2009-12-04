@@ -27,6 +27,11 @@
 
 #include <stdint.h>
 
+/**
+ * @addtogroup bioloid
+ * @{
+ */
+
 /* ---- Constants and Types ---------------------------------------------- */
 
 #define BLD_STATE_IDLE          0   ///< We're waiting for the beginning of the packet
@@ -81,7 +86,11 @@ struct BLD_Instance_s
     BLD_Packet_t        m_pkt;      ///< Contains the packet that was actually received
     BLD_PacketReceived  m_pktRcvd;  ///< Ptr to Fn called when a packet is successfully received
     BLD_SendChar        m_sendChar; ///< Ptr to Fn called to send out a character
+
+    uint8_t             m_logPacket;  ///< Causes Log statements for each packet sent
 };
+
+#define BLD_LogPacket( inst, fmt, args... ) do { if ( inst->m_logPacket ) { Log( fmt, ## args ); }} while (0)
 
 /*
  * Control Table

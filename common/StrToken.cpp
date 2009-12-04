@@ -148,5 +148,98 @@ char *StrTokenizer::NextToken
 
 } // NextToken
 
+//***************************************************************************
+/**
+*   Parses a uint8_t using the next token.
+*
+*   @returns    true if the number was parsed successfully, false otherwise.
+*/
+
+bool StrTokenizer::NextNum( const char *delim, uint8_t *outNum )
+{
+    char *token;
+    char *endPtr;
+    unsigned long   num;
+
+    *outNum = 0;
+
+    if (( token = NextToken( delim )) == NULL )
+    {
+        return false;
+    }
+
+    // See if it looks like an unsigned number
+
+    num = strtoul( token, &endPtr, 0 );
+    if ( *endPtr != '\0' )
+    {
+        // Not a valid number
+
+        return false;
+    }
+    if ( num > 255 )
+    {
+        // Number out of range
+
+        return false;
+    }
+
+    *outNum = num;
+    return true;
+}
+
+//***************************************************************************
+/**
+*   Parses a uint8_t using the next token.
+*
+*   @returns    true if the number was parsed successfully, false otherwise.
+*/
+
+bool StrTokenizer::NextNum( const char *delim, uint16_t *outNum )
+{
+    char *token;
+    char *endPtr;
+    unsigned long   num;
+
+    *outNum = 0;
+
+    if (( token = NextToken( delim )) == NULL )
+    {
+        return false;
+    }
+
+    // See if it looks like an unsigned number
+
+    num = strtoul( token, &endPtr, 0 );
+    if ( *endPtr != '\0' )
+    {
+        // Not a valid number
+
+        return false;
+    }
+    if ( num > 65535 )
+    {
+        // Number out of range
+
+        return false;
+    }
+
+    *outNum = num;
+    return true;
+}
+
+//***************************************************************************
+/**
+*   Returns the previously parsed token. This is most useful for error
+*   handling when using NextNum or similar routines.
+*
+*   @returns    pointer to the previous token that was parsed.
+*/
+
+char *StrTokenizer::PrevToken()
+{
+    return m_outToken;
+}
+
 /** @} */
 

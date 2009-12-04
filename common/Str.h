@@ -36,6 +36,10 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#if defined( __cplusplus )
+extern "C" {
+#endif
+
 /**
  * @addtogroup Str
  * @{
@@ -85,6 +89,10 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args );
 int StrXPrintf( StrXPrintfFunc func, void *userParm, const char *fmt, ... );
 int vStrXPrintf( StrXPrintfFunc func, void *userParm, const char *fmt, va_list args );
 
+#endif
+
+#if defined( __cplusplus )
+}
 #endif
 
 #endif // STR_H

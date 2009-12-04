@@ -1,0 +1,56 @@
+Commands:
+
+servo id command [params]
+
+Common Commands:
+
+ping
+read-data or rd
+write-data or wd
+reg-write  or rw
+action
+reset
+sync-write
+
+
+get <register>
+set <register> <value>
+
+where common registers are:
+
+model
+version
+id
+baud-rate
+return-delay-time
+status-return-level
+led
+
+Servo specific registers:
+
+cw-angle-limit
+ccw-angle-limit
+highest-limit-temperature
+lowest-limit-voltage
+highest-limit-voltage
+max-torque
+alarm-led
+alarm-shutdown
+down-calibration
+up-calibration
+torque-enable
+cw-compliance-margin
+ccw-compliance-margin
+cw-compliance-slope
+ccw-compliance-slope
+goal-position
+moving-speed
+torque-limit
+present-position
+present-load
+present-voltage
+present-temperature
+registered-instruction
+moving
+lock
+punch

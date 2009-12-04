@@ -188,6 +188,8 @@ void BLD_SendStatus
     uint8_t         paramIdx;
     BLD_SendChar    sendChar = inst->m_sendChar;
 
+    BLD_LogPacket( "Sending STATUS errCode: %d\n", errCode );
+
     // Send out the preamble
 
     sendChar( 0xff );
