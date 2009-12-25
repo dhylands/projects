@@ -51,6 +51,11 @@ public:
     virtual ~SimBus();
 
     //------------------------------------------------------------------------
+    // Reads a byte.
+
+    virtual bool ReadByte( uint8_t *ch );
+
+    //------------------------------------------------------------------------
     // Sends a byte. This will automatically accumulate the byte into 
     // the checksum
 

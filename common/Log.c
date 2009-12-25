@@ -37,7 +37,7 @@
 
 #undef  Log
 #undef  LogError
-#unded  LogAssertFailed
+#undef  LogAssertFailed
 #undef  vLog
 
 #define Log             Log_P
@@ -46,17 +46,18 @@
 #define vLog            vLog_P
 #define LogBuf          LogBuf_P
 
-#define char            prog_char
+//#define char            prog_char
 
 #else
 
 #define PSTR(str)   str
 
-int gVerbose = 0;
-int gDebug = 0;
 int gQuiet = 0;
 
 #endif
+
+int gVerbose = 0;
+int gDebug = 0;
 
 #if CFG_LOG_TO_BUFFER
 
@@ -313,7 +314,7 @@ void LogAssertFailed
     Log_P( function );
     Log_P( PSTR( " Assertion '" ));
     Log_P( expr );
-    Log_P( PStR( "' failed.\n" ));
+    Log_P( PSTR( "' failed.\n" ));
 #else
     LogFunc( LOG_LEVEL_ASSERT, "%s: %d: %s Assertion '%s' failed.\n", 
              fileName, lineNum, function, expr );

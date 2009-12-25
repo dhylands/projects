@@ -54,6 +54,32 @@ public:
     virtual ~BioloidDevice();
 
     //------------------------------------------------------------------------
+    // Returns the ID of this device.
+
+    Bioloid::ID_t ID() const { return m_id; }
+
+    //------------------------------------------------------------------------
+    // Pings the device and waits for a status packet.
+
+    Bioloid::Error Ping();
+
+    //------------------------------------------------------------------------
+    // Reads data from the devices control table.
+
+    Bioloid::Error Read( uint8_t offset, void *data, uint8_t numBytes );
+
+    //------------------------------------------------------------------------
+    // Reads an 8 bit data register
+
+    Bioloid::Error Read( uint8_t offset, uint8_t *val );
+    Bioloid::Error Read( uint8_t offset, uint16_t *val );
+
+    //------------------------------------------------------------------------
+    // Resets the control table to factory defaults.
+
+    Bioloid::Error Reset();
+
+    //------------------------------------------------------------------------
     // Sends a ping packet to this device
 
     void SendPing();
@@ -66,13 +92,13 @@ public:
     //------------------------------------------------------------------------
     // Sends some data to write into the control table.
 
-    void SendWrite( uint8_t offset, uint8_t numBytes, const uint8_t *data );
+    void SendWrite( uint8_t offset, const void *data, uint8_t numBytes );
 
     //------------------------------------------------------------------------
     // Sends some data to write into the control table. The write into the
     // control table will be deferred until the ACTION command is sent.
 
-    void SendDeferredWrite( uint8_t offset, uint8_t numBytes, const uint8_t *data );
+    void SendDeferredWrite( uint8_t offset, const void *data, uint8_t numBytes );
 
     //------------------------------------------------------------------------
     // Sends a commands to reset the control table to factory defaults.
@@ -87,6 +113,11 @@ public:
         m_bus = bus;
         m_id = id;
     }
+
+    //------------------------------------------------------------------------
+    // Writes some data into the control table, and returns the result.
+
+    Bioloid::Error Write( uint8_t offset, const void *data, uint8_t numBytes );
 
 protected:
 

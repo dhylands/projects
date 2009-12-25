@@ -3,31 +3,62 @@
 # This script actss as a frontend for rsnapshot. It checks to see if 
 # my laptop is connected to my network at home, and if it is, then
 # it fires up the backup.
+#
+# Note: 
 
 LOG=/var/log/backup.log
 BACKUP_DIR=/var/cache/rsnapshot
 
-# Check to see if we're on my wireless LAN
-#
-# For reference, the output of iwconfig looks like this when associated:
-#
-# eth1      IEEE 802.11b/g  ESSID:"Seeker-WLAN"  Nickname:"Broadcom 4306"
-#           Mode:Managed  Frequency=2.437 GHz  Access Point: 00:00:00:00:00:00   
-#           Bit Rate=24 Mb/s   Tx-Power=15 dBm   
-#           RTS thr:off   Fragment thr:off
-#           Link Quality=60/100  Signal level=-62 dBm  Noise level=-72 dBm
-#           Rx invalid nwid:0  Rx invalid crypt:30678  Rx invalid frag:0
-#           Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+HOSTNAME=$(hostname)
 
+echo "$(date): HOSTNAME = ${HOSTNAME}" >> ${LOG}
 
-SSID=$(/sbin/iwconfig eth1 | grep ESSID | sed -e 's/^.*ESSID://' -e 's/ .*//' -e 's/"//g')
+CHECK_WIRELESS=0
 
-echo "====================================================" >> ${LOG}
-if [ "${SSID}" != "Blue-Heron" ]
+case ${HOSTNAME} in
+
+    # These machines are always attached to the network, so don't
+    # need the wireless check
+
+    dave-ubuntu)
+        CHECK_WIRELESS=0
+        ;;
+
+    dave-laptop)
+        CHECK_WIRELESS=1
+        ;;
+
+    *)
+        echo "$(date): Unrecognized hostname '${HOSTNAME}'" >> ${LOG}
+        exit 0
+        ;;
+
+asac
+
+if [ ${CHECK_WIRELESS} = 1 ];
 then
-    echo "$(date): Not on home network" >> ${LOG}
-    echo "  SSID = ${SSID}" >> ${LOG}
-    exit 0
+    # Check to see if we're on my wireless LAN
+    #
+    # For reference, the output of iwconfig looks like this when associated:
+    #
+    # eth1      IEEE 802.11b/g  ESSID:"Seeker-WLAN"  Nickname:"Broadcom 4306"
+    #           Mode:Managed  Frequency=2.437 GHz  Access Point: 00:00:00:00:00:00   
+    #           Bit Rate=24 Mb/s   Tx-Power=15 dBm   
+    #           RTS thr:off   Fragment thr:off
+    #           Link Quality=60/100  Signal level=-62 dBm  Noise level=-72 dBm
+    #           Rx invalid nwid:0  Rx invalid crypt:30678  Rx invalid frag:0
+    #           Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+    
+    
+    SSID=$(/sbin/iwconfig eth1 | grep ESSID | sed -e 's/^.*ESSID://' -e 's/ .*//' -e 's/"//g')
+    
+    echo "====================================================" >> ${LOG}
+    if [ "${SSID}" != "Blue-Heron" ]
+    then
+        echo "$(date): Not on home network" >> ${LOG}
+        echo "  SSID = ${SSID}" >> ${LOG}
+        exit 0
+    fi
 fi
 
 #
@@ -75,4 +106,5 @@ then
     nice /usr/bin/rsnapshot -v monthly >> ${LOG} 2>&1
     echo "$(date): Finished monthly rsnapshot" >> ${LOG}
 fi
+
 

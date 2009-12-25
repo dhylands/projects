@@ -71,6 +71,86 @@ BioloidDevice::~BioloidDevice()
 
 //***************************************************************************
 /**
+*   Pings the device and waits for a status packet.
+*/
+
+Bioloid::Error BioloidDevice::Ping()
+{
+    BioloidPacket   pkt;
+
+    SendPing();
+    if ( !m_bus->ReadStatusPacket( &pkt ))
+    {
+        return Bioloid::ERROR_TIMEOUT;
+    }
+
+    return pkt.ErrorCode();
+}
+
+//***************************************************************************
+/**
+*   Reads data from the device's control table
+*/
+
+Bioloid::Error BioloidDevice::Read( uint8_t offset, void *data, uint8_t numBytes )
+{
+    BioloidPacket   pkt( data, numBytes );
+
+    SendRead( offset, numBytes );
+    if ( !m_bus->ReadStatusPacket( &pkt ))
+    {
+        return Bioloid::ERROR_TIMEOUT;
+    }
+
+    return pkt.ErrorCode();
+}
+
+//***************************************************************************
+/**
+*   Reads an 8 bit register.
+*/
+
+Bioloid::Error BioloidDevice::Read( uint8_t offset, uint8_t *val )
+{
+    return Read( offset, val, sizeof( *val ));
+}
+
+//***************************************************************************
+/**
+*   Reads an 16 bit register.
+*/
+
+Bioloid::Error BioloidDevice::Read( uint8_t offset, uint16_t *val )
+{
+    return Read( offset, val, sizeof( *val ));
+}
+
+//***************************************************************************
+/**
+*   Reset the control table to factory defaults.
+*/
+
+Bioloid::Error BioloidDevice::Reset()
+{
+    BioloidPacket   pkt;
+
+    SendReset();
+
+    if ( m_id == Bioloid::BROADCAST_ID )
+    {
+        return Bioloid::ERROR_NONE;
+    }
+
+    if ( !m_bus->ReadStatusPacket( &pkt ))
+    {
+        return Bioloid::ERROR_TIMEOUT;
+    }
+
+    return pkt.ErrorCode();
+}
+
+//***************************************************************************
+/**
 *   Sends a ping packet to this device
 */
 
@@ -102,7 +182,7 @@ void BioloidDevice::SendRead( uint8_t offset, uint8_t numBytes )
 *   Sends some data to write into the control table.
 */
 
-void BioloidDevice::SendWrite( uint8_t offset, uint8_t numBytes, const uint8_t *data )
+void BioloidDevice::SendWrite( uint8_t offset, const void *data, uint8_t numBytes )
 {
     BLD_BUS_LOG( "Sending WRITE to ID %d, offset:%d numBytes:%d\n", m_id, offset, numBytes );
 
@@ -118,7 +198,7 @@ void BioloidDevice::SendWrite( uint8_t offset, uint8_t numBytes, const uint8_t *
 *   control table will be deferred until the ACTION command is sent.    
 */
 
-void BioloidDevice::SendDeferredWrite( uint8_t offset, uint8_t numBytes, const uint8_t *data )
+void BioloidDevice::SendDeferredWrite( uint8_t offset, const void *data, uint8_t numBytes )
 {
     BLD_BUS_LOG( "Sending REG_WRITE to ID %d, offset:%d numBytes:%d\n", m_id, offset, numBytes );
 
@@ -140,6 +220,31 @@ void BioloidDevice::SendReset()
     m_bus->SendCmdHeader( m_id, 0, Bioloid::CMD_RESET );
     m_bus->SendCheckSum();
 }
+
+//***************************************************************************
+/**
+*   Writes some data into the control table, and returns the result.
+*/
+
+Bioloid::Error BioloidDevice::Write( uint8_t offset, const void *data, uint8_t numBytes )
+{
+    BioloidPacket   pkt;
+
+    SendWrite( offset, data, numBytes );
+
+    if ( m_id == Bioloid::BROADCAST_ID )
+    {
+        return Bioloid::ERROR_NONE;
+    }
+
+    if ( !m_bus->ReadStatusPacket( &pkt ))
+    {
+        return Bioloid::ERROR_TIMEOUT;
+    }
+
+    return pkt.ErrorCode();
+}
+
 
 /** @} */
 

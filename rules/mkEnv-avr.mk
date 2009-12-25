@@ -61,7 +61,7 @@ MK_avrdude_RD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PRO
 MK_BootHost 		= boothost
 MK_BootHost_BAUD	?= 38400
 MK_BootHost_PORT	?= ttyS0
-MK_BootHost_OPTS	?= --baud=$(MK_BootHost_BAUD) --port=$(MK_BootHost_PORT)
+MK_BootHost_OPTS	?= --baud=$(MK_BootHost_BAUD) --port=$(MK_BootHost_PORT) -r
 MK_BootHost_CMD		= $(Q)$(MK_BootHost) $(MK_BootHost_OPTS) $<
 
 MK_stk500	 		= "c:/Program Files/Atmel/AVR Tools/stk500/stk500.exe"

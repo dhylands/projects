@@ -22,23 +22,33 @@
 *
 ****************************************************************************/
 
+#if defined( AVR )
+#define USE_COMMAND_LINE    0
+#else
+#define USE_COMMAND_LINE    1
+#endif
+
 // ---- Include Files -------------------------------------------------------
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#if USE_COMMAND_LINE
 #include <getopt.h>
+#endif
 
 #include "Log.h"
 #include "BioloidBus.h"
 #include "BioloidDevice.h"
 #include "BioloidCommandLine.h"
-#include "SimBus.h"
 #include "bioloid-reg-servo.h"
+#include "SerialPort.h"
+#include "SerialBus.h"
 
 // ---- Public Variables ----------------------------------------------------
 // ---- Private Constants and Types -----------------------------------------
 
-#define DEFAULT_BAUD    1000000
+#define DEFAULT_BAUD    "1000000"
 
 #if defined( linux )
 #   define  DEFAULT_PORT    "ttyUSB0"
@@ -65,6 +75,7 @@ enum
     OPT_HELP,
 };
 
+#if USE_COMMAND_LINE
 static struct option gOption[] =
 {
     { "baud",       required_argument,  NULL,       OPT_BAUD },
@@ -74,9 +85,11 @@ static struct option gOption[] =
     { "verbose",    no_argument,        NULL,       OPT_VERBOSE },
     { NULL }
 };
+#endif
 
-SimBus          gSimBus;
-BioloidDevice   gDev( &gSimBus, 1 );
+SerialPort      gSerialPort;
+SerialBus       gSerialBus;
+BioloidDevice   gDev( &gSerialBus, 1 );
 
 static BLD_DevType_t    gDevType[] =
 {
@@ -93,6 +106,7 @@ static BLD_DevType_t    gDevType[] =
 *   Print out the program usage.
 */
 
+#if USE_COMMAND_LINE
 void Usage()
 {
     fprintf( stderr, "Usage: bioloid <option(s)> <file>\n" );
@@ -105,6 +119,7 @@ void Usage()
     fprintf( stderr, "  -v, --verbose     Turn on verbose messages\n" );
 
 } // Usage
+#endif
 
 //***************************************************************************
 /**
@@ -113,16 +128,19 @@ void Usage()
 
 int main( int argc, char **argv )
 {
+#if USE_COMMAND_LINE
     char                shortOptsStr[ sizeof( gOption ) / sizeof( gOption[ 0 ] ) + 1 ];
     char               *shortOpts = shortOptsStr;
     struct option      *scanOpt;
     int                 opt;
     int                 arg;
-    const char         *baudStr = NULL;
+    const char         *baudStr = DEFAULT_BAUD;
     const char         *portStr = DEFAULT_PORT;
+#endif
     char                line[ 80 ];
     BioloidCommandLine  cmdLine;
 
+#if USE_COMMAND_LINE
     // Figure out the short options from our options structure
 
     for ( scanOpt = gOption; scanOpt->name != NULL; scanOpt++ ) 
@@ -194,9 +212,19 @@ int main( int argc, char **argv )
     LogDebug( "Debug enabled\n" );
     LogVerbose( "Verbose enabled\n" );
     LogVerbose( "Port: %s Baud: %s\n", portStr, baudStr );
+#endif
+
+    if ( !gSerialPort.Open( portStr, baudStr ))
+    {
+        LogError( "Unable to open serial port '%s'", portStr );
+        exit( 1 );
+    }
+    gSerialBus.SetSerialPort( &gSerialPort );
+    gSerialBus.SetDebug( gDebug != 0 );
 
     cmdLine.RegisterDevices( gDevType );
-    cmdLine.SetBus( &gSimBus );
+
+    cmdLine.SetBus( &gSerialBus );
 
     printf( "> " );
     while ( fgets( line, sizeof( line ), stdin ) != NULL )

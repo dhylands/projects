@@ -60,6 +60,10 @@ namespace Bioloid
         ERROR_ANGLE_LIMIT   = 0x02, ///< Goal position is outside of limit range
         ERROR_INPUT_VOLTAGE = 0x01, ///< Input voltage out of range
         ERROR_NONE          = 0x00, ///< No Error
+
+        ERROR_NOT_DONE      = 0x100,///< Special error code used by BioloidPacket::ProcessChar
+        ERROR_TIMEOUT       = 0x101,///< Indicates that a timeout occurred whilw waiting for a reply
+        ERROR_TOO_MUCH_DATA = 0x102,///< Packet storage isn't big enough
     };
 };
 

@@ -41,8 +41,21 @@
 #endif
 
 #if defined( AVR )
-#   include <avr/pgmspace.h>
+#   include <avr/pgmspace-fix.h>
 #   include <avr/interrupt.h>
+
+/* It turns out that newer versions of gcc have troubles with the
+ * default PSTR macro when compiled using C++. This change
+ * provides the equivalent behaviour, but gets rid of the 
+ * warning: only initialized variables can be placed into program memory area
+ */
+
+#define LOG_PROGMEM     PROGMEM
+#define LOG_PSTR(s)      PSTR(s)
+
+//#define LOG_PROGMEM __attribute__(( section(".progmem.data") ))
+//#define LOG_PSTR(s) (__extension__({static char __c[] LOG_PROGMEM = (s); &__c[0];}))    
+
 #endif
 
 #if CFG_LOG_TO_BUFFER
@@ -123,13 +136,13 @@ typedef struct
 
 void LogBuf_P( const prog_char *fmt, uint8_t arg1, uint8_t arg2 LOG_EXTRA_PARAMS_DECL );
 
-#define LogBuf0( fmt )              LogBuf_P( PSTR( fmt ), 0, 0       LOG_EXTRA_PARAMS )
-#define LogBuf1( fmt, arg1 )        LogBuf_P( PSTR( fmt ), arg1, 0    LOG_EXTRA_PARAMS )
-#define LogBuf2( fmt, arg1, arg2 )  LogBuf_P( PSTR( fmt ), arg1, arg2 LOG_EXTRA_PARAMS )
+#define LogBuf0( fmt )              LogBuf_P( LOG_PSTR( fmt ), 0, 0       LOG_EXTRA_PARAMS )
+#define LogBuf1( fmt, arg1 )        LogBuf_P( LOG_PSTR( fmt ), arg1, 0    LOG_EXTRA_PARAMS )
+#define LogBuf2( fmt, arg1, arg2 )  LogBuf_P( LOG_PSTR( fmt ), arg1, arg2 LOG_EXTRA_PARAMS )
 
 #if CFG_LOG_EXTRA_PARAMS
-#define LogBuf3( fmt, arg1, arg2, arg3 )        LogBuf_P( PSTR( fmt ), arg1, arg2, arg3, 0 )
-#define LogBuf4( fmt, arg1, arg2, arg3, arg4 )  LogBuf_P( PSTR( fmt ), arg1, arg2, arg3, arg4 )
+#define LogBuf3( fmt, arg1, arg2, arg3 )        LogBuf_P( LOG_PSTR( fmt ), arg1, arg2, arg3, 0 )
+#define LogBuf4( fmt, arg1, arg2, arg3, arg4 )  LogBuf_P( LOG_PSTR( fmt ), arg1, arg2, arg3, arg4 )
 #endif
 
 #else
@@ -187,15 +200,15 @@ void LogInit( FILE *logFs );
 
 #if defined( AVR )
 
-void Log_P( const prog_char *fmt, ... );
-void LogError_P( const prog_char *fmt, ... );
+void Log_P( const char *fmt, ... );
+void LogError_P( const char *fmt, ... );
 void LogAssertFailed_P( const char *exprStr, const char *file, unsigned lineNum, const char *function );
-void vLog_P( const prog_char *fmt, va_list args );
+void vLog_P( const char *fmt, va_list args );
 
-#define Log( fmt, args... )         Log_P( PSTR( fmt ), ## args )
-#define LogError( fmt, args... )    LogError_P( PSTR( fmt ), ## args )
-#define LogAssertFailed( exprStr, file, lineNum, function )    LogAssertFailed_P( PSTR( expr ), PSTR( file ), lineNum, PSTR( function ))
-#define vLog( fmt, va_list, args )  vLog_P( PSTR( fmt ), args )
+#define Log( fmt, args... )         Log_P( LOG_PSTR( fmt ), ## args )
+#define LogError( fmt, args... )    LogError_P( LOG_PSTR( fmt ), ## args )
+#define LogAssertFailed( exprStr, file, lineNum, function )    LogAssertFailed_P( LOG_PSTR( expr ), LOG_PSTR( file ), lineNum, LOG_PSTR( function ))
+#define vLog( fmt, va_list, args )  vLog_P( LOG_PSTR( fmt ), args )
 
 #else   // AVR
 
@@ -205,8 +218,6 @@ void vLog_P( const prog_char *fmt, va_list args );
 
 typedef void (*LogFunc_t)( int logLevel, const char *fmt, va_list args );
 
-extern  int     gVerbose;
-extern  int     gDebug;
 extern  int     gQuiet;
 
 void Log( const char *fmt, ... );
@@ -223,13 +234,16 @@ void vLogFunc( int logLevel, const char *fmt, va_list args );
 #define LogAssertFailed_P( expr, file, lineNum, function )  LogAssertFailed( expr, file, line, function )
 #define vLog_P( fmt, args )         vLog( fmt, args )
 
-#define LogDebug( fmt, args... )    do { if ( gDebug )   { Log( fmt, ## args ); }} while (0)
-#define LogVerbose( fmt, args... )  do { if ( gVerbose ) { Log( fmt, ## args ); }} while (0)
-
 void SetLogFunc( LogFunc_t logFunc );
 void DefaultLogFunc( int logLevel, const char *fmt, va_list args );
 
 #endif  // AVR
+
+extern  int     gVerbose;
+extern  int     gDebug;
+
+#define LogDebug( fmt, args... )    do { if ( gDebug )   { Log( fmt, ## args ); }} while (0)
+#define LogVerbose( fmt, args... )  do { if ( gVerbose ) { Log( fmt, ## args ); }} while (0)
 
 #if defined( __cplusplus )
 }

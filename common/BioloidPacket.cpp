@@ -43,7 +43,21 @@
 */
 
 BioloidPacket::BioloidPacket()
-    : m_state( BioloidPacket::STATE_IDLE )
+    : m_state( BioloidPacket::STATE_IDLE ),
+      m_param( NULL ),
+      m_maxParam( 0 )
+{
+}
+
+//***************************************************************************
+/**
+*   Constructor where storage for parameter data is specified.
+*/
+
+BioloidPacket::BioloidPacket( void *data, uint8_t maxData )
+    : m_state( BioloidPacket::STATE_IDLE ),
+      m_param( static_cast< uint8_t * >( data )),
+      m_maxParam( maxData )
 {
 }
 
@@ -67,9 +81,10 @@ BioloidPacket::~BioloidPacket()
 *   virtual
 */
 
-void BioloidPacket::ProcessChar( uint8_t ch )
+Bioloid::Error BioloidPacket::ProcessChar( uint8_t ch )
 {
-    State   nextState = m_state;
+    State           nextState = m_state;
+    Bioloid::Error  err = Bioloid::ERROR_NOT_DONE;
 
     switch ( nextState )
     {
@@ -136,13 +151,22 @@ void BioloidPacket::ProcessChar( uint8_t ch )
         {
             if (( m_paramIdx + 2 ) >= m_length )
             {
-                Bioloid::Error err = Bioloid::ERROR_NONE;
-
                 // ch is the Checksum
 
                 m_checksum = ~m_checksum;
 
-                if ( m_checksum != ch )
+                if ( m_checksum == ch )
+                {
+                    if ( m_paramIdx <= m_maxParam )
+                    {
+                        err = Bioloid::ERROR_NONE;
+                    }
+                    else
+                    {
+                        err = Bioloid::ERROR_TOO_MUCH_DATA;
+                    }
+                }
+                else
                 {
                     // CRC failed
 
@@ -150,15 +174,13 @@ void BioloidPacket::ProcessChar( uint8_t ch )
                     LogError( "Rcvd Checksum: 0x%02x Expecting: 0x%02x\n",
                               ch, m_checksum );
                 }
-
-                PacketReceived( err );
                 nextState = STATE_IDLE;
                 break;
             }
 
-            if ( m_paramIdx < sizeof( m_param ))
+            m_checksum += ch;
+            if ( m_paramIdx < m_maxParam )
             {
-                m_checksum += ch;
                 m_param[ m_paramIdx ] = ch;
             }
             m_paramIdx++;
@@ -167,5 +189,7 @@ void BioloidPacket::ProcessChar( uint8_t ch )
     }
 
     m_state = nextState;
+
+    return err;
 }
 

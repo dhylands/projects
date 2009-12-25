@@ -67,7 +67,7 @@ char *StrMaxCat( char *dst, const char *src, size_t maxLen );
 
 #if defined( AVR )
 
-#include <avr/pgmspace.h>
+#include <avr/pgmspace-fix.h>
 
 int StrPrintf_P( char *outStr, int maxLen, const prog_char *fmt, ... );
 int vStrPrintf_P( char *outStr, int maxLen, const prog_char *fmt, va_list args );

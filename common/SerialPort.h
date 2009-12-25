@@ -71,7 +71,13 @@ public:
     //------------------------------------------------------------------------
     //  Reads data from the serial port.
 
-    size_t Read( void *buf, size_t bytesToWrite );
+    size_t Read( void *buf, size_t bytesToRead );
+
+    //------------------------------------------------------------------------
+    //  Sets the timeout to use when waiting for data. 0 = infinite
+    //  The timeout is specified in 1/10ths of a second.
+
+    bool SetTimeout( uint8_t timeout );
 
     //------------------------------------------------------------------------
     //  Writes data to the serial port.
@@ -79,14 +85,9 @@ public:
     size_t Write( const void *buf, size_t bytesToWrite );
 
     //------------------------------------------------------------------------
-    //  Sets up the RTS line to be used to reset the target
+    //  Strobes the RTS line.
 
-    void UseRTStoReset( bool useRTStoReset );
-
-    //------------------------------------------------------------------------
-    //  Resets the target.
-
-    void ResetTarget();
+    void StrobeRTS( int strobeWidthInMsec );
 
 private:
 
@@ -100,21 +101,9 @@ private:
     //------------------------------------------------------------------------
 
     int     m_fd;
-    bool    m_useRTStoReset;
-
 };
 
 // ---- Inline Functions ----------------------------------------------------
-
-//***************************************************************************
-/**
-*   Sets up the RTS line to be used to reset the target
-*/
-
-inline void SerialPort::UseRTStoReset( bool useRTStoReset )
-{
-    m_useRTStoReset = useRTStoReset;
-}
 
 /** @} */
 

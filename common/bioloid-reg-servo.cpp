@@ -31,7 +31,7 @@ BLD_Reg_t   BLD_gServoReg[] =
 {
     { 0x00, "model",                BLD_REG_FLAG_16_RD,      0,    0, NULL },
     { 0x02, "version",              BLD_REG_FLAG_8_RD,       0,    0, NULL },
-    { 0x03, "id",                   BLD_REG_FLAG_8_RW,       0,   23, NULL },
+    { 0x03, "id",                   BLD_REG_FLAG_8_RW,       0,  253, NULL },
     { 0x04, "baud-rate",            BLD_REG_FLAG_8_RW,       0,  254, BLD_RegFmtBaud },
     { 0x05, "return-delay-time",    BLD_REG_FLAG_8_RW,       0,  254, BLD_RegFmtRDT },
     { 0x06, "cw-angle-limit",       BLD_REG_FLAG_16_RW,      0, 1023, BLD_RegFmtAngle },

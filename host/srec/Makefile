@@ -1,16 +1,13 @@
 ###########################################################################
 #
-# tiny45-flasher Makefile
+#	Makefile to build sertest
 #
 ###########################################################################
 
-MK_OS				= avr
-MK_AVR_MCU			= m328p
-MK_AVR_FREQ			= 8MHz
-MK_AVR_PROGRAMMER  ?= BootHost
-					  
-MK_HEX_TARGET	= uart-test
-MK_SRC_FILES	= uart-test.c UART.c Timer.c
+MK_OS			= host
+MK_ELF_TARGET 	= srec2bin
+
+MK_SRC_FILES = srec2bin.cpp srec.cpp
 
 include ../../rules/mkRules.mk
 

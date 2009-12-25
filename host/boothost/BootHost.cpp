@@ -324,8 +324,10 @@ int main( int argc, char **argv )
     {
         return 1;
     }
-    gSerialPort.UseRTStoReset( gUseRtsToReset );
-    gSerialPort.ResetTarget();
+    if ( gUseRtsToReset )
+    {
+        gSerialPort.StrobeRTS( 10 );
+    }
 
     // Put stdin in raw mode
 

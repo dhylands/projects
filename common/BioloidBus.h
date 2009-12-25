@@ -28,6 +28,9 @@
 
 #include <stdint.h>
 #include "Bioloid.h"
+#include "BioloidPacket.h"
+
+class BioloidDevice;
 
 /**
  * @addtogroup bioloid
@@ -51,6 +54,12 @@ public:
     virtual ~BioloidBus();
 
     //------------------------------------------------------------------------
+    // Scans the bus, calling the passed callback for each device
+    // ID which responds.
+
+    bool Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ));
+
+    //------------------------------------------------------------------------
     // Broadcasts an action packet to all of the devices on the bus.
     // This causes all of the devices to perform their deferred writes
     // at the same time.
@@ -64,14 +73,27 @@ public:
     virtual void SendByte( uint8_t data ) = 0;
 
     //------------------------------------------------------------------------
-    // Sends Sends the accumulated checksum.
+    // Reads a byte. This function returns true if a character was read, and
+    // returns false if no character is received within the designated
+    // timeout.
+    // 
+    // The max Return Delay time is 254 x 2 usec = 508 usec (the default
+    // is 500 usec). This represents the minimum time between receiving a
+    // packet and sending the response.
 
-    void SendCheckSum() { SendByte( ~m_checksum ); }
+    virtual bool ReadByte( uint8_t *ch ) = 0;
+
+    //------------------------------------------------------------------------
+    // Send the checksum. Since the checksum byte is the last byte of the
+    // packet, this function is made virtual to allow bus drivers to
+    // buffer the packet bytes until the entire packet is ready to send.
+
+    virtual void SendCheckSum();
 
     //------------------------------------------------------------------------
     // Sends 'len' bytes
 
-    void SendData( uint8_t len, const uint8_t *data );
+    void SendData( uint8_t len, const void *data );
 
     //------------------------------------------------------------------------
     // Sends the command header, which is common to all of the commands.
@@ -79,7 +101,13 @@ public:
     // way the caller is only responsible for figuring out how many extra
     // parameter bytes are being sent.
 
-    void SendCmdHeader( Bioloid::ID_t id, uint8_t paramLen, Bioloid::Command cmd );
+    virtual void SendCmdHeader( Bioloid::ID_t id, uint8_t paramLen, Bioloid::Command cmd );
+
+    //------------------------------------------------------------------------
+    // Reads a packet. Returns true if a packet was read successfully,
+    // false if a timeout or error occurred.
+
+    virtual bool ReadStatusPacket( BioloidPacket *pkt );
 
     static  bool    m_log;
 

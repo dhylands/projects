@@ -69,6 +69,11 @@ public:
 private:
 
     //------------------------------------------------------------------------
+    // Adds an error string to the output string, if err contains the mask.
+
+    void AddErrorStr( Bioloid::Error err, Bioloid::Error mask, char *str, size_t maxLen, const char *errStr );
+
+    //------------------------------------------------------------------------
     // Prints out register information
 
     void DumpRegInfo( BLD_DevType_t *devType );
@@ -82,6 +87,12 @@ private:
     // Parses a register name
 
     bool ParseRegisterName( StrTokenizer &line, BLD_DevType_t *devType, BLD_Reg_t **outReg );
+
+    //------------------------------------------------------------------------
+    // Prints the error code and prints the results.
+
+    void PrintError( Bioloid::Error err );
+
 
     BioloidBus     *m_bus;
     BioloidDevice   m_device;

@@ -25,6 +25,8 @@
 // ---- Include Files -------------------------------------------------------
 
 #include <string.h>
+#include "Str.h"
+#include "DumpMem.h"
 #include "Log.h"
 #include "Bioloid.h"
 #include "BioloidCommandLine.h"
@@ -33,10 +35,11 @@
 // ---- Private Constants and Types -----------------------------------------
 // ---- Private Variables ---------------------------------------------------
 
-static BLD_DevType_t  *gDevType;
+static BLD_DevType_t   *gDevType;
 
-static char           *gDelim = " \r\n\t";
+static char             gDelim[] = " \r\n\t";
 
+static uint8_t          gBuf[ 80 ];
 
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
@@ -151,6 +154,82 @@ bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *d
 
 //***************************************************************************
 /**
+*   Parses the error code and prints the results.
+*/
+void BioloidCommandLine::AddErrorStr( Bioloid::Error err, Bioloid::Error mask, char *str, size_t maxLen, const char *errStr )
+{
+    if (( err & mask ) != 0 )
+    {
+        if ( str[0] != '\0' )
+        {
+            StrMaxCat( str, ",", maxLen );
+        }
+        StrMaxCat( str, errStr, maxLen );
+    }
+}
+
+//***************************************************************************
+/**
+*   Prints the error code and prints the results.
+*/
+void BioloidCommandLine::PrintError( Bioloid::Error err )
+{
+    char   *str = (char *)&gBuf[0];
+
+    str[0] = '\0';
+
+    if ( err == Bioloid::ERROR_NONE )
+    {
+        return;
+    }
+
+    if ( err > 0xff )
+    {
+        char    *errStr;
+
+        switch ( err )
+        {
+            case Bioloid::ERROR_NOT_DONE:       errStr = "Not Done";        break;
+            case Bioloid::ERROR_TIMEOUT:        errStr = "Timeout";         break;
+            case Bioloid::ERROR_TOO_MUCH_DATA:  errStr = "Too Much Data";   break;
+            default:                            errStr = "***Unknown***";   break;
+        }
+
+        StrMaxCpy( str, errStr, sizeof( gBuf ));
+    }
+    else
+    {
+        AddErrorStr( err, Bioloid::ERROR_RESERVED,       str, sizeof( gBuf ), "Reserved" );
+        AddErrorStr( err, Bioloid::ERROR_INSTRUCTION,    str, sizeof( gBuf ), "Instruction" );
+        AddErrorStr( err, Bioloid::ERROR_OVERLOAD,       str, sizeof( gBuf ), "Overload" );
+        AddErrorStr( err, Bioloid::ERROR_CHECKSUM,       str, sizeof( gBuf ), "Checksum" );
+        AddErrorStr( err, Bioloid::ERROR_RANGE,          str, sizeof( gBuf ), "Range" );
+        AddErrorStr( err, Bioloid::ERROR_OVERHEATING,    str, sizeof( gBuf ), "Over Heating" );
+        AddErrorStr( err, Bioloid::ERROR_ANGLE_LIMIT,    str, sizeof( gBuf ), "Angle Limit" );
+        AddErrorStr( err, Bioloid::ERROR_INPUT_VOLTAGE,  str, sizeof( gBuf ), "Input Voltage" );
+    }
+    Log( "%s\n", str );
+}
+
+//***************************************************************************
+/**
+*   Called from the Scan command when a device is found.
+*/
+static bool DevFound( BioloidBus *bus, BioloidDevice *dev )
+{
+    uint16_t    model;
+    uint8_t     version;
+
+    dev->Read( 0, &model );
+    dev->Read( 2, &version );
+
+    Log( "ID: %3d Model: 0x%04x Version: 0x%02x\n", dev->ID(), model, version );
+
+    return true;
+}
+
+//***************************************************************************
+/**
 *   Processes one line of data
 */
 
@@ -188,6 +267,16 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 
         return true;
     }
+    if ( strcmp( devTypeStr, "scan" ) == 0 )
+    {
+        if ( !m_bus->Scan( DevFound ))
+        {
+            Log( "No devices found\n" );
+        }
+
+        return true;
+    }
+
     if ( strcmp( devTypeStr, "quit" ) == 0 )
     {
         return false;
@@ -239,15 +328,23 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 
     if ( strcmp( cmdStr, "ping" ) == 0 )
     {
+        Bioloid::Error err;
+
         if ( id == Bioloid::BROADCAST_ID )
         {
             LogError( "Broadcast ID not valid with ping command\n" );
             return true;
         }
 
-        m_device.SendPing();
-
-        //??? Need to read response
+        Log( "%s %d ", devType->devTypeStr, id );
+        if (( err = m_device.Ping()) == Bioloid::ERROR_NONE )
+        {
+            Log( "Response Received\n" );
+        }
+        else
+        {
+            PrintError( err );
+        }
     }
     else
     if (( strcmp( cmdStr, "read-data" ) == 0 )
@@ -272,9 +369,10 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             LogError( "Invalid numBytes specified: '%s'\n", line.PrevToken() );
             return true;
         }
-        m_device.SendRead( offset, numBytes );
 
-        //??? Need to read response
+        PrintError( m_device.Read( offset, gBuf, numBytes ));
+
+        DumpMem( "Read", offset, gBuf, numBytes );
     }
     else
     if (( strcmp( cmdStr, "write-data" ) == 0 )
@@ -288,12 +386,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
         {
             return true;
         }
-        m_device.SendWrite( offset, numBytes, data );
-
-        if ( id != Bioloid::BROADCAST_ID )
-        {
-            //??? Need to read status
-        }
+        PrintError( m_device.Write( offset, data, numBytes ));
     }
     else
     if (( strcmp( cmdStr, "reg-write" ) == 0 )
@@ -307,12 +400,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
         {
             return true;
         }
-        m_device.SendDeferredWrite( offset, numBytes, data );
-
-        if ( id != Bioloid::BROADCAST_ID )
-        {
-            //??? Need to read status
-        }
+        m_device.SendDeferredWrite( offset, data, numBytes );
     }
     else
     if ( strcmp( cmdStr, "get" ) == 0 )
@@ -325,14 +413,67 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             return true;
         }
 
-        if ( !ParseRegisterName( line, devType, &reg ))
+        if ( strncmp( line.Remainder(), "all", 3 ) == 0 )
         {
-            return true;
+            reg = devType->reg;
+
+            Log( "Addr Size Value Name\n" );
+            Log( "---- ---- ----- --------------------\n" );
+
+            while ( reg->name != NULL )
+            {
+                unsigned    val;
+
+                if ( reg->flags & BLD_REG_FLAG_16BIT )
+                {
+                    uint16_t    val16;
+
+                    m_device.Read( reg->address, &val16 );
+
+
+                    val = val16;
+                }
+                else
+                {
+                    uint8_t    val8;
+
+                    m_device.Read( reg->address, &val8 );
+
+                    val = val8;
+                }
+
+                Log( "0x%02x %s %d %5u %s\n", 
+                    reg->address, 
+                    reg->flags & BLD_REG_FLAG_WR ? "rw" : "ro",
+                    reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, 
+                    val, 
+                    reg->name );
+
+                reg++;
+            }
         }
-
-        m_device.SendRead( reg->address, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1 );
-
-        //??? Need to reads response
+        else
+        {
+            if ( !ParseRegisterName( line, devType, &reg ))
+            {
+                return true;
+            }
+    
+            if (( reg->flags & BLD_REG_FLAG_16BIT ) != 0 )
+            {
+                uint16_t    val16;
+    
+                PrintError( m_device.Read( reg->address, &val16, sizeof( val16 )));
+                Log( "Read: %u\n", val16 );
+            }
+            else
+            {
+                uint16_t    val8;
+    
+                PrintError( m_device.Read( reg->address, &val8, sizeof( val8 )));
+                Log( "Read: %u\n", val8 );
+            }
+        }
     }
     else
     if ( strcmp( cmdStr, "set" ) == 0 )
@@ -362,22 +503,12 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             return true;
         }
 
-        m_device.SendWrite( reg->address, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, (uint8_t *)&val16 );
-
-        if ( id != Bioloid::BROADCAST_ID )
-        {
-            //??? Need to read status
-        }
+        PrintError( m_device.Write( reg->address, &val16, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1 ));
     }
     else
     if ( strcmp( cmdStr, "reset" ) == 0 )
     {
-        m_device.SendReset();
-
-        if ( id != Bioloid::BROADCAST_ID )
-        {
-            //??? Need to read status
-        }
+        m_device.Reset();
     }
     else
     {

@@ -59,6 +59,18 @@ SimBus::~SimBus()
 
 //***************************************************************************
 /**
+*   Reads a byte.
+*
+*   virtual
+*/
+
+bool SimBus::ReadByte( uint8_t *ch )
+{
+    return false;
+}
+
+//***************************************************************************
+/**
 *   Sends a byte. This will automatically accumulate the byte into 
 *   the checksum)
 *

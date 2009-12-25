@@ -36,12 +36,6 @@
  * @{
  */
 
-#if defined( CFG_BIOLOID_MAX_PARAM )
-#   define BLD_MAX_PARAM    CFG_BIOLOID_MAX_PARAM
-#else
-#   define BLD_MAX_PARAM    8
-#endif
-
 class BioloidPacket
 {
 public:
@@ -52,32 +46,35 @@ public:
     BioloidPacket();
 
     //------------------------------------------------------------------------
+    // Constructor where the storage for parameter data is specified.
+
+    BioloidPacket( void *data, uint8_t maxData );
+
+    //------------------------------------------------------------------------
     // Destructor
 
-    virtual ~BioloidPacket();
+    ~BioloidPacket();
 
     //------------------------------------------------------------------------
     // Accessor functions which allow portions of the packet to be retrieved.
 
-    Bioloid::ID_t ID()      { return m_id; }
-    uint8_t       Length()  { return m_length; }
-    uint8_t       Command() { return m_cmd; }
-    uint8_t       Param( uint8_t idx ) { return idx < BLD_MAX_PARAM ? m_param[ idx ] : 0; }
-    uint8_t       CheckSum(){ return m_checksum; }
+    Bioloid::ID_t   ID()          { return m_id; }
+    uint8_t         Length()      { return m_length; }
+    uint8_t         Command()     { return m_cmd; }
+    Bioloid::Error  ErrorCode()   { return (Bioloid::Error)m_cmd; }
+    uint8_t         CheckSum(){ return m_checksum; }
 
     //------------------------------------------------------------------------
     // Runs a single character through the state machine. Once a packet
     // has been parsed successfully, the PacketReceived virtual method
     // is called.
+    // 
+    // ProcessChar returns Bioloid::ERROR_NOT_DONE if the packet is incomplete.
+    // If the packet was parsed successfully, then Bioloid::ERROR_NONE is
+    // returned. If an error is detected that Bioloid::ERROR_CHECKSUM is
+    // returned.
 
-    virtual void ProcessChar( uint8_t ch );
-
-    //------------------------------------------------------------------------
-    // Called when a packet has been parsed. If the packet was well formed
-    // then err will be equal to Bioloid::ERROR_NONE, otherwise err will 
-    // be Bioloid::ERROR_CHECKSUM.
-
-    virtual void PacketReceived( Bioloid::Error err ) = 0;
+    Bioloid::Error ProcessChar( uint8_t ch );
 
 private:
 
@@ -96,8 +93,11 @@ private:
 
     Bioloid::ID_t   m_id;
     uint8_t         m_length;
-    uint8_t         m_cmd;
-    uint8_t         m_param[ BLD_MAX_PARAM ];
+    uint8_t         m_cmd;  // Error code for a status packet
+
+    uint8_t        *m_param;
+    uint8_t         m_maxParam;
+
     uint8_t         m_checksum;
 };
 

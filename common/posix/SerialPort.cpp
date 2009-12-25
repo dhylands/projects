@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*   Copyright (c) 2005 - 2008 Dave Hylands     <dhylands@gmail.com>
+*   Copyright (c) 2009 Dave Hylands     <dhylands@gmail.com>
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,8 @@
 *
 *   @file   SerialPort.cpp
 *
-*   @brief  This file implements the SerialPort class.
+*   @brief  This file implements the SerialPort class using the posix
+*           API, which is supported by cygwin and linux.
 *
 ****************************************************************************/
 
@@ -63,7 +64,8 @@ static struct
     { B38400,    38400 },
     { B57600,    57600 },
     { B115200,  115200 },
-    { B230400,  230400 }
+    { B230400,  230400 },
+    { B1000000,1000000 }
 };
 
 #define ARRAY_LEN(x)    ( sizeof( x ) / sizeof( x[ 0 ]))
@@ -155,7 +157,7 @@ bool SerialPort::Open( const char *inDevName, const char *param )
 
         if ( speed == B0 )
         {
-            fprintf( stderr, "Unrecognized baud rate: '%s'\n", param );
+            LogError( "Unrecognized baud rate: '%s'\n", param );
             return false;
         }
     }
@@ -164,7 +166,7 @@ bool SerialPort::Open( const char *inDevName, const char *param )
 
     if (( m_fd = open( devName, O_RDWR | O_EXCL )) < 0 )
     {
-        fprintf( stderr, "Unable to open serial port '%s': %s\n", devName, strerror( errno ));
+        LogError( "Unable to open serial port '%s': %s\n", devName, strerror( errno ));
         return false;
     }
 
@@ -174,7 +176,7 @@ bool SerialPort::Open( const char *inDevName, const char *param )
 
     if ( tcgetattr( m_fd, &attr ) < 0 )
     {
-        fprintf( stderr, "Call to tcgetattr failed: %s\n", strerror( errno ));
+        LogError( "A: Call to tcgetattr failed: %s\n", strerror( errno ));
         return false;
     }
 
@@ -190,7 +192,7 @@ bool SerialPort::Open( const char *inDevName, const char *param )
 
     if ( tcsetattr( m_fd, TCSAFLUSH, &attr ) < 0 )
     {
-        fprintf( stderr, "Call to tcsetattr failed: %s\n", strerror( errno ));
+        LogError( "Call to tcsetattr failed: %s\n", strerror( errno ));
         return false;
     }
 
@@ -220,7 +222,7 @@ size_t SerialPort::Read( void *buf, size_t bufSize )
             // We get EBADF returned if the serial port is closed on
             // us.
 
-            fprintf( stderr, "read failed: %d\n", errno );
+            LogError( "read failed: %d\n", errno );
         }
         return 0;
     }
@@ -228,6 +230,42 @@ size_t SerialPort::Read( void *buf, size_t bufSize )
     return bytesRead;
 
 } // Read
+
+//***************************************************************************
+/**
+*   Sets the timeout to use when waiting for data. 0 = infinite
+*   The timeout is specified in 1/10ths of a second.
+*/
+bool SerialPort::SetTimeout( uint8_t timeout )
+{
+    struct termios  attr;
+
+    if ( tcgetattr( m_fd, &attr ) < 0 )
+    {
+        LogError( "B: Call to tcgetattr failed: %s\n", strerror( errno ));
+        return false;
+    }
+
+    if ( timeout == 0 )
+    {
+        attr.c_cc[ VTIME ] = 0;
+        attr.c_cc[ VMIN ]  = 1;
+    }
+    else
+    {
+        attr.c_cc[ VTIME ] = timeout;   // timeout in tenths of a second
+        attr.c_cc[ VMIN ]  = 0;
+    }
+
+    if ( tcsetattr( m_fd, TCSAFLUSH, &attr ) < 0 )
+    {
+        LogError( "Call to tcsetattr failed: %s\n", strerror( errno ));
+        return false;
+    }
+
+    return true;
+
+} // SetTimeout
 
 //***************************************************************************
 /**
@@ -241,7 +279,7 @@ size_t SerialPort::Write( const void *buf, size_t bytesToWrite )
     bytesWritten = write( m_fd, buf, bytesToWrite );
     if ( bytesWritten < 0 )
     {
-        fprintf( stderr, "write failed: %d\n", errno );
+        LogError( "write failed: %d\n", errno );
         bytesWritten = 0;
     }
 
@@ -254,26 +292,23 @@ size_t SerialPort::Write( const void *buf, size_t bytesToWrite )
 *   Resets the target
 */
 
-void SerialPort::ResetTarget()
+void SerialPort::StrobeRTS( int strobeWidthInMsec )
 {
     int bits = TIOCM_RTS;
 
-    if ( m_useRTStoReset )
-    {
-        // On my computer downstairs, settinging the RTS line makes it low.
+    // On my computer downstairs, settinging the RTS line makes it low.
 
-        ioctl( m_fd, TIOCMBIS, &bits );
+    ioctl( m_fd, TIOCMBIS, &bits );
 
-        // Sleep for 10 msec to allow the reset to take effect.
+    // Sleep for 10 msec to allow the reset to take effect.
 
-        usleep( 10000 );
-        
-        // On my computer downstairs, clearing the RTS line makes it high.
+    usleep( strobeWidthInMsec * 1000 );
+    
+    // On my computer downstairs, clearing the RTS line makes it high.
 
-        ioctl( m_fd, TIOCMBIC, &bits );
-    }
+    ioctl( m_fd, TIOCMBIC, &bits );
 
-} // ResetTarget
+} // StrobeRTS
 
 /** @} */
 
