@@ -107,13 +107,13 @@ bool BioloidCommandLine::ParseOffsetAndData( StrTokenizer &line, uint8_t *offset
 {
     *numBytes = 0;
 
-    if ( !line.NextNum( gDelim, offset ))
+    if ( !line.NextNum( offset ))
     {
         LogError( "Invalid offset specified: '%s'\n", line.PrevToken() );
         return false;
     }
 
-    while (( *numBytes < maxLen ) && line.NextNum( gDelim, &data[ *numBytes ] ))
+    while (( *numBytes < maxLen ) && line.NextNum( &data[ *numBytes ] ))
     {
         (*numBytes)++;
     }
@@ -131,7 +131,7 @@ bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *d
     BLD_Reg_t   *reg;
     char        *regStr;
 
-    if (( regStr = line.NextToken( gDelim )) == NULL )
+    if (( regStr = line.NextToken()) == NULL )
     {
         LogError( "No register specified\n" );
         return false;
@@ -230,6 +230,173 @@ static bool DevFound( BioloidBus *bus, BioloidDevice *dev )
 
 //***************************************************************************
 /**
+*   Called to process the get and get-raw commands
+*/
+
+void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
+{
+    BLD_Reg_t  *reg;
+    char        str[ 40 ]; 
+    unsigned    val;
+    int         strWidth;
+    int         i;
+
+    if ( id == Bioloid::BROADCAST_ID )
+    {
+        LogError( "Broadcast ID not valid with get command\n" );
+        return;
+    }
+
+    if ( strncmp( line.Remainder(), "all", 3 ) == 0 )
+    {
+        reg = devType->reg;
+
+        if ( raw )
+        {
+            strWidth = 5;
+        }
+        else
+        {
+            strWidth = 15;
+        }
+        for ( i = 0; i < strWidth; i++ )
+        {
+            str[i] = '-';
+        }
+        str[i] = '\0';
+
+        Log( "Addr Size %-*s Name\n", strWidth, "Value" );
+        Log( "---- ---- %s --------------------\n", str );
+
+        while ( reg->name != NULL )
+        {
+            if ( reg->flags & BLD_REG_FLAG_16BIT )
+            {
+                uint16_t    val16;
+
+                m_device.Read( reg->address, &val16 );
+
+
+                val = val16;
+            }
+            else
+            {
+                uint8_t    val8;
+
+                m_device.Read( reg->address, &val8 );
+
+                val = val8;
+            }
+
+            if ( raw )
+            {
+                snprintf( str, sizeof( str ), "%5u", val );
+                strWidth = 5;
+            }
+            else
+            if ( reg->fmtFunc == NULL )
+            {
+                snprintf( str, sizeof( str ), "%u", val );
+            }
+            else
+            {
+                reg->fmtFunc( reg, val, str, sizeof( str ));
+            }
+
+            Log( "0x%02x %s %d %-*s %s\n", 
+                reg->address, 
+                reg->flags & BLD_REG_FLAG_WR ? "rw" : "ro",
+                reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, 
+                strWidth, str, 
+                reg->name );
+
+            reg++;
+        }
+    }
+    else
+    {
+        if ( !ParseRegisterName( line, devType, &reg ))
+        {
+            return;
+        }
+
+        if (( reg->flags & BLD_REG_FLAG_16BIT ) != 0 )
+        {
+            uint16_t    val16;
+
+            PrintError( m_device.Read( reg->address, &val16, sizeof( val16 )));
+
+            val = val16;
+        }
+        else
+        {
+            uint8_t    val8;
+
+            PrintError( m_device.Read( reg->address, &val8, sizeof( val8 )));
+
+            val = val8;
+        }
+
+        if (( reg->fmtFunc == NULL ) || raw )
+        {
+            snprintf( str, sizeof( str ), "%5u", val );
+        }
+        else
+        {
+            reg->fmtFunc( reg, val, str, sizeof( str ));
+        }
+
+        Log( "Read: %s\n", str );
+    }
+}
+
+//***************************************************************************
+/**
+*   Called to process the set and set-raw commands
+*/
+
+void BioloidCommandLine::ProcessSetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
+{
+    BLD_Reg_t  *reg;
+    uint16_t    val16;
+
+    if ( !ParseRegisterName( line, devType, &reg ))
+    {
+        return;
+    }
+    if (( reg->flags & BLD_REG_FLAG_WR ) == 0 )
+    {
+        LogError( "Register %s is read-only\n", reg->name );
+        return;
+    }
+
+    if ( raw || ( reg->parseFunc == NULL ))
+    {
+        if ( !line.NextNum( &val16 ))
+        {
+            LogError( "Invalid value specified: '%s'\n", line.PrevToken() );
+            return;
+        }
+
+        if (( val16 < reg->minVal  ) || ( val16 > reg->maxVal ))
+        {
+            LogError( "Value %u is out of range (%u - %u)\n", val16, reg->minVal, reg->maxVal );
+            return;
+        }
+    }
+    else
+    {
+        if ( !reg->parseFunc( reg, line, &val16 ))
+        {
+            return;
+        }
+    }
+
+    PrintError( m_device.Write( reg->address, &val16, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1 ));
+}
+
+//***************************************************************************
+/**
 *   Processes one line of data
 */
 
@@ -299,7 +466,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 
     Bioloid::ID_t id;
 
-    if ( !line.NextNum( gDelim, &id ))
+    if ( !line.NextNum( &id ))
     {
         if ( strcmp( line.PrevToken(), "reg" ) == 0 )
         {
@@ -318,7 +485,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 
     char *cmdStr;
 
-    if (( cmdStr = line.NextToken( gDelim )) == NULL )
+    if (( cmdStr = line.NextToken()) == NULL )
     {
         LogError( "No command specified for %s %u\n", devType->devTypeStr, id );
         return true;
@@ -359,12 +526,12 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             return true;
         }
 
-        if ( !line.NextNum( gDelim, &offset ))
+        if ( !line.NextNum( &offset ))
         {
             LogError( "Invalid offset specified: '%s'\n", line.PrevToken() );
             return true;
         }
-        if ( !line.NextNum( gDelim, &numBytes ))
+        if ( !line.NextNum( &numBytes ))
         {
             LogError( "Invalid numBytes specified: '%s'\n", line.PrevToken() );
             return true;
@@ -405,105 +572,22 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
     else
     if ( strcmp( cmdStr, "get" ) == 0 )
     {
-        BLD_Reg_t   *reg;
-
-        if ( id == Bioloid::BROADCAST_ID )
-        {
-            LogError( "Broadcast ID not valid with get command\n" );
-            return true;
-        }
-
-        if ( strncmp( line.Remainder(), "all", 3 ) == 0 )
-        {
-            reg = devType->reg;
-
-            Log( "Addr Size Value Name\n" );
-            Log( "---- ---- ----- --------------------\n" );
-
-            while ( reg->name != NULL )
-            {
-                unsigned    val;
-
-                if ( reg->flags & BLD_REG_FLAG_16BIT )
-                {
-                    uint16_t    val16;
-
-                    m_device.Read( reg->address, &val16 );
-
-
-                    val = val16;
-                }
-                else
-                {
-                    uint8_t    val8;
-
-                    m_device.Read( reg->address, &val8 );
-
-                    val = val8;
-                }
-
-                Log( "0x%02x %s %d %5u %s\n", 
-                    reg->address, 
-                    reg->flags & BLD_REG_FLAG_WR ? "rw" : "ro",
-                    reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, 
-                    val, 
-                    reg->name );
-
-                reg++;
-            }
-        }
-        else
-        {
-            if ( !ParseRegisterName( line, devType, &reg ))
-            {
-                return true;
-            }
-    
-            if (( reg->flags & BLD_REG_FLAG_16BIT ) != 0 )
-            {
-                uint16_t    val16;
-    
-                PrintError( m_device.Read( reg->address, &val16, sizeof( val16 )));
-                Log( "Read: %u\n", val16 );
-            }
-            else
-            {
-                uint16_t    val8;
-    
-                PrintError( m_device.Read( reg->address, &val8, sizeof( val8 )));
-                Log( "Read: %u\n", val8 );
-            }
-        }
+        ProcessGetCommand( devType, id, line, false );
+    }
+    else
+    if ( strcmp( cmdStr, "get-raw" ) == 0 )
+    {
+        ProcessGetCommand( devType, id, line, true );
     }
     else
     if ( strcmp( cmdStr, "set" ) == 0 )
     {
-        BLD_Reg_t  *reg;
-        uint16_t    val16;
-
-        if ( !ParseRegisterName( line, devType, &reg ))
-        {
-            return true;
-        }
-        if (( reg->flags & BLD_REG_FLAG_WR ) == 0 )
-        {
-            LogError( "Register %s is read-only\n", reg->name );
-            return true;
-        }
-
-        if ( !line.NextNum( gDelim, &val16 ))
-        {
-            LogError( "Invalid value specified: '%s'\n", line.PrevToken() );
-            return true;
-        }
-
-        if (( val16 < reg->minVal  ) || ( val16 > reg->maxVal ))
-        {
-            LogError( "Value %u is out of range (%u - %u)\n", val16, reg->minVal, reg->maxVal );
-            return true;
-        }
-
-        PrintError( m_device.Write( reg->address, &val16, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1 ));
+        ProcessSetCommand( devType, id, line, false );
+    }
+    else
+    if ( strcmp( cmdStr, "set-raw" ) == 0 )
+    {
+        ProcessSetCommand( devType, id, line, true );
     }
     else
     if ( strcmp( cmdStr, "reset" ) == 0 )

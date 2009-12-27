@@ -93,6 +93,17 @@ private:
 
     void PrintError( Bioloid::Error err );
 
+    //------------------------------------------------------------------------
+    // Processes the get and get-raw command
+
+    void ProcessGetCommand( BLD_DevType_t *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw );
+
+    //------------------------------------------------------------------------
+    // Processes the set and set-raw command
+
+    void ProcessSetCommand( BLD_DevType_t *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw );
+
+    //------------------------------------------------------------------------
 
     BioloidBus     *m_bus;
     BioloidDevice   m_device;

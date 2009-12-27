@@ -61,7 +61,10 @@ StrTokenizer::StrTokenizer
     char *outToken,     ///< Place to store the result.
     size_t maxLen       ///< Maximum lenght of @a outToken.
 )
-    : m_str( str ), m_outToken( outToken ), m_maxLen( maxLen )
+    : m_str( str ), 
+      m_outToken( outToken ), 
+      m_delim( " \r\n\t" ), 
+      m_maxLen( maxLen )
 {
 }
 
@@ -105,6 +108,15 @@ char *StrTokenizer::NextToken
     const char *delim   ///< Set of delimiter characters which can terminate the token.
 )
 {
+    if ( delim == NULL )
+    {
+        delim = m_delim;
+    }
+    else
+    {
+        m_delim = delim;
+    }
+
     // Skip over delimiter characters
     
     while (( *m_str != '\0' ) && ( strchr( delim, *m_str ) != NULL ))
@@ -155,7 +167,7 @@ char *StrTokenizer::NextToken
 *   @returns    true if the number was parsed successfully, false otherwise.
 */
 
-bool StrTokenizer::NextNum( const char *delim, uint8_t *outNum )
+bool StrTokenizer::NextNum( uint8_t *outNum, const char *delim )
 {
     char *token;
     char *endPtr;
@@ -190,12 +202,12 @@ bool StrTokenizer::NextNum( const char *delim, uint8_t *outNum )
 
 //***************************************************************************
 /**
-*   Parses a uint8_t using the next token.
+*   Parses a uint16_t using the next token.
 *
 *   @returns    true if the number was parsed successfully, false otherwise.
 */
 
-bool StrTokenizer::NextNum( const char *delim, uint16_t *outNum )
+bool StrTokenizer::NextNum( uint16_t *outNum, const char *delim )
 {
     char *token;
     char *endPtr;
@@ -220,6 +232,40 @@ bool StrTokenizer::NextNum( const char *delim, uint16_t *outNum )
     if ( num > 65535 )
     {
         // Number out of range
+
+        return false;
+    }
+
+    *outNum = num;
+    return true;
+}
+
+//***************************************************************************
+/**
+*   Parses a floating point value using the next token.
+*
+*   @returns    true if the number was parsed successfully, false otherwise.
+*/
+
+bool StrTokenizer::NextNum( double *outNum, const char *delim )
+{
+    char *token;
+    char *endPtr;
+    double  num;
+
+    *outNum = 0.0;
+
+    if (( token = NextToken( delim )) == NULL )
+    {
+        return false;
+    }
+
+    // See if it looks like an unsigned number
+
+    num = strtod( token, &endPtr );
+    if ( *endPtr != '\0' )
+    {
+        // Not a valid number
 
         return false;
     }

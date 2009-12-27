@@ -29,6 +29,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "StrToken.h"
+
 /**
  * @addtogroup bioloid
  * @{
@@ -54,6 +56,7 @@ struct BLD_Reg_s;
 typedef struct BLD_Reg_s BLD_Reg_t;
 
 typedef void (*BLD_RegFmtFunc)( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t maxLen );
+typedef bool (*BLD_RegParseFunc)( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
 
 struct BLD_Reg_s
 {
@@ -63,7 +66,8 @@ struct BLD_Reg_s
     uint16_t        minVal;
     uint16_t        maxVal;
 
-    BLD_RegFmtFunc  fmtFunc;
+    BLD_RegFmtFunc      fmtFunc;
+    BLD_RegParseFunc    parseFunc;
 };
 
 typedef struct
@@ -92,6 +96,15 @@ void BLD_RegFmtAlarm( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t 
 void BLD_RegFmtOnOff( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t maxLen );
 void BLD_RegFmtVelocity( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t maxLen );
 void BLD_RegFmtLoad( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t maxLen );
+
+bool BLD_RegParseBaud( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseRDT( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseAngle( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseTemp( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseVolt( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseStatusRet( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseOnOff( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
+bool BLD_RegParseVelocity( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp );
 
 #if defined( __cplusplus )
 }

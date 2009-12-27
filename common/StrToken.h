@@ -64,7 +64,7 @@ public:
 
     //------------------------------------------------------------------------
     
-    char *NextToken( const char *delim );
+    char *NextToken( const char *delim = NULL );
 
     //------------------------------------------------------------------------
 
@@ -72,8 +72,9 @@ public:
 
     //------------------------------------------------------------------------
 
-    bool NextNum( const char *delim, uint8_t *num );
-    bool NextNum( const char *delim, uint16_t *num );
+    bool NextNum( uint8_t *num, const char *delim = NULL );
+    bool NextNum( uint16_t *num, const char *delim = NULL );
+    bool NextNum( double *num, const char *delim = NULL );
 
     //------------------------------------------------------------------------
 
@@ -91,6 +92,7 @@ private:
     //------------------------------------------------------------------------
 
     const char *m_str;      ///< Where we are in the string
+    const char *m_delim;    ///< Last delimiters used
     char       *m_outToken; ///< Place to store the parsed token.
     size_t      m_maxLen;   ///< Max size of m_outToken.
 };

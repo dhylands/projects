@@ -218,7 +218,11 @@ void SerialBus::SendCmdHeader
 void SerialBus::SetSerialPort( SerialPort *serPort )
 {
     m_serialPort = serPort;
-    m_serialPort->SetTimeout( 30 );
+
+    // 15 gives intermittent failures on my Dell laptop. 50 seems
+    // to work reliably
+
+    m_serialPort->SetTimeout( 50 );
 }
 
 /** @} */
