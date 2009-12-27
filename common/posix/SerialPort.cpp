@@ -234,11 +234,16 @@ size_t SerialPort::Read( void *buf, size_t bufSize )
 //***************************************************************************
 /**
 *   Sets the timeout to use when waiting for data. 0 = infinite
-*   The timeout is specified in 1/10ths of a second.
+*   The timeout is specified in milliseconds.
 */
-bool SerialPort::SetTimeout( uint8_t timeout )
+bool SerialPort::SetTimeout( unsigned timeout )
 {
     struct termios  attr;
+
+    if ( m_fd < 0 )
+    {
+        return false;
+    }
 
     if ( tcgetattr( m_fd, &attr ) < 0 )
     {
@@ -253,7 +258,16 @@ bool SerialPort::SetTimeout( uint8_t timeout )
     }
     else
     {
-        attr.c_cc[ VTIME ] = timeout;   // timeout in tenths of a second
+        // Note. termios only supports timeouts specified in tenths of 
+        // a second, so we need convert from milliseconds.
+
+        timeout = ( timeout + 99 ) / 100;
+        if ( timeout > 255 )
+        {
+            timeout = 255;
+        }
+
+        attr.c_cc[ VTIME ] = (uint8_t)timeout;   // timeout in tenths of a second
         attr.c_cc[ VMIN ]  = 0;
     }
 

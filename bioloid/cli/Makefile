@@ -12,6 +12,10 @@ MK_AVR_MCU      = m168
 MK_AVR_FREQ     = 8MHz
 endif
 
+ifeq ($(MK_OS),host)
+MK_HOST_OS = mingw
+endif
+
 MK_ELF_TARGET 	= bioloid
 
 MK_SRC_FILES = \
@@ -30,6 +34,10 @@ MK_SRC_FILES = \
 	DumpMem.c \
 	Str.c \
 	StrToken.cpp
+
+ifeq ($(MK_HOST_OS),mingw)
+MK_SRC_FILES += Error.cpp
+endif
 
 ifeq ($(MK_OS),avr)
 MK_SRC_FILES += c++-support.cpp

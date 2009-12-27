@@ -79,14 +79,37 @@ bool BioloidBus::ReadStatusPacket( BioloidPacket *pkt )
     {
         uint8_t         ch;
 
-        if ( !ReadByte( &ch ))
+#if 0
+        int i;
+
+        for ( i = 0; i < 10; i++ )
         {
+            if ( ReadByte( &ch ))
+            {
+                break;
+            }
+        }
+        if ( i >= 10 )
+        {
+            LogError( "BioloidBus::ReadStatusPacket: ReadByte returned false\n");
             return false;
         }
+#else
+        if ( !ReadByte( &ch ))
+        {
+            //LogError( "BioloidBus::ReadStatusPacket: ReadByte returned false\n");
+            return false;
+        }
+#endif
 
         err = pkt->ProcessChar( ch );
 
     } while ( err == Bioloid::ERROR_NOT_DONE );
+
+    if ( err != Bioloid::ERROR_NONE )
+    {
+        Log( "BioloidBus::ReadStatusPacket err = %d\n", err );
+    }
 
     return err == Bioloid::ERROR_NONE;
 }

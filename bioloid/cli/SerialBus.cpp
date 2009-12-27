@@ -112,9 +112,12 @@ bool SerialBus::ReadByte( uint8_t *ch )
 
     rc = m_serialPort->Read( ch, 1 ) == 1;
 
-    if ( m_dataBytes < sizeof( m_data ))
+    if ( rc )
     {
-        m_data[ m_dataBytes++ ] = *ch;
+        if ( m_dataBytes < sizeof( m_data ))
+        {
+            m_data[ m_dataBytes++ ] = *ch;
+        }
     }
 
     return rc;
@@ -138,12 +141,16 @@ bool SerialBus::ReadStatusPacket( BioloidPacket *pkt )
 
     if ( m_debug )
     {
-        DumpMem( "R", 0, m_data, m_dataBytes );
-
+        if ( m_dataBytes > 0 )
+        {
+            DumpMem( "R", 0, m_data, m_dataBytes );
+        }
+#if 0
         if ( !rc )
         {
             LogError( "Packet Error\n" );
         }
+#endif
     }
 
     return rc;
@@ -211,8 +218,7 @@ void SerialBus::SendCmdHeader
 void SerialBus::SetSerialPort( SerialPort *serPort )
 {
     m_serialPort = serPort;
-
-    m_serialPort->SetTimeout( 1 );
+    m_serialPort->SetTimeout( 30 );
 }
 
 /** @} */

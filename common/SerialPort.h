@@ -32,6 +32,11 @@
 // ---- Include Files -------------------------------------------------------
 
 #include <stddef.h>
+#include <stdint.h>
+
+#if defined( WIN32 )
+#include <windows.h>
+#endif
 
 /**
  * @addtogroup SerialPort
@@ -75,9 +80,9 @@ public:
 
     //------------------------------------------------------------------------
     //  Sets the timeout to use when waiting for data. 0 = infinite
-    //  The timeout is specified in 1/10ths of a second.
+    //  The timeout is specified in milliseconds.
 
-    bool SetTimeout( uint8_t timeout );
+    bool SetTimeout( unsigned timeout );
 
     //------------------------------------------------------------------------
     //  Writes data to the serial port.
@@ -100,7 +105,11 @@ private:
 
     //------------------------------------------------------------------------
 
+#if defined( WIN32 )
+    HANDLE  m_serialHndl;
+#else
     int     m_fd;
+#endif
 };
 
 // ---- Inline Functions ----------------------------------------------------

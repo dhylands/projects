@@ -216,7 +216,6 @@ int main( int argc, char **argv )
 
     if ( !gSerialPort.Open( portStr, baudStr ))
     {
-        LogError( "Unable to open serial port '%s'", portStr );
         exit( 1 );
     }
     gSerialBus.SetSerialPort( &gSerialPort );

@@ -336,13 +336,13 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             return true;
         }
 
-        Log( "%s %d ", devType->devTypeStr, id );
         if (( err = m_device.Ping()) == Bioloid::ERROR_NONE )
         {
-            Log( "Response Received\n" );
+            Log( "%s %d Response Received\n", devType->devTypeStr, id );
         }
         else
         {
+            Log( "%s %d ", devType->devTypeStr, id );
             PrintError( err );
         }
     }
