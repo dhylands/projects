@@ -1,0 +1,347 @@
+<html>
+    <head>
+        <title>Bioloid Command Line Utility</title>
+    </head>
+    <body bgcolor="darkgray">
+        <h1>Bioloid Command Line Utility</h1>
+        The bioloid program is a command line program for communicating    
+        with devices on the bioloid bus.
+
+        <h2>Command Line Options</h2>
+
+        <table>
+            <tr>
+                <td style="background-color:LightGray;">
+<pre>
+Usage: bioloid &lt;option(s)&gt;
+  Send commands to bioloid devices
+
+  -b, --baud=baud   Set the baudrate used
+  -p, --port=name   Set the serial port to use
+  -d, --debug       Enable debug features
+  -h, --help        Display this message
+  -v, --verbose     Turn on verbose messages
+</pre>
+                    The default baud rate is 1000000. Passing in the debug flag 
+                    will cause all packet data sent to and received from the bus 
+                    to be printed.
+<pre>
+# bioloid.exe -p com8 -d
+Debug enabled
+&gt; servo 15 ping
+W: 0000: FF FF 0F 02 01 ED                               ......
+R: 0000: FF FF 0F 02 00 EE                               ......
+servo 15 Response Received
+</pre>
+                </td>
+            </tr>
+        </table>
+
+        <h2>Commands</h2>
+
+        <table>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>action</code></p>
+                    <p>Broadcasts an ACTION command on the bus. This will cause
+                    registered writes to be performed.</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>scan</code></p>
+                    <p>Scans the bus (sends a ping command to every ID), and for
+                    devices that respond, it reads and reports the model number
+                    and version.
+                    </p>
+<pre>
+&gt; scan
+> scan
+ID:  15 Model:    12 Version:    22
+ID:  18 Model:    12 Version:    22
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>dev-types</code></p>
+                    <p>Lists the device types that the program knows about.</p> 
+<pre>
+&gt; dev-types
+servo      Model:    12 34 registers
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>quit</code></p>
+                    <p>Exits from the program.</p> 
+                </td>
+            </tr>
+        </table>
+         
+        <h2>Device Commands</h2>
+
+        <p>The following commands are sent to a partiular device, and are of the
+        form:</p>
+        <p><code>device-type id command arguments</code></p>
+
+        <table>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type reg</code></p>
+                    <p>Prints the registers associated with this 
+                        device-type.</p>
+<pre>
+&gt; servo reg
+Addr Size Min  Max Name
+---- ---- ---  --- --------------------
+0x00 ro 2          model
+0x02 ro 1          version
+0x03 rw 1   0  253 id
+0x04 rw 1   0  254 baud-rate
+0x05 rw 1   0  254 return-delay-time
+0x06 rw 2   0 1023 cw-angle-limit
+0x08 rw 2   0 1023 ccw-angle-limit
+0x0b rw 1   0  150 high-limit-temp
+0x0c rw 1  50  250 low-limit-voltage
+0x0d rw 1  50  250 high-limit-voltage
+0x0e rw 2   0 1023 max-torque-def
+0x10 rw 1   0    2 status-level
+0x11 rw 1   0  127 alarm-led
+0x12 rw 1   0  127 alarm-shutdown
+0x14 ro 2          down-calib
+0x16 ro 2          up-calib
+0x18 rw 1   0    1 torque-enable
+0x19 rw 1   0    1 led
+0x1a rw 1   0  254 cw-comp-margin
+0x1b rw 1   0  254 ccw-comp-margin
+0x1c rw 1   1  254 cw-comp-slope
+0x1d rw 1   1  254 ccw-comp-slope
+0x1e rw 2   0 1023 goal-position
+0x20 rw 2   0 1023 moving-speed
+0x22 rw 2   0 1023 max-torque
+0x24 ro 2          present-position
+0x26 ro 2          present-speed
+0x28 ro 2          present-load
+0x2a ro 1          present-voltage
+0x2b ro 1          present-temp
+0x2c rw 1   0    1 reg-instruction
+0x2e ro 1          moving
+0x2f rw 1   0    1 lock
+0x30 rw 2   0 1023 punch                        
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id ping</code></p>
+                    <p>Sends a <code>PING</code> command to the indicated 
+                        device.</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id get register</code></br>
+                    <code>device-type id get-raw register</code></p>
+                    <p>Retrieves the named register from the device 
+                        indicated by <code>id</code>. In the case of get the
+                        register will be formatted, whereas get-raw just returns
+                        the raw register value. There is a special register name
+                        called <code>all</code> which will cause all of the 
+                        registers to be retrieved and printed.</p>
+<pre>
+&gt; servo 15 get present-voltage
+Read: 11.7 volts
+&gt; servo 15 get-raw present-voltage
+Read:   117
+&gt; servo 15 get all
+Addr Size Value           Name
+---- ---- --------------- --------------------
+0x00 ro 2 12              model
+0x02 ro 1 22              version
+0x03 rw 1 15              id
+0x04 rw 1 1000000 baud    baud-rate
+0x05 rw 1 0 usec          return-delay-time
+0x06 rw 2 0 degrees       cw-angle-limit
+0x08 rw 2 300 degrees     ccw-angle-limit
+0x0b rw 1 70C             high-limit-temp
+0x0c rw 1 6.0 volts       low-limit-voltage
+0x0d rw 1 14.0 volts      high-limit-voltage
+0x0e rw 2 1023            max-torque-def
+0x10 rw 1 all             status-level
+0x11 rw 1 OvLoad OvHeat   alarm-led
+0x12 rw 1 OvLoad OvHeat   alarm-shutdown
+0x14 ro 2 40              down-calib
+0x16 ro 2 973             up-calib
+0x18 rw 1 off             torque-enable
+0x19 rw 1 off             led
+0x1a rw 1 1               cw-comp-margin
+0x1b rw 1 1               ccw-comp-margin
+0x1c rw 1 32              cw-comp-slope
+0x1d rw 1 32              ccw-comp-slope
+0x1e rw 2 150 degrees     goal-position
+0x20 rw 2 0.0 RPM         moving-speed
+0x22 rw 2 1023            max-torque
+0x24 ro 2 150 degrees     present-position
+0x26 ro 2 0.0 RPM         present-speed
+0x28 ro 2 CCW 0           present-load
+0x2a ro 1 11.7 volts      present-voltage
+0x2b ro 1 32C             present-temp
+0x2c rw 1 off             reg-instruction
+0x2e ro 1 0               moving
+0x2f rw 1 0               lock
+0x30 rw 2 32              punch
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id set register value</code></br>
+                    <code>device-type id set-raw register value</code></p>
+                    <p>Sets the value of a register. Set-raw sets the raw 
+                        register value, whereas set takes the natural units of
+                        the register (degrees, volts, etc.)</p>
+<pre>
+&gt; servo 15 set goal-position 200
+&gt; servo 15 set-raw goal-position 682
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id read-data offset numBytes</br>
+                    device-type id rd offset numBytes</code></p>
+                    <p>Issues the READ_DATA command to the inidcated device. 
+                        The read data is formatted as hex bytes. Note that 
+                        read-data may be abbreviated as rd.</p>
+                    <p>
+<pre>
+&gt; servo 15 read-data 0x1e 4
+Read: 001e: AA 02 00 00                                     ....
+</pre>
+                        </p>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id write-data offset byte data<br>
+                    device-type id wd offset byte data</code></p>
+                    <p>Issues the WRITE_DATA command to the indicated 
+                        device. The data must be formatted as a sequence of
+                        bytes. Note that write-data may be abbreviated as 
+                        wd.</p>
+<pre>
+&gt; servo 15 write-data 0x1e 0xaa 2    
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id reg-write offset byte data<br>
+                    device-type id rw offset byte data</code></p>
+                    <p>Issues the REG_WRITE command to the indicated 
+                        device. The data must be formatted as a sequence of
+                        bytes. Note that reg-write may be abbreviated as rw.</p>
+<pre>
+&gt; servo 15 reg-write 0x1e 0xaa 2
+&gt; servo 18 reg-write 0x1e 0x00 1
+&gt; action
+</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>device-type id reset</code></p>
+                    <p>Issues the RESET command to the indicated 
+                        device.  This resets all registers to factory defaults,
+                        including changing the ID.</p>
+<pre>
+&gt; servo 15 reset
+</pre>
+                </td>
+            </tr>
+        </table>
+
+        <h2>Register Definition Files</h2>
+
+        <table>
+            <tr>
+                <td style="background-color:LightGray;">
+                    The register definitions for devices on the bioloid bus are 
+                    specified using register definition files. These files are 
+                    named reg-*.bld and all of the files which match this 
+                    specification and that are found in the same directory as 
+                    the bioloid executable will be read when the bioloid program 
+                    starts. Comments are denoted using the # character,and blank 
+                    lines are allowed.</p>
+                    <p>Each line starts with a keyword. Supported keywords 
+                        are DeviceType:, Model:, Register: and 
+                        EndDeviceType.</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>DeviceType: string</p>
+                    <p>This starts a new device. Each <code>DeviceType:</code> 
+                        tag must have a matching <code>EndDeviceType</code> tag 
+                        later in the file. The device type should be a simple
+                        string with no embedded spaces.</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>Model: number</p>
+                    <p>Identifies the model associated with this device type. 
+                        This field isn't currently used, but will eventually be 
+                        used for populating device data structures based on a 
+                        bus scan.</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>Register: offset name numBytes mode min max fieldType</p>
+                    <p>Specifies a register. The offset is the register 
+                        offset in the device memory. The name field is used to
+                        identity the register. The numBytes field can have 
+                        values 1 or 2 to indicate 8-bit or 16-bit registers. The 
+                        mode must be ro (read-only) or rw (read-write). The min, 
+                        max, and field type are optional for read-only fields.</p>
+                    <p>Valid field types are:</p>
+                    <ul>
+                        <li>Alarm (format only) Translates the bits from the
+                            alarm byte and prints as many of Inst, OvLoad,
+                            ChkSum, Range, OvHeat, AngLim, InVolt as applicable,
+                            or None if none of the bits are set.</li>
+                        <li>Angle - Translate to/from degrees (0-300) into 
+                            the raw value (0-1023)</li>
+                        <li>AngularVelocity - Translates to/from RPM (0-114) 
+                            into the raw range (0-1023)</li>
+                        <li>BaudRate - Translates to/from the baudrate into 
+                            the divisor format.</li>
+                        <li>Load (format only) - Translates the direction 
+                            bit to CW or CCW, and leaves the 10-bit portion as a
+                            raw number.</li>
+                        <li>OnOff - Translates between on/off and 0/1.</li>
+                        <li>RDT - Translates from microsends (0-508) to the 
+                            raw value (0-254).</li>
+                        <li>StatusRet - Translates to/from none, read, all into
+                            0, 1, 2 respectively.</li>
+                        <li>Temperature - Translates to/from degrees 
+                            celcius into the raw value (temperature * 1).</li>
+                        <li>Voltage - Translate to/from volts into the raw 
+                            value (voltage * 10).</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:LightGray;">
+                    <p><code>EndDeviceType</p>
+                    <p>Terminates the device-type definition.</p>
+                </td>
+            </tr>
+        </table>
+
+    </body>
+</html>
+

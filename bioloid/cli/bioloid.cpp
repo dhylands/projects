@@ -77,12 +77,12 @@ enum
     OPT_DEBUG       = 'd',
     OPT_PORT        = 'p',
     OPT_VERBOSE     = 'v',
+    OPT_HELP        = 'h',
 
     // Options from this point onwards don't have any short option equivalents
 
     OPT_FIRST_LONG_OPT   = 0x80,
 
-    OPT_HELP,
 };
 
 #if USE_COMMAND_LINE
@@ -204,7 +204,7 @@ bool ReadRegisterFiles( const char *exeDir )
 #if USE_COMMAND_LINE
 void Usage()
 {
-    fprintf( stderr, "Usage: bioloid <option(s)> <file>\n" );
+    fprintf( stderr, "Usage: bioloid <option(s)>\n" );
     fprintf( stderr, "  Send commands to bioloid devices\n" );
     fprintf( stderr, "\n" );
     fprintf( stderr, "  -b, --baud=baud   Set the baudrate used\n" );
@@ -311,7 +311,6 @@ int main( int argc, char **argv )
 
     LogDebug( "Debug enabled\n" );
     LogVerbose( "Verbose enabled\n" );
-    LogVerbose( "Port: %s Baud: %s\n", portStr, baudStr );
 #endif
 
     // Read in all of the reg-*.bld files

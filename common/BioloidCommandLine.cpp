@@ -37,7 +37,8 @@
 
 static char             gDelim[] = " \r\n\t";
 
-static uint8_t          gBuf[ 80 ];
+static uint8_t          gErrorBuf[ 80 ];
+static uint8_t          gReadBuf[ 80 ];
 
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
@@ -77,8 +78,6 @@ void BioloidCommandLine::DumpRegInfo( BLD_DevType_t *devType )
 {
     BLD_Reg_t  *reg;
     int         regIdx;
-
-    Log( "%p %s: %d registers\n", devType, devType->devTypeStr, devType->numRegs );
 
     Log( "Addr Size Min  Max Name\n" );
     Log( "---- ---- ---  --- --------------------\n" );
@@ -175,7 +174,7 @@ void BioloidCommandLine::AddErrorStr( Bioloid::Error err, Bioloid::Error mask, c
 */
 void BioloidCommandLine::PrintError( Bioloid::Error err )
 {
-    char   *str = (char *)&gBuf[0];
+    char   *str = (char *)&gErrorBuf[0];
 
     str[0] = '\0';
 
@@ -196,18 +195,18 @@ void BioloidCommandLine::PrintError( Bioloid::Error err )
             default:                            errStr = "***Unknown***";   break;
         }
 
-        StrMaxCpy( str, errStr, sizeof( gBuf ));
+        StrMaxCpy( str, errStr, sizeof( gErrorBuf ));
     }
     else
     {
-        AddErrorStr( err, Bioloid::ERROR_RESERVED,       str, sizeof( gBuf ), "Reserved" );
-        AddErrorStr( err, Bioloid::ERROR_INSTRUCTION,    str, sizeof( gBuf ), "Instruction" );
-        AddErrorStr( err, Bioloid::ERROR_OVERLOAD,       str, sizeof( gBuf ), "Overload" );
-        AddErrorStr( err, Bioloid::ERROR_CHECKSUM,       str, sizeof( gBuf ), "Checksum" );
-        AddErrorStr( err, Bioloid::ERROR_RANGE,          str, sizeof( gBuf ), "Range" );
-        AddErrorStr( err, Bioloid::ERROR_OVERHEATING,    str, sizeof( gBuf ), "Over Heating" );
-        AddErrorStr( err, Bioloid::ERROR_ANGLE_LIMIT,    str, sizeof( gBuf ), "Angle Limit" );
-        AddErrorStr( err, Bioloid::ERROR_INPUT_VOLTAGE,  str, sizeof( gBuf ), "Input Voltage" );
+        AddErrorStr( err, Bioloid::ERROR_RESERVED,       str, sizeof( gErrorBuf ), "Reserved" );
+        AddErrorStr( err, Bioloid::ERROR_INSTRUCTION,    str, sizeof( gErrorBuf ), "Instruction" );
+        AddErrorStr( err, Bioloid::ERROR_OVERLOAD,       str, sizeof( gErrorBuf ), "Overload" );
+        AddErrorStr( err, Bioloid::ERROR_CHECKSUM,       str, sizeof( gErrorBuf ), "Checksum" );
+        AddErrorStr( err, Bioloid::ERROR_RANGE,          str, sizeof( gErrorBuf ), "Range" );
+        AddErrorStr( err, Bioloid::ERROR_OVERHEATING,    str, sizeof( gErrorBuf ), "Over Heating" );
+        AddErrorStr( err, Bioloid::ERROR_ANGLE_LIMIT,    str, sizeof( gErrorBuf ), "Angle Limit" );
+        AddErrorStr( err, Bioloid::ERROR_INPUT_VOLTAGE,  str, sizeof( gErrorBuf ), "Input Voltage" );
     }
     Log( "%s\n", str );
 }
@@ -224,7 +223,7 @@ static bool DevFound( BioloidBus *bus, BioloidDevice *dev )
     dev->Read( 0, &model );
     dev->Read( 2, &version );
 
-    Log( "ID: %3d Model: 0x%04x Version: 0x%02x\n", dev->ID(), model, version );
+    Log( "ID: %3d Model: %5u Version: %5u\n", dev->ID(), model, version );
 
     return true;
 }
@@ -241,6 +240,7 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
     unsigned    val;
     int         strWidth;
     int         i;
+    int         regIdx;
 
     if ( id == Bioloid::BROADCAST_ID )
     {
@@ -269,14 +269,15 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
         Log( "Addr Size %-*s Name\n", strWidth, "Value" );
         Log( "---- ---- %s --------------------\n", str );
 
-        while ( reg->name != NULL )
+        for ( regIdx = 0; regIdx < devType->numRegs; regIdx++ )
         {
+            reg = &devType->reg[ regIdx ];
+
             if ( reg->flags & BLD_REG_FLAG_16BIT )
             {
                 uint16_t    val16;
 
                 m_device.Read( reg->address, &val16 );
-
 
                 val = val16;
             }
@@ -555,10 +556,15 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             LogError( "Invalid numBytes specified: '%s'\n", line.PrevToken() );
             return true;
         }
+        if ( numBytes > sizeof( gReadBuf ))
+        {
+            LogError( "Only able to a maximum of %d bytes\n", sizeof( gReadBuf ));
+            return true;
+        }
 
-        PrintError( m_device.Read( offset, gBuf, numBytes ));
+        PrintError( m_device.Read( offset, gReadBuf, numBytes ));
 
-        DumpMem( "Read", offset, gBuf, numBytes );
+        DumpMem( "Read", offset, gReadBuf, numBytes );
     }
     else
     if (( strcmp( cmdStr, "write-data" ) == 0 )
