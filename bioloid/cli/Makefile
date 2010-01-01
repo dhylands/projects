@@ -30,7 +30,7 @@ MK_SRC_FILES = \
 	StrPrintf.c \
 	BioloidCommandLine.cpp \
 	bioloid-reg.c \
-	bioloid-reg-servo.c \
+	DevTypeParser.cpp \
 	DumpMem.c \
 	Str.c \
 	StrToken.cpp
@@ -43,10 +43,25 @@ ifeq ($(MK_OS),avr)
 MK_SRC_FILES += c++-support.cpp
 endif
 
+MK_ADD_SYMBOLS := 1
+
 #CFLAGS += $(OPTS)
 #CXXFLAGS += $(OPTS)
 
 #LDLIBS += -lpthread
 
 include ../../rules/mkRules.mk
+
+#
+# bioloid.exe looks in the directory with the executable to find 
+# the register (reg-*.bld) files. So we need to copy them.
+#
+
+all: copy-register-files
+
+copy-register-files: $(addprefix $(MK_BIN_DIR)/,$(wildcard reg-*.bld))
+
+$(MK_BIN_DIR)/reg-%.bld : reg-%.bld
+	@echo "Copying $< to $@ ..."
+	cp $< $@
 

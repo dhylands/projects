@@ -55,6 +55,7 @@ CFLAGS += \
 	-Wmissing-declarations
 
 ifeq ($(MK_ADD_SYMBOLS),1)
+CXXFLAGS += -ggdb
 CFLAGS += -ggdb
 LDFLAGS += -ggdb
 endif

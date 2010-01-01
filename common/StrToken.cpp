@@ -22,6 +22,7 @@
 
 // ---- Include Files -------------------------------------------------------
 
+#include "Log.h"
 #include "StrToken.h"
 
 #include <string.h>
@@ -44,8 +45,7 @@
 */
 
 StrTokenizer::StrTokenizer()
-    : m_str( NULL ), m_outToken( NULL ), m_maxLen( 0 )
-
+    : m_str( NULL ), m_outToken( NULL ), m_maxLen( 0 ), m_delim( NULL )
 {
 }
 
@@ -59,11 +59,12 @@ StrTokenizer::StrTokenizer
 (
     const char *str,    ///< String to be parsed.
     char *outToken,     ///< Place to store the result.
-    size_t maxLen       ///< Maximum lenght of @a outToken.
+    size_t maxLen,      ///< Maximum lenght of @a outToken.
+    const char *delim   ///< Delimiters to use if none are provided
 )
     : m_str( str ), 
       m_outToken( outToken ), 
-      m_delim( " \r\n\t" ), 
+      m_delim( delim ), 
       m_maxLen( maxLen )
 {
 }
@@ -87,12 +88,14 @@ void StrTokenizer::Init
 (
     const char *str,    ///< String to be parsed.
     char *outToken,     ///< Place to store the result.
-    size_t maxLen       ///< Maximum lenght of @a outToken.
+    size_t maxLen,      ///< Maximum lenght of @a outToken.
+    const char *delim   ///< Default delimitersto use
 )
 {
     m_str       = str;
     m_outToken  = outToken;
     m_maxLen    = maxLen;
+    m_delim     = delim;
 
 } // Init
 
@@ -155,7 +158,8 @@ char *StrTokenizer::NextToken
         }
     }
     m_outToken[ i ] = '\0';
-    
+
+//    Log( "NextToken: '%s'\n", m_outToken );
     return m_outToken;
 
 } // NextToken

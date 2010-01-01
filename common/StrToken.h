@@ -51,7 +51,7 @@ public:
     // Constructor which specifies string to be tokenized, along with location
     // to store tokens as they're parsed.
 
-    StrTokenizer( const char *str, char *outToken, size_t maxLen );
+    StrTokenizer( const char *str, char *outToken, size_t maxLen, const char *delim = " \r\n\t" );
 
     //------------------------------------------------------------------------
     // Destructor
@@ -60,7 +60,7 @@ public:
 
     //------------------------------------------------------------------------
 
-    void Init( const char *str, char *outToken, size_t maxLen );
+    void Init( const char *str, char *outToken, size_t maxLen, const char *delim = " \r\n\t" );
 
     //------------------------------------------------------------------------
     

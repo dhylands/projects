@@ -35,8 +35,6 @@
 // ---- Private Constants and Types -----------------------------------------
 // ---- Private Variables ---------------------------------------------------
 
-static BLD_DevType_t   *gDevType;
-
 static char             gDelim[] = " \r\n\t";
 
 static uint8_t          gBuf[ 80 ];
@@ -77,13 +75,18 @@ BioloidCommandLine::~BioloidCommandLine()
 
 void BioloidCommandLine::DumpRegInfo( BLD_DevType_t *devType )
 {
-    BLD_Reg_t   *reg;
+    BLD_Reg_t  *reg;
+    int         regIdx;
+
+    Log( "%p %s: %d registers\n", devType, devType->devTypeStr, devType->numRegs );
 
     Log( "Addr Size Min  Max Name\n" );
     Log( "---- ---- ---  --- --------------------\n" );
 
-    for ( reg = devType->reg; reg->name != NULL; reg++ )
+    for ( regIdx = 0; regIdx < devType->numRegs; regIdx++ )
     {
+        reg = &devType->reg[ regIdx];
+
         if (( reg->flags & BLD_REG_FLAG_WR ) == 0 )
         {
             Log( "0x%02x ro %d          %s\n", 
@@ -126,10 +129,10 @@ bool BioloidCommandLine::ParseOffsetAndData( StrTokenizer &line, uint8_t *offset
 *   Parses a register name
 */
 
-bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *devType, BLD_Reg_t **outReg )
+bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *devType, BLD_Reg_t **outRegp )
 {
-    BLD_Reg_t   *reg;
     char        *regStr;
+    int          regIdx;
 
     if (( regStr = line.NextToken()) == NULL )
     {
@@ -137,15 +140,13 @@ bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *d
         return false;
     }
 
-    reg = devType->reg;
-    while ( reg->name != NULL )
+    for ( regIdx = 0; regIdx < devType->numRegs; regIdx++ )
     {
-        if ( strcmp( regStr, reg->name ) == 0 )
+        if ( strcmp( regStr, devType->reg[regIdx].name ) == 0 )
         {
-            *outReg = reg;
+            *outRegp = &devType->reg[regIdx];
             return true;
         }
-        reg++;
     }
 
     LogError( "Unrecognized register name: '%s'\n", regStr );
@@ -407,6 +408,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
     char           *endPtr;
     char            token[ 20 ];
     StrTokenizer    line( lineStr, token, sizeof( token ));
+    int             devTypeIdx;
 
     if ( m_bus == NULL )
     {
@@ -444,6 +446,20 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
         return true;
     }
 
+    if ( strcmp( devTypeStr, "dev-types" ) == 0 )
+    {
+        int     devTypeIdx;
+
+        for ( devTypeIdx = 0; devTypeIdx < m_numDevTypes; devTypeIdx++ )
+        {
+            BLD_DevType_t   *devType = m_devType[devTypeIdx];
+
+            Log( "%-10s Model: %5u %2d registers\n", 
+                 devType->devTypeStr, devType->model, devType->numRegs );
+        }
+        return true;
+    }
+
     if ( strcmp( devTypeStr, "quit" ) == 0 )
     {
         return false;
@@ -451,14 +467,17 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 
     // Since it's not one of those - assume it's a device type
 
-    devType = gDevType;
-    while (( devType->devTypeStr != NULL )
-        && ( strcmp( devType->devTypeStr, devTypeStr ) != 0 ))
+    devType = NULL;
+    for ( devTypeIdx = 0; devTypeIdx < m_numDevTypes; devTypeIdx++ )
     {
-        devType++;
+        if ( strcmp( m_devType[ devTypeIdx ]->devTypeStr, devTypeStr ) == 0 )
+        {
+            devType = m_devType[ devTypeIdx ];
+            break;
+        }
     }
 
-    if ( devType->devTypeStr == NULL )
+    if ( devTypeIdx >= m_numDevTypes )
     {
         LogError( "Unrecognized device type: '%s'\n", devTypeStr );
         return true;
@@ -607,8 +626,9 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 *   Register the devices that we'll recognize
 */
 
-void BioloidCommandLine::RegisterDevices( BLD_DevType_t *devType )
+void BioloidCommandLine::RegisterDeviceTypes( unsigned numDevTypes, BLD_DevType_t **devType )
 {
-    gDevType = devType;
+    m_numDevTypes = numDevTypes;
+    m_devType = devType;
 }
 

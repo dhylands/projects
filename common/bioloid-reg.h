@@ -61,7 +61,7 @@ typedef bool (*BLD_RegParseFunc)( struct BLD_Reg_s *reg, StrTokenizer &line, uin
 struct BLD_Reg_s
 {
     uint8_t         address;
-    char           *name;
+    char            name[ 20 ];
     uint8_t         flags;
     uint16_t        minVal;
     uint16_t        maxVal;
@@ -72,8 +72,10 @@ struct BLD_Reg_s
 
 typedef struct
 {
-    const char  *devTypeStr;
-    BLD_Reg_t   *reg;
+    char        devTypeStr[ 16 ];
+    uint16_t    model;
+    unsigned    numRegs;
+    BLD_Reg_t  *reg;
 
 } BLD_DevType_t;
 

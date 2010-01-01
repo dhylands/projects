@@ -37,6 +37,8 @@
 #include <getopt.h>
 #endif
 
+#include <libgen.h>
+
 #include "Log.h"
 #include "BioloidBus.h"
 #include "BioloidDevice.h"
@@ -44,6 +46,14 @@
 #include "bioloid-reg-servo.h"
 #include "SerialPort.h"
 #include "SerialBus.h"
+#include "DevTypeParser.h"
+
+#if defined( WIN32 )
+#   include <windows.h>
+#else
+#   include <fnmatch.h>
+#   include <dirent.h>
+#endif
 
 // ---- Public Variables ----------------------------------------------------
 // ---- Private Constants and Types -----------------------------------------
@@ -91,15 +101,100 @@ SerialPort      gSerialPort;
 SerialBus       gSerialBus;
 BioloidDevice   gDev( &gSerialBus, 1 );
 
-static BLD_DevType_t    gDevType[] =
-{
-    { "servo",   BLD_gServoReg },
-    { NULL, NULL },
-};
+#define MAX_DEV_TYPES   20
+
+static unsigned         gNumDevTypes; 
+static BLD_DevType_t   *gDevType[ MAX_DEV_TYPES ];
 
 // ---- Private Function Prototypes -----------------------------------------
 
 // ---- Functions -----------------------------------------------------------
+
+/***************************************************************************/
+/**
+*   Adds a device type to the list of device types that we know about.
+*/
+void AddDevType( BLD_DevType_t *devType )
+{
+    int     devTypeIdx;
+
+    if ( gNumDevTypes >= MAX_DEV_TYPES )
+    {
+        LogError( "Too many device types (max of %d)\n", MAX_DEV_TYPES );
+        return;
+    }
+
+    // Make sure this isn't a duplicate
+
+    for ( devTypeIdx = 0; devTypeIdx < gNumDevTypes; devTypeIdx++ )
+    {
+        if ( stricmp( gDevType[ devTypeIdx ]->devTypeStr, devType->devTypeStr ) == 0 )
+        {
+            LogError( "Device Type '%s' already registered\n", devType->devTypeStr );
+            return;
+        }
+    }
+
+    // Not a device type we know about - add it to the list
+
+    gDevType[ gNumDevTypes ] = devType;
+    gNumDevTypes++;
+}
+
+/***************************************************************************/
+/**
+*   Read device types and registers
+*/
+
+bool ReadRegisterFiles( const char *exeDir )
+{
+#if defined( __WIN32__ )
+    HANDLE          dir;
+    WIN32_FIND_DATA fd;
+    char            pathName[ MAX_PATH ];
+
+    _makepath( pathName, "", exeDir, "reg-*", "bld" );
+
+    if (( dir = FindFirstFile( pathName, &fd )) != INVALID_HANDLE_VALUE )
+    {
+        do
+        {
+            DevTypeParser   dtp;
+
+            if ( !dtp.ParseFile( fd.cFileName, AddDevType ))
+            {
+                return false;
+            }
+
+        } while ( FindNextFile( dir, &fd ));
+    }
+#else
+    DIR *dir;
+    struct dirent *de;
+
+    if (( dir = opendir( exeDir )) == NULL )
+    {
+        LogError( "Unable to open '%s'\n", exeDir );
+        return false;
+    }
+
+    while (( de = readdir( dir )) != NULL )
+    {
+        if ( fnmatch( "reg-*.bld", de->d_name, FNM_CASEFOLD ) == 0 )
+        {
+            DevTypeParser   dtp;
+
+            if ( !dtp.ParseFile( de->d_name, AddDevType ))
+            {
+                return false;
+            }
+        }
+    }
+
+    closedir( dir );
+#endif
+    return true;
+}
 
 /***************************************************************************/
 /**
@@ -141,6 +236,11 @@ int main( int argc, char **argv )
     BioloidCommandLine  cmdLine;
 
 #if USE_COMMAND_LINE
+
+    // Figure out which directory our executable came from
+
+    char *exeDir = dirname( argv[0] );
+
     // Figure out the short options from our options structure
 
     for ( scanOpt = gOption; scanOpt->name != NULL; scanOpt++ ) 
@@ -214,6 +314,10 @@ int main( int argc, char **argv )
     LogVerbose( "Port: %s Baud: %s\n", portStr, baudStr );
 #endif
 
+    // Read in all of the reg-*.bld files
+
+    ReadRegisterFiles( exeDir );
+
     if ( !gSerialPort.Open( portStr, baudStr ))
     {
         exit( 1 );
@@ -221,8 +325,7 @@ int main( int argc, char **argv )
     gSerialBus.SetSerialPort( &gSerialPort );
     gSerialBus.SetDebug( gDebug != 0 );
 
-    cmdLine.RegisterDevices( gDevType );
-
+    cmdLine.RegisterDeviceTypes( gNumDevTypes, gDevType );
     cmdLine.SetBus( &gSerialBus );
 
     printf( "> " );

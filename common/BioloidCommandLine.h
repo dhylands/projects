@@ -56,7 +56,7 @@ public:
     //------------------------------------------------------------------------
     // Registers a device type which has registers
 
-    void RegisterDevices( BLD_DevType_t *devType );
+    void RegisterDeviceTypes( unsigned numDevTypes, BLD_DevType_t **devType );
 
     //------------------------------------------------------------------------
     // Sets the bus used to send commands.
@@ -107,6 +107,9 @@ private:
 
     BioloidBus     *m_bus;
     BioloidDevice   m_device;
+
+    unsigned        m_numDevTypes;
+    BLD_DevType_t **m_devType;
 };
 
 #endif  // BIOLOIDCOMMANDLINE_H
