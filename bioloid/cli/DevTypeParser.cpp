@@ -61,7 +61,7 @@ static FieldType_t  gFieldType[] =
     { "OnOff",              BLD_RegFmtOnOff,        BLD_RegParseOnOff },
     { "AngularVelocity",    BLD_RegFmtVelocity,     BLD_RegParseVelocity },
     { "Load",               BLD_RegFmtLoad,         NULL },
-bio    { NULL }
+    { NULL }
 };
 
 //***************************************************************************

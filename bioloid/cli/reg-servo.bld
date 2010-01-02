@@ -1,0 +1,38 @@
+DeviceType: servo 
+Model: 12
+Register: 0x00  model                   2 ro
+Register: 0x02  version                 1 ro
+Register: 0x03  id                      1 rw  0  253
+Register: 0x04  baud-rate               1 rw  0  254 BaudRate
+Register: 0x05  return-delay-time       1 rw  0  254 RDT
+Register: 0x06  cw-angle-limit          2 rw  0 1023 Angle
+Register: 0x08  ccw-angle-limit         2 rw  0 1023 Angle
+Register: 0x0B  high-limit-temp         1 rw  0  150 Temperature
+Register: 0x0C  low-limit-voltage       1 rw 50  250 Voltage
+Register: 0x0D  high-limit-voltage      1 rw 50  250 Voltage
+Register: 0x0E  max-torque-def          2 rw  0 1023 
+Register: 0x10  status-level            1 rw  0    2 StatusRet
+Register: 0x11  alarm-led               1 rw  0 0x7f Alarm
+Register: 0x12  alarm-shutdown          1 rw  0 0x7f Alarm
+Register: 0x14  down-calib              2 ro
+Register: 0x16  up-calib                2 ro
+Register: 0x18  torque-enable           1 rw  0    1 OnOff
+Register: 0x19  led                     1 rw  0    1 OnOff
+Register: 0x1A  cw-comp-margin          1 rw  0  254
+Register: 0x1B  ccw-comp-margin         1 rw  0  254
+Register: 0x1C  cw-comp-slope           1 rw  1  254
+Register: 0x1D  ccw-comp-slope          1 rw  1  254
+Register: 0x1E  goal-position           2 rw  0 1023 Angle
+Register: 0x20  moving-speed            2 rw  0 1023 AngularVelocity
+Register: 0x22  max-torque              2 rw  0 1023
+Register: 0x24  present-position        2 ro  0    0 Angle
+Register: 0x26  present-speed           2 ro  0    0 AngularVelocity
+Register: 0x28  present-load            2 ro  0    0 Load
+Register: 0x2A  present-voltage         1 ro  0    0 Voltage
+Register: 0x2B  present-temp            1 ro  0    0 Temperature
+Register: 0x2C  reg-instruction         1 rw  0    1 OnOff
+Register: 0x2E  moving                  1 ro
+Register: 0x2F  lock                    1 rw  0    1
+Register: 0x30  punch                   2 rw  0 1023
+EndDeviceType
+
