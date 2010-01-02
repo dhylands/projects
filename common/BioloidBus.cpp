@@ -120,13 +120,20 @@ bool BioloidBus::ReadStatusPacket( BioloidPacket *pkt )
 *   ID which responds.
 */
 
-bool BioloidBus::Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ))
+bool BioloidBus::Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ), uint8_t startId, uint8_t numIds )
 {
     Bioloid::ID_t   id;
+    Bioloid::ID_t   endId;
     BioloidDevice   scanDev;
     bool            someDevFound = false;
 
-    for ( id = 0; id < Bioloid::BROADCAST_ID; id++ )
+    endId = startId + numIds - 1;
+    if ( endId >= Bioloid::BROADCAST_ID )
+    {
+        endId = Bioloid::BROADCAST_ID - 1;
+    }
+
+    for ( id = startId; id <= endId; id++ )
     {
         scanDev.SetBusAndID( this, id );
 

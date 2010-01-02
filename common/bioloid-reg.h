@@ -77,6 +77,8 @@ typedef struct
     unsigned    numRegs;
     BLD_Reg_t  *reg;
 
+    uint8_t     numRegBytes;
+
 } BLD_DevType_t;
 
 /* ---- Variable Externs ------------------------------------------------- */

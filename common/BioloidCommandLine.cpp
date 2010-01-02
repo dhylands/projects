@@ -172,7 +172,7 @@ void BioloidCommandLine::AddErrorStr( Bioloid::Error err, Bioloid::Error mask, c
 /**
 *   Prints the error code and prints the results.
 */
-void BioloidCommandLine::PrintError( Bioloid::Error err )
+bool BioloidCommandLine::PrintError( Bioloid::Error err )
 {
     char   *str = (char *)&gErrorBuf[0];
 
@@ -180,7 +180,7 @@ void BioloidCommandLine::PrintError( Bioloid::Error err )
 
     if ( err == Bioloid::ERROR_NONE )
     {
-        return;
+        return false;
     }
 
     if ( err > 0xff )
@@ -209,6 +209,8 @@ void BioloidCommandLine::PrintError( Bioloid::Error err )
         AddErrorStr( err, Bioloid::ERROR_INPUT_VOLTAGE,  str, sizeof( gErrorBuf ), "Input Voltage" );
     }
     Log( "%s\n", str );
+
+    return true;
 }
 
 //***************************************************************************
@@ -250,7 +252,22 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
 
     if ( strncmp( line.Remainder(), "all", 3 ) == 0 )
     {
+        uint8_t numBytes;
+
         reg = devType->reg;
+
+        numBytes = devType->numRegBytes;
+        if ( numBytes > sizeof( gReadBuf ))
+        {
+            LogError( "gReadBuf is only %d bytes, numRegBytes is %d\n",
+                      sizeof( gReadBuf ), devType->numRegBytes );
+            return;
+        }
+
+        if ( PrintError( m_device.Read( 0, gReadBuf, numBytes )))
+        {
+            return;
+        }
 
         if ( raw )
         {
@@ -275,19 +292,11 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
 
             if ( reg->flags & BLD_REG_FLAG_16BIT )
             {
-                uint16_t    val16;
-
-                m_device.Read( reg->address, &val16 );
-
-                val = val16;
+                val = *(uint16_t *)&gReadBuf[ reg->address ];
             }
             else
             {
-                uint8_t    val8;
-
-                m_device.Read( reg->address, &val8 );
-
-                val = val8;
+                val = gReadBuf[ reg->address ];
             }
 
             if ( raw )
@@ -326,7 +335,10 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
         {
             uint16_t    val16;
 
-            PrintError( m_device.Read( reg->address, &val16, sizeof( val16 )));
+            if ( PrintError( m_device.Read( reg->address, &val16, sizeof( val16 ))))
+            {
+                return;
+            }
 
             val = val16;
         }
@@ -334,7 +346,10 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
         {
             uint8_t    val8;
 
-            PrintError( m_device.Read( reg->address, &val8, sizeof( val8 )));
+            if (PrintError( m_device.Read( reg->address, &val8, sizeof( val8 ))))
+            {
+                return;
+            }
 
             val = val8;
         }
@@ -439,9 +454,29 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
     }
     if ( strcmp( devTypeStr, "scan" ) == 0 )
     {
-        if ( !m_bus->Scan( DevFound ))
+        uint8_t numIds;
+
+        if ( !line.NextNum( &numIds ))
         {
-            Log( "No devices found\n" );
+            numIds = 32;
+        }
+
+        if ( numIds < 100 )
+        {
+            bool    servoIdFound    = m_bus->Scan( DevFound, 0, numIds );
+            bool    sensorIdFound   = m_bus->Scan( DevFound, 100, numIds );
+
+            if ( !servoIdFound && !sensorIdFound )
+            {
+                Log( "No devices found\n" );
+            }
+        }
+        else
+        {
+            if ( !m_bus->Scan( DevFound, 0 , numIds ))
+            {
+                Log( "No devices found\n" );
+            }
         }
 
         return true;
@@ -562,7 +597,10 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             return true;
         }
 
-        PrintError( m_device.Read( offset, gReadBuf, numBytes ));
+        if ( PrintError( m_device.Read( offset, gReadBuf, numBytes )))
+        {
+            return true;
+        }
 
         DumpMem( "Read", offset, gReadBuf, numBytes );
     }

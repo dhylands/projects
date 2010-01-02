@@ -270,6 +270,11 @@ bool DevTypeParser::ParseRegister( BLD_Reg_t *reg )
         reg->flags |= BLD_REG_FLAG_16BIT;
     }
 
+    if ( reg->address + numBytes > m_devType->numRegBytes )
+    {
+        m_devType->numRegBytes = reg->address + numBytes;
+    }
+
     if (( s = m_line.NextToken()) == NULL )
     {
         LogError( "Register %s: No mode specified (ro/rw) %s:%d\n", reg->name, m_fileName, m_lineNum );

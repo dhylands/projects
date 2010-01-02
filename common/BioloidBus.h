@@ -57,7 +57,7 @@ public:
     // Scans the bus, calling the passed callback for each device
     // ID which responds.
 
-    bool Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ));
+    bool Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ), uint8_t startId, uint8_t numIds );
 
     //------------------------------------------------------------------------
     // Broadcasts an action packet to all of the devices on the bus.

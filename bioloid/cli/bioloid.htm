@@ -49,10 +49,14 @@ servo 15 Response Received
             </tr>
             <tr>
                 <td style="background-color:LightGray;">
-                    <p><code>scan</code></p>
-                    <p>Scans the bus (sends a ping command to every ID), and for
-                    devices that respond, it reads and reports the model number
-                    and version.
+                    <p><code>scan [numIds]</code></p>
+                    <p>Scans the bus, by sending ping commands to the indicated 
+                    devices. If numIds is not specified, then it is assumed to 
+                    be 32. If numIds is less than 100, then addresses from 0 to 
+                    numIds - 1, and 100 to 100 + numIds - 1 will be scanned. 
+                    If numIds is greater than 100, then ids from 0 to numIds - 1 
+                    will be scanned. For devices that respond, The model number
+                    and version will be read and reported.
                     </p>
 <pre>
 &gt; scan

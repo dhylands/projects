@@ -91,7 +91,7 @@ private:
     //------------------------------------------------------------------------
     // Prints the error code and prints the results.
 
-    void PrintError( Bioloid::Error err );
+    bool PrintError( Bioloid::Error err );
 
     //------------------------------------------------------------------------
     // Processes the get and get-raw command
