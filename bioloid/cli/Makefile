@@ -61,11 +61,11 @@ all: copy-files
 
 MK_DEVICE_TYPE_FILES := $(wildcard reg-*.bld)
 MK_HTM_FILES := $(wildcard *.htm)
-MK_NSI_FILES := $(wildcard *.nsi)
+MK_NSI_FILES := $(wildcard *.nsi) $(wildcard *.nsh)
 
-MK_COPY_FILES := $(MK_NSI_FILES) $(MK_HTM_FILES) $(MK_DEVICE_TYPE_FILES)
+MK_COPY_FILES := $(addprefix $(MK_BIN_DIR)/,$(MK_NSI_FILES) $(MK_HTM_FILES) $(MK_DEVICE_TYPE_FILES))
 
-$(addprefix $(MK_BIN_DIR)/,$(MK_COPY_FILES)) : $(MK_BIN_DIR)/% : %
+$(MK_COPY_FILES) : $(MK_BIN_DIR)/% : %
 	@echo "Copying $< to $@ ..."
 	cp $< $@
 	
@@ -80,7 +80,7 @@ MK_INSTALL_FILES := $(MK_ELF_TARGET)$(MK_ELF_EXT)
 MK_INSTALL_FILES += $(MK_HTM_FILES)
 MK_INSTALL_FILES += $(MK_DEVICE_TYPE_FILES)
 
-installer : $(addprefix $(MK_BIN_DIR)/,$(MK_COPY_FILES))
+installer : $(MK_COPY_FILES)
 	@$(ECHO) -e "file $(subst $(space),\nfile ,$(MK_INSTALL_FILES))" > $(MK_BIN_DIR)/file-list.nsh
 	@$(ECHO) -e "delete \$$INSTDIR\\\\$(subst $(space),\ndelete \$$INSTDIR\\\\,$(MK_INSTALL_FILES))" > $(MK_BIN_DIR)/file-delete.nsh
 	(cd $(MK_BIN_DIR); makensis installer.nsi)

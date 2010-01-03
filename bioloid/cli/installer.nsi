@@ -1,9 +1,13 @@
+!include EnvVarUpdate.nsh
+
 # define installer name
 outFile "installer.exe"
 
 ShowInstDetails show
-
+ShowUnInstDetails show
 InstallDir $PROGRAMFILES\Bioloid
+
+Name "Bioloid Command Line Utility"
 
 Page directory
 Page instfiles
@@ -11,8 +15,8 @@ UninstPage uninstConfirm
 UninstPage instfiles
  
 # default section start
-section
- 
+Section "Bioloid Command Line Utility"
+
 # define output path
 setOutPath $INSTDIR
  
@@ -21,6 +25,8 @@ setOutPath $INSTDIR
  
 # define uninstaller name
 writeUninstaller $INSTDIR\uninstaller.exe
+
+${EnvVarUpdate} $0 "PATH" "A" "HKCU" "$INSTDIR"
  
 # default section end
 sectionEnd
@@ -34,5 +40,7 @@ delete $INSTDIR\uninstaller.exe
  
 # now delete installed file
 !include file-delete.nsh
+
+${un.EnvVarUpdate} $0 "PATH" "R" "HKCU" "$INSTDIR"
  
 sectionEnd
