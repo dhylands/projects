@@ -1,7 +1,7 @@
 !include EnvVarUpdate.nsh
 
 # define installer name
-outFile "installer.exe"
+outFile "Bioloid-CLI-Installer.exe"
 
 ShowInstDetails show
 ShowUnInstDetails show
@@ -14,12 +14,16 @@ Page instfiles
 UninstPage uninstConfirm
 UninstPage instfiles
  
+#set the icon
+icon installer.ico
+UninstallIcon installer.ico
+ 
 # default section start
 Section "Bioloid Command Line Utility"
 
 # define output path
 setOutPath $INSTDIR
- 
+
 # specify file to go in output path
 !include file-list.nsh
  

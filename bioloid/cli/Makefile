@@ -62,8 +62,9 @@ all: copy-files
 MK_DEVICE_TYPE_FILES := $(wildcard reg-*.bld)
 MK_HTM_FILES := $(wildcard *.htm)
 MK_NSI_FILES := $(wildcard *.nsi) $(wildcard *.nsh)
+MK_ICO_FILES := $(wildcard *.ico)
 
-MK_COPY_FILES := $(addprefix $(MK_BIN_DIR)/,$(MK_NSI_FILES) $(MK_HTM_FILES) $(MK_DEVICE_TYPE_FILES))
+MK_COPY_FILES := $(addprefix $(MK_BIN_DIR)/,$(MK_NSI_FILES) $(MK_HTM_FILES) $(MK_DEVICE_TYPE_FILES) $(MK_ICO_FILES))
 
 $(MK_COPY_FILES) : $(MK_BIN_DIR)/% : %
 	@echo "Copying $< to $@ ..."
