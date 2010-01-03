@@ -57,11 +57,30 @@ include ../../rules/mkRules.mk
 # the register (reg-*.bld) files. So we need to copy them.
 #
 
-all: copy-register-files
+all: copy-files
 
-copy-register-files: $(addprefix $(MK_BIN_DIR)/,$(wildcard reg-*.bld))
+MK_DEVICE_TYPE_FILES := $(wildcard reg-*.bld)
+MK_HTM_FILES := $(wildcard *.htm)
+MK_NSI_FILES := $(wildcard *.nsi)
 
-$(MK_BIN_DIR)/reg-%.bld : reg-%.bld
+MK_COPY_FILES := $(MK_NSI_FILES) $(MK_HTM_FILES) $(MK_DEVICE_TYPE_FILES)
+
+$(addprefix $(MK_BIN_DIR)/,$(MK_COPY_FILES)) : $(MK_BIN_DIR)/% : %
 	@echo "Copying $< to $@ ..."
 	cp $< $@
+	
+#
+# Now go and build an installer.
+#
+# We build the installer from withing the bin directory, so
+# filenames need to be relative to that
+#
 
+MK_INSTALL_FILES := $(MK_ELF_TARGET)$(MK_ELF_EXT)
+MK_INSTALL_FILES += $(MK_HTM_FILES)
+MK_INSTALL_FILES += $(MK_DEVICE_TYPE_FILES)
+
+installer : $(addprefix $(MK_BIN_DIR)/,$(MK_COPY_FILES))
+	@$(ECHO) -e "file $(subst $(space),\nfile ,$(MK_INSTALL_FILES))" > $(MK_BIN_DIR)/file-list.nsh
+	@$(ECHO) -e "delete \$$INSTDIR\\\\$(subst $(space),\ndelete \$$INSTDIR\\\\,$(MK_INSTALL_FILES))" > $(MK_BIN_DIR)/file-delete.nsh
+	(cd $(MK_BIN_DIR); makensis installer.nsi)
