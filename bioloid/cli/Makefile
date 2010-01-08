@@ -18,6 +18,9 @@ MK_HOST_OS = mingw
 endif
 endif
 
+$(info MK_OS      = $(MK_OS))
+$(info MK_HOST_OS = $(MK_HOST_OS))
+
 MK_ELF_TARGET 	= bioloid
 
 MK_SRC_FILES = \
@@ -42,7 +45,7 @@ ifeq ($(MK_OS),avr)
 MK_SRC_FILES += c++-support.cpp
 endif
 
-MK_ADD_SYMBOLS := 1
+MK_ADD_SYMBOLS := 0
 
 #CFLAGS += $(OPTS)
 #CXXFLAGS += $(OPTS)
