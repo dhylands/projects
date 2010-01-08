@@ -35,6 +35,7 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <string.h>
 
 #if defined( __cplusplus )
 extern "C" {
@@ -89,6 +90,13 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args );
 int StrXPrintf( StrXPrintfFunc func, void *userParm, const char *fmt, ... );
 int vStrXPrintf( StrXPrintfFunc func, void *userParm, const char *fmt, va_list args );
 
+#endif
+
+#if defined( linux )
+static inline int stricmp( const char *s1, const char *s2 )
+{
+    return strcasecmp( s1, s2 );
+}
 #endif
 
 #if defined( __cplusplus )

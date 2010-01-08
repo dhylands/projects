@@ -185,7 +185,7 @@ bool BioloidCommandLine::PrintError( Bioloid::Error err )
 
     if ( err > 0xff )
     {
-        char    *errStr;
+        const char *errStr;
 
         switch ( err )
         {
