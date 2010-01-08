@@ -18,11 +18,11 @@
 
 // ---- Include Files -------------------------------------------------------
 
+#include <errno.h>
+#include <string.h>
+
 #include "Error.h"
 #include "Str.h"
-
-#define WIN32_LEAN_AND_MEAN                    
-#include <windows.h>
 
 // ---- Public Variables ----------------------------------------------------
 // ---- Private Constants and Types -----------------------------------------
@@ -35,6 +35,27 @@
  * @{
  */
 
+//***************************************************************************
+/**
+*   Returns the error number corresponding to the last error. This function
+*   is provided for compatability with Win32.
+*/
+
+uint32_t GetLastError()
+{
+    return errno;
+}
+
+//***************************************************************************
+/**
+*   Returns the error number corresponding to the last error. This function
+*   is provided for compatability with Win32.
+*/
+
+uint32_t WSAGetLastError()
+{
+    return errno;
+}
 
 //***************************************************************************
 /**
@@ -45,21 +66,12 @@
 
 char *GetErrorStr
 (
-    uint32_t    errNum,   ///< Error number to get the string version for.
-    char       *errStr,   ///< Place to store the error string.
-    size_t      maxLen   ///< Max length that can be written into errStr.
+    uint32_t    errNum, ///< Error number to get the string version for.
+    char       *errStr, ///< Place to store the error string.
+    size_t      maxLen  ///< Max length that can be written into errStr.
 )
 {
-    if ( FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, // dwFlags
-                        0,                          // lpSource
-                        errNum,                     // dwMessageId
-                        GetUserDefaultLangID(),     // dwlanguageId
-                        errStr,                     // lpBuffer
-                        maxLen,                     // nSize
-                        NULL ) == 0 )               // arguments
-    {
-        StrPrintf( errStr, maxLen, "*** Unknown Error: %d ***", errNum );
-    }
+    strerror_r( errNum, errStr, maxLen );
 
     return errStr;
                         
@@ -83,5 +95,4 @@ char *GetLastErrorStr
 } // GetLastErrorStr
 
 /** @} */
-
 

@@ -27,19 +27,37 @@
 
 // ---- Include Files -------------------------------------------------------
 
-#if !defined( _WINDOWS_ )
-#	include <windows.h>
-#endif
+#include <stdint.h>
+#include <stdlib.h>
 
 /**
  * @addtogroup Error
  * @{
  */
 
+
 //---------------------------------------------------------------------------
 
-char *GetErrorStr( DWORD errNum, char *errStr, size_t maxLen );
+#if defined( __cplusplus )
+extern "C"
+{
+#endif
+
+char *GetErrorStr( uint32_t errNum, char *errStr, size_t maxLen );
 char *GetLastErrorStr( char *errStr, size_t maxLen );
+
+#if !defined( WIN32 )
+
+// Define some routines for compatability with Win32
+
+uint32_t    GetLastError();
+uint32_t    WSAGetLastError();
+
+#endif
+
+#if defined( __cplusplus )
+}
+#endif
 
 /** @} */
 
