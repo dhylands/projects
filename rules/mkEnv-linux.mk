@@ -13,7 +13,7 @@ MK_COMMON_POSIX_DIR	= $(MK_COMMON_DIR)/posix
 vpath %.c   $(MK_COMMON_POSIX_DIR)
 vpath %.cpp $(MK_COMMON_POSIX_DIR)
 
-# linux used -rdynamic
+# linux uses -rdynamic
 LDFLAGS_RDYNAMIC = -rdynamic
 
 include $(MK_RULES_DIR)/mkEnv-gcc.mk

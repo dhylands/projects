@@ -224,6 +224,7 @@ print-info: print-cfg print-include print-path
 print-cfg:
 	 @$(ECHO)
 	 @$(ECHO) "MK_OS        = $(MK_OS)"
+	 @$(ECHO) "MK_HOST_OS   = $(MK_HOST_OS)"
 	 @$(ECHO) "MK_ROOT      = $(MK_ROOT)"
 	 @$(ECHO) "MK_OBJ_DIR   = $(MK_OBJ_DIR)"
 	 @$(ECHO) "MK_LIB_DIR   = $(MK_LIB_DIR)"

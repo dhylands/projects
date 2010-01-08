@@ -35,7 +35,7 @@ LDFLAGS  += $(MK_AVR_MCU_FLAGS)
 
 CXXFLAGS += -fno-exceptions -fno-rtti
 
-# On the AVR, we always optimize
+# On the AVR, we always optimize for size
 
 CFLAGS += -Os
 CXXFLAGS += -Os
