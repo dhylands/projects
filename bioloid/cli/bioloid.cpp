@@ -27,7 +27,11 @@
 #define USE_NETBUS          0
 #else
 #define USE_COMMAND_LINE    1
+#if defined( linux )
+#define USE_NETBUS          0
+#else
 #define USE_NETBUS          1
+#endif
 #endif
 
 // ---- Include Files -------------------------------------------------------
@@ -42,6 +46,7 @@
 #include <libgen.h>
 
 #include "Log.h"
+#include "Str.h"
 #include "BioloidBus.h"
 #include "BioloidDevice.h"
 #include "BioloidCommandLine.h"
@@ -341,11 +346,13 @@ int main( int argc, char **argv )
     LogVerbose( "Verbose enabled\n" );
 #endif
 
+#if USE_NETBUS
     if ( gUseSerial && gUseNet )
     {
         LogError( "Only specify network or serial, not both\n" );
         exit( 1 );
     }
+#endif
 
     // Read in all of the reg-*.bld files
 

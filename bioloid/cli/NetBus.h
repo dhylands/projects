@@ -31,6 +31,8 @@
 
 #if defined( WIN32 )
 #include <windows.h>
+#else
+#include <netinet/in.h>
 #endif
 
 /**

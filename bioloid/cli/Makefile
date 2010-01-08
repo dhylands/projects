@@ -4,7 +4,7 @@
 #
 ###########################################################################
 
-MK_OS			= host
+MK_OS		= host
 #MK_OS           = avr
 
 ifeq ($(MK_OS),avr)
@@ -13,7 +13,9 @@ MK_AVR_FREQ     = 8MHz
 endif
 
 ifeq ($(MK_OS),host)
+ifeq ($(findstring CYGWIN_NT,$(shell uname -s)),CYGWIN_NT)
 MK_HOST_OS = mingw
+endif
 endif
 
 MK_ELF_TARGET 	= bioloid
@@ -27,7 +29,6 @@ MK_SRC_FILES = \
 	SerialPort.cpp \
 	SerialBus.cpp \
 	Error.cpp \
-	NetBus.cpp \
 	bioloid-reg.cpp \
 	StrPrintf.c \
 	BioloidCommandLine.cpp \
@@ -47,6 +48,7 @@ MK_ADD_SYMBOLS := 1
 #CXXFLAGS += $(OPTS)
 
 ifeq ($(MK_HOST_OS),mingw)
+MK_SRC_FILES += NetBus.cpp
 LDLIBS += -lwsock32
 endif
 
