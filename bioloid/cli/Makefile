@@ -26,6 +26,8 @@ MK_SRC_FILES = \
 	BioloidPacket.cpp \
 	SerialPort.cpp \
 	SerialBus.cpp \
+	Error.cpp \
+	NetBus.cpp \
 	bioloid-reg.cpp \
 	StrPrintf.c \
 	BioloidCommandLine.cpp \
@@ -34,10 +36,6 @@ MK_SRC_FILES = \
 	DumpMem.c \
 	Str.c \
 	StrToken.cpp
-
-ifeq ($(MK_HOST_OS),mingw)
-MK_SRC_FILES += Error.cpp
-endif
 
 ifeq ($(MK_OS),avr)
 MK_SRC_FILES += c++-support.cpp
@@ -48,7 +46,9 @@ MK_ADD_SYMBOLS := 1
 #CFLAGS += $(OPTS)
 #CXXFLAGS += $(OPTS)
 
-#LDLIBS += -lpthread
+ifeq ($(MK_HOST_OS),mingw)
+LDLIBS += -lwsock32
+endif
 
 include ../../rules/mkRules.mk
 
@@ -69,6 +69,8 @@ MK_COPY_FILES := $(addprefix $(MK_BIN_DIR)/,$(MK_NSI_FILES) $(MK_HTM_FILES) $(MK
 $(MK_COPY_FILES) : $(MK_BIN_DIR)/% : %
 	@echo "Copying $< to $@ ..."
 	cp $< $@
+
+copy-files: $(MK_COPY_FILES)
 	
 #
 # Now go and build an installer.
@@ -81,7 +83,7 @@ MK_INSTALL_FILES := $(MK_ELF_TARGET)$(MK_ELF_EXT)
 MK_INSTALL_FILES += $(MK_HTM_FILES)
 MK_INSTALL_FILES += $(MK_DEVICE_TYPE_FILES)
 
-installer : $(MK_COPY_FILES)
+installer : copy-files                                                         
 	@$(ECHO) -e "file $(subst $(space),\nfile ,$(MK_INSTALL_FILES))" > $(MK_BIN_DIR)/file-list.nsh
 	@$(ECHO) -e "delete \$$INSTDIR\\\\$(subst $(space),\ndelete \$$INSTDIR\\\\,$(MK_INSTALL_FILES))" > $(MK_BIN_DIR)/file-delete.nsh
 	(cd $(MK_BIN_DIR); makensis installer.nsi)

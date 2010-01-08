@@ -24,8 +24,10 @@
 
 #if defined( AVR )
 #define USE_COMMAND_LINE    0
+#define USE_NETBUS          0
 #else
 #define USE_COMMAND_LINE    1
+#define USE_NETBUS          1
 #endif
 
 // ---- Include Files -------------------------------------------------------
@@ -47,6 +49,10 @@
 #include "SerialPort.h"
 #include "SerialBus.h"
 #include "DevTypeParser.h"
+
+#if USE_NETBUS
+#   include "NetBus.h"
+#endif
 
 #if defined( WIN32 )
 #   include <windows.h>
@@ -76,6 +82,7 @@ enum
     OPT_BAUD        = 'b',
     OPT_DEBUG       = 'd',
     OPT_PORT        = 'p',
+    OPT_NET         = 'n',
     OPT_VERBOSE     = 'v',
     OPT_HELP        = 'h',
 
@@ -92,6 +99,7 @@ static struct option gOption[] =
     { "debug",      no_argument,        NULL,       OPT_DEBUG },
     { "help",       no_argument,        NULL,       OPT_HELP },
     { "port",       required_argument,  NULL,       OPT_PORT },
+    { "net",        required_argument,  NULL,       OPT_NET },
     { "verbose",    no_argument,        NULL,       OPT_VERBOSE },
     { NULL }
 };
@@ -99,7 +107,13 @@ static struct option gOption[] =
 
 SerialPort      gSerialPort;
 SerialBus       gSerialBus;
-BioloidDevice   gDev( &gSerialBus, 1 );
+
+bool            gUseSerial = false;
+
+#if USE_NETBUS
+NetBus          gNetBus;
+bool            gUseNet = false;
+#endif
 
 #define MAX_DEV_TYPES   20
 
@@ -209,6 +223,7 @@ void Usage()
     fprintf( stderr, "\n" );
     fprintf( stderr, "  -b, --baud=baud   Set the baudrate used\n" );
     fprintf( stderr, "  -p, --port=name   Set the serial port to use\n" );
+    fprintf( stderr, "  -n, --net=name[:port] Set the network host to use\n" );
     fprintf( stderr, "  -d, --debug       Enable debug features\n" );
     fprintf( stderr, "  -h, --help        Display this message\n" );
     fprintf( stderr, "  -v, --verbose     Turn on verbose messages\n" );
@@ -231,6 +246,9 @@ int main( int argc, char **argv )
     int                 arg;
     const char         *baudStr = DEFAULT_BAUD;
     const char         *portStr = DEFAULT_PORT;
+#endif
+#if USE_NETBUS
+    const char         *hostStr = NULL;
 #endif
     char                line[ 80 ];
     BioloidCommandLine  cmdLine;
@@ -285,8 +303,18 @@ int main( int argc, char **argv )
             case OPT_PORT:
             {
                 portStr = optarg;
+                gUseSerial = true;
                 break;
             }
+
+#if USE_NETBUS
+            case OPT_NET:
+            {
+                hostStr = optarg;
+                gUseNet = true;
+                break;
+            }
+#endif
 
             case OPT_VERBOSE:
             {
@@ -313,19 +341,41 @@ int main( int argc, char **argv )
     LogVerbose( "Verbose enabled\n" );
 #endif
 
+    if ( gUseSerial && gUseNet )
+    {
+        LogError( "Only specify network or serial, not both\n" );
+        exit( 1 );
+    }
+
     // Read in all of the reg-*.bld files
 
     ReadRegisterFiles( exeDir );
 
-    if ( !gSerialPort.Open( portStr, baudStr ))
+#if USE_NETBUS
+    if ( gUseNet )
     {
-        exit( 1 );
+        if ( !gNetBus.Open( hostStr ))
+        {
+            exit( 1 );
+        }
+        gNetBus.SetDebug( gDebug != 0 );
+        cmdLine.SetBus( &gNetBus );
     }
-    gSerialBus.SetSerialPort( &gSerialPort );
-    gSerialBus.SetDebug( gDebug != 0 );
+    else
+#endif
+    {
+        // Default to serial if no network specified
+
+        if ( !gSerialPort.Open( portStr, baudStr ))
+        {
+            exit( 1 );
+        }
+        gSerialBus.SetSerialPort( &gSerialPort );
+        gSerialBus.SetDebug( gDebug != 0 );
+        cmdLine.SetBus( &gSerialBus );
+    }
 
     cmdLine.RegisterDeviceTypes( gNumDevTypes, gDevType );
-    cmdLine.SetBus( &gSerialBus );
 
     printf( "> " );
     while ( fgets( line, sizeof( line ), stdin ) != NULL )
@@ -342,5 +392,4 @@ int main( int argc, char **argv )
     exit( 0 );
     return 0;
 }
-
 

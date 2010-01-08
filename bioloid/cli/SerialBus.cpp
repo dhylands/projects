@@ -27,6 +27,7 @@
 #include "Log.h"
 #include "DumpMem.h"
 #include "SerialBus.h"
+#include "Error.h"
 
 // ---- Public Variables ----------------------------------------------------
 // ---- Private Constants and Types -----------------------------------------
