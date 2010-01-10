@@ -16,6 +16,12 @@ vpath %.cpp $(MK_COMMON_POSIX_DIR)
 # linux uses -rdynamic
 LDFLAGS_RDYNAMIC = -rdynamic
 
+# Turn on optimization by default. This generates some warning that non
+# optimized won't find.
+
+CFLAGS += -O$(MK_OPTIMIZE)
+CXXFLAGS += -O$(MK_OPTIMIZE)
+
 include $(MK_RULES_DIR)/mkEnv-gcc.mk
 
 MK_ELF_EXT    	=

@@ -125,11 +125,11 @@ export debug = 0
 endif
 
 ifeq ($(debug),1)
-MK_OPTIMIZE    	= 1
-MK_REL_EXT		= -dbg
-else
 MK_OPTIMIZE    	= 0
-MK_REL_EXT		=
+MK_REL_EXT	= -dbg
+else
+MK_OPTIMIZE    	= 3
+MK_REL_EXT	=
 endif
 
 MK_ADD_SYMBOLS 	?= 1

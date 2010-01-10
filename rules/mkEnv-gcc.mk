@@ -54,6 +54,18 @@ CFLAGS += \
 	-Wstrict-prototypes \
 	-Wmissing-declarations
 
+CXXFLAGS += \
+	-Wall \
+	-Wimplicit \
+	-Wpointer-arith \
+	-Wswitch \
+	-Wredundant-decls \
+	-Wreturn-type \
+	-Wshadow \
+	-Wunused \
+	-Wcast-qual \
+	-Wmissing-declarations
+
 ifeq ($(MK_ADD_SYMBOLS),1)
 CXXFLAGS += -ggdb
 CFLAGS += -ggdb
