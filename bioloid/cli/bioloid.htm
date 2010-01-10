@@ -346,6 +346,48 @@ Read: 001e: AA 02 00 00                                     ....
             </tr>
         </table>
 
+        <h2>Building from source</h2>
+
+        <p>Full source code for this utility is available, and building has 
+            been tested under windows and linux. To build it under windows will 
+            require cygwin. You'll need subversion, gcc, and make. make needs to 
+            be version 3.81 or later. To build the windows installer, you'll 
+            need to also install <a 
+            href="http://nsis.sourceforge.net/Main_Page">NSIS</a> and add it to 
+            your PATH.</p>
+        <p>To install the source code, cd to the directory where you would 
+            like the projects tree to go to, and do the following:</p>
+        <pre>
+    svn co http://svn.hylands.org/common http://svn.hylands.org/rules http://svn.hylands.org/bioloid projects
+        </pre>
+        <p>The above will retrieve a small set of files required to build 
+            the command line utility. To check out the full tree, use:</p>
+        <pre>
+    svn co http://svn.hylands.org/ projects
+        </pre>
+        <p>To build, use</p>
+        <pre>
+    cd projects/bioloid/cli
+    make
+        </pre>
+        <p>To build the windows installer (windows only):</p>
+        <pre>
+    make installer
+        </pre>
+        <p>Note that while cygwin is required to build under windows, the 
+            bioloid executable is a Win32 native app (i.e. doesn't require 
+            cygwin1.dll)</p>
+        <p>Under windows, the executable can be found in bin/mingw. Under 
+            linux, the executable can be found in bin/linux.</p>
+        <p>To build for the gumstix, you'll need to edit the 
+            projects/rules/mkEnv-gumstix.mk file and ensure that the
+            MK_TOOLS_DIR and MK_CROSS_COMPILE are initialized properly for your
+            build environment. To build, use the command:</p>
+        <pre>
+    make MK_OS=gumstix
+        </pre>
+        <p>The reg-*.bld files are expected to be in the same directory as 
+            the executable.</p>
     </body>
 </html>
 
