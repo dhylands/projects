@@ -77,7 +77,7 @@ BioloidCommandLine::~BioloidCommandLine()
 void BioloidCommandLine::DumpRegInfo( BLD_DevType_t *devType )
 {
     BLD_Reg_t  *reg;
-    int         regIdx;
+    unsigned    regIdx;
 
     Log( "Addr Size Min  Max Name\n" );
     Log( "---- ---- ---  --- --------------------\n" );
@@ -131,7 +131,7 @@ bool BioloidCommandLine::ParseOffsetAndData( StrTokenizer &line, uint8_t *offset
 bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *devType, BLD_Reg_t **outRegp )
 {
     char        *regStr;
-    int          regIdx;
+    unsigned     regIdx;
 
     if (( regStr = line.NextToken()) == NULL )
     {
@@ -242,7 +242,7 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
     unsigned    val;
     int         strWidth;
     int         i;
-    int         regIdx;
+    unsigned    regIdx;
 
     if ( id == Bioloid::BROADCAST_ID )
     {
@@ -421,10 +421,9 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 {
     char           *devTypeStr;
     BLD_DevType_t  *devType;
-    char           *endPtr;
     char            token[ 20 ];
     StrTokenizer    line( lineStr, token, sizeof( token ));
-    int             devTypeIdx;
+    unsigned        devTypeIdx;
 
     if ( m_bus == NULL )
     {
@@ -484,11 +483,9 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
 
     if ( strcmp( devTypeStr, "dev-types" ) == 0 )
     {
-        int     devTypeIdx;
-
         for ( devTypeIdx = 0; devTypeIdx < m_numDevTypes; devTypeIdx++ )
         {
-            BLD_DevType_t   *devType = m_devType[devTypeIdx];
+            devType = m_devType[devTypeIdx];
 
             Log( "%-10s Model: %5u %2d registers\n", 
                  devType->devTypeStr, devType->model, devType->numRegs );

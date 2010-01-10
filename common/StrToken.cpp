@@ -45,7 +45,10 @@
 */
 
 StrTokenizer::StrTokenizer()
-    : m_str( NULL ), m_outToken( NULL ), m_maxLen( 0 ), m_delim( NULL )
+    : m_str( NULL ),
+      m_delim( NULL ),
+      m_outToken( NULL ), 
+      m_maxLen( 0 )
 {
 }
 
@@ -63,8 +66,8 @@ StrTokenizer::StrTokenizer
     const char *delim   ///< Delimiters to use if none are provided
 )
     : m_str( str ), 
-      m_outToken( outToken ), 
       m_delim( delim ), 
+      m_outToken( outToken ), 
       m_maxLen( maxLen )
 {
 }

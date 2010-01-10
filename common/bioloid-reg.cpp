@@ -242,7 +242,6 @@ void BLD_RegFmtVelocity( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size
 
 bool BLD_RegParseVelocity( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t *valp )
 {
-    const char *token;
     double rpm;
 
     if ( !line.NextNum( &rpm ))
