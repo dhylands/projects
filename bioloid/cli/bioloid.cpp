@@ -135,7 +135,7 @@ static BLD_DevType_t   *gDevType[ MAX_DEV_TYPES ];
 */
 void AddDevType( BLD_DevType_t *devType )
 {
-    int     devTypeIdx;
+    unsigned    devTypeIdx;
 
     if ( gNumDevTypes >= MAX_DEV_TYPES )
     {
@@ -256,7 +256,6 @@ int main( int argc, char **argv )
     char               *shortOpts = shortOptsStr;
     struct option      *scanOpt;
     int                 opt;
-    int                 arg;
     const char         *baudStr = DEFAULT_BAUD;
     const char         *portStr = DEFAULT_PORT;
 #endif

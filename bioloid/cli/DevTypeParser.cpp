@@ -133,6 +133,7 @@ bool DevTypeParser::ParseFile( const char *fileName, AddDevTypeFunc addDevTypeFu
             return false;
         }
     }
+    return true;
 }
 
 //***************************************************************************

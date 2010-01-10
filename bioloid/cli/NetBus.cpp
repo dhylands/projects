@@ -51,9 +51,9 @@
 */
 
 NetBus::NetBus()
-    : m_dataBytes( 0 ),
-      m_debug( false ),
-      m_initialized( false )
+    : m_debug( false ),
+      m_initialized( false ),
+      m_dataBytes( 0 )
 {
 }
 
@@ -150,7 +150,6 @@ bool NetBus::Open( const char *hostStr )
     {
         int   seg;
         char *segStr  = hostName;
-        char *endPtr;
 
         // The hostname is only made up of numbers and dots. We'll parse
         // it ourselves.
@@ -274,6 +273,8 @@ bool NetBus::Open( const char *hostStr )
                ntohs( m_sockAddr.sin_port ));
 
     Log( "Connected to %s\n", m_connectionInfo );
+
+    return true;
 }
 
 //***************************************************************************
@@ -283,7 +284,7 @@ bool NetBus::Open( const char *hostStr )
 
 void NetBus::WriteBuffer()
 {
-    size_t  bytesWritten;
+//    size_t  bytesWritten;
 
     if ( m_debug )
     {

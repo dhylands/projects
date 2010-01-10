@@ -109,7 +109,7 @@ private:
     bool        m_debug;
 
     int         m_fd;
-    int         m_dataBytes;
+    size_t      m_dataBytes;
     uint8_t     m_data[ 128 ];
 
 };

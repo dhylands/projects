@@ -32,6 +32,7 @@
 #if defined( WIN32 )
 #include <windows.h>
 #else
+typedef int SOCKET;
 #include <netinet/in.h>
 #endif
 
@@ -113,8 +114,8 @@ private:
 
     bool                m_initialized;
 
-    int                 m_socket;       ///< Socket handle
-    int                 m_dataBytes;
+    SOCKET              m_socket;       ///< Socket handle
+    size_t              m_dataBytes;
     uint8_t             m_data[ 128 ];
     unsigned short      m_defaultPort;  ///< Default Port number (if none specified)
     struct sockaddr_in  m_sockAddr;     ///< Socket address for the remote end

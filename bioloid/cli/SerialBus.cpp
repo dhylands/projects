@@ -47,8 +47,8 @@
 
 SerialBus::SerialBus()
     : m_serialPort( NULL ),
-      m_dataBytes( 0 ),
-      m_debug( false )
+      m_debug( false ),
+      m_dataBytes( 0 )
 {
 }
 
