@@ -1,0 +1,36 @@
+DeviceType: sensor
+Model: 13
+Register: 0x00  model                   2 ro
+Register: 0x02  version                 1 ro
+Register: 0x03  id                      1 rw  0  253
+Register: 0x04  baud-rate               1 rw  0  254 BaudRate
+Register: 0x05  return-delay-time       1 rw  0  254 RDT
+Register: 0x0B  high-limit-temp         1 rw  0  150 Temperature
+Register: 0x0C  low-limit-voltage       1 rw 50  250 Voltage
+Register: 0x0D  high-limit-voltage      1 rw 50  250 Voltage
+Register: 0x10  status-level            1 rw  0    2 StatusRet
+Register: 0x14  obstacle-threshold      1 rw  0  255
+Register: 0x15  light-threshold      	1 rw  0  255
+Register: 0x1A  ir-l-value		1 ro
+Register: 0x1B  ir-c-value		1 ro
+Register: 0x1C  ir-r-value		1 ro
+Register: 0x1D  luminosity-l-value	1 ro
+Register: 0x1E  luminosity-c-value	1 ro
+Register: 0x1F  luminosity-r-value	1 ro
+Register: 0x20  obstacle-detected	1 ro
+Register: 0x21  luminosity-detected	1 ro
+Register: 0x23  sound-data         	1 ro
+Register: 0x24  sound-max-data         	1 rw  0  255
+Register: 0x25  sound-det-count   	1 rw  0  255
+Register: 0x26  sound-det-timestamp     2 rw 0 65535
+Register: 0x28  buzzer-index         	1 rw  0  255
+Register: 0x29  buzzer-time             1 rw  0  255
+Register: 0x2A  present-voltage         1 ro  0    0 Voltage
+Register: 0x2B  present-temp            1 ro  0    0 Temperature
+Register: 0x2C  reg-instruction         1 rw  0    1 OnOff
+Register: 0x2E  ir-data-avail           1 ro
+Register: 0x2F  lock                    1 rw  0    1
+Register: 0x30  ir-data-rx              2 ro
+Register: 0x32  ir-data-tx              2 rw  0 65535
+EndDeviceType
+
