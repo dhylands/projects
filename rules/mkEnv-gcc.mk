@@ -63,8 +63,7 @@ CXXFLAGS += \
 	-Wreturn-type \
 	-Wshadow \
 	-Wunused \
-	-Wcast-qual \
-	-Wmissing-declarations
+	-Wcast-qual
 
 ifeq ($(MK_ADD_SYMBOLS),1)
 CXXFLAGS += -ggdb
