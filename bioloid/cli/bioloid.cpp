@@ -167,6 +167,8 @@ void AddDevType( BLD_DevType_t *devType )
 
 bool ReadRegisterFiles( const char *exeDir )
 {
+    bool    rc = true;
+
 #if defined( __WIN32__ )
     HANDLE          dir;
     WIN32_FIND_DATA fd;
@@ -180,13 +182,17 @@ bool ReadRegisterFiles( const char *exeDir )
         {
             DevTypeParser   dtp;
 
+            LogVerbose( "Parsing device type file '%s' ...\n", fd.cFileName );
             if ( !dtp.ParseFile( fd.cFileName, AddDevType ))
             {
-                return false;
+                rc = false;
+                break;
             }
 
         } while ( FindNextFile( dir, &fd ));
     }
+
+    FindClose( dir );
 #else
     DIR *dir;
     struct dirent *de;
@@ -203,16 +209,18 @@ bool ReadRegisterFiles( const char *exeDir )
         {
             DevTypeParser   dtp;
 
+            LogVerbose( "Parsing device type file '%s' ...\n", de->d_name );
             if ( !dtp.ParseFile( de->d_name, AddDevType ))
             {
-                return false;
+                rc = false;
+                break;
             }
         }
     }
 
     closedir( dir );
 #endif
-    return true;
+    return rc;
 }
 
 /***************************************************************************/

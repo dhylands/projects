@@ -197,7 +197,6 @@ bool DevTypeParser::ParseLine()
 
         LogError( "Unrecognized keyword: '%s' %s:%d\n", token, m_fileName, m_lineNum );
         return false;
-        
     }
 
     if ( stricmp( token, "DeviceType:" ) == 0 )
