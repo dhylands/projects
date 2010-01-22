@@ -574,5 +574,9 @@ void InitUART( void )
 
 #endif
 
+#if ( CFG_USE_UART0 && ( CFG_UART0_TX_BUFFER_SIZE > 0 )) || (CFG_USE_UART1 && ( CFG_UART1_TX_BUFFER_SIZE > 0 ))
+    sei();
+#endif
+
 } // InitUART
 
