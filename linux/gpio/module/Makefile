@@ -1,0 +1,33 @@
+#############################################################################
+#
+#	Makefile for building the gpio kernel module
+#
+#############################################################################
+
+ifneq ($(KERNELRELEASE),)
+# call from kernel build system
+
+obj-m	:= user-gpio-drv.o
+
+else
+
+PWD       	= $(shell pwd)
+
+OVEROTOP	?= /home/gumstix/overo-oe
+CROSS_COMPILE	?= $(OVEROTOP)/tmp/cross/armv7a/bin/arm-angstrom-linux-gnueabi-
+KERNEL_PATH     ?= $(OVEROTOP)/tmp/staging/overo-angstrom-linux-gnueabi/kernel
+ARCH		?= arm
+
+export ARCH CROSS_COMPILE
+
+KBUILD_FLAGS 	= -C $(KERNEL_PATH) M=$(PWD)
+
+default: modules
+
+modules:
+	$(MAKE) $(KBUILD_FLAGS) modules
+
+clean:
+	rm -rf *.o *~ *.ko *.mod.c .*.cmd .tmp* modules.order Module.symvers
+endif
+
