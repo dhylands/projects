@@ -7,12 +7,12 @@ start() {
         echo "Starting gpio-event..."
 
         # load driver
-        /sbin/modprobe gpio-event
+        /sbin/modprobe gpio-event-drv
 }
 stop() {
         echo "Stopping gpio-event..."
 
-	/sbin/modprobe -r gpio-event
+	/sbin/modprobe -r gpio-event-drv
 }
 restart() {
         stop
