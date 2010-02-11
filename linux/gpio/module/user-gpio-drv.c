@@ -42,7 +42,7 @@ static char     gBanner[] __initdata = KERN_INFO "User Mode GPIO Driver: 1.00\n"
 
 /* ---- Private Variables ------------------------------------------------ */
 
-#define GPIO_DRV_DEV_NAME   "gpio"
+#define GPIO_DRV_DEV_NAME   "user-gpio"
 
 static  dev_t           gGpioDrvDevNum = 0;
 static  struct class   *gGpioDrvClass = NULL;

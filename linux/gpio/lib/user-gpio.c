@@ -51,7 +51,7 @@ int gpio_init( void )
 {
     if ( gFd < 0 )
     {
-        if (( gFd = open( "/dev/gpio", O_RDWR )) < 0 )
+        if (( gFd = open( "/dev/user-gpio", O_RDWR )) < 0 )
         {
             return -1;
         }

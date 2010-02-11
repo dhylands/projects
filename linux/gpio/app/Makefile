@@ -34,7 +34,7 @@ OBJ_FILES = gpio.o
 
 $(APPNAME) : $(OBJ_FILES)
 	@echo "Creating executable $@ ..."
-	$(CC) -shared -o $@ -L ../lib $^ -lgpio
+	$(CC) -o $@ -L ../lib $^ -lgpio
 
 .PHONY: %.d
 %.d: ;
