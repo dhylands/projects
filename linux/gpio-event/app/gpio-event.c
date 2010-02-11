@@ -238,9 +238,9 @@ int main( int argc, char **argv )
             monitor.onOff = 1;
         }
 
-        if ( monitor.gpio > 127 )
+        if ( monitor.gpio > 255 )
         {
-            fprintf( stderr, "Expecting gpio to be in the range 1-127, found: %d\n", monitor.gpio );
+            fprintf( stderr, "Expecting gpio to be in the range 1-255, found: %d\n", monitor.gpio );
             exit( 1 );
         }
         if ( !ispunct( *endPtr ))
