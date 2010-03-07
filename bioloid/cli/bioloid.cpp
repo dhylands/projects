@@ -372,7 +372,7 @@ int main( int argc, char **argv )
         {
             exit( 1 );
         }
-        gNetBus.SetDebug( gDebug != 0 );
+        gNetBus.SetShowPackets( gDebug != 0 );
         cmdLine.SetBus( &gNetBus );
     }
     else
@@ -385,7 +385,7 @@ int main( int argc, char **argv )
             exit( 1 );
         }
         gSerialBus.SetSerialPort( &gSerialPort );
-        gSerialBus.SetDebug( gDebug != 0 );
+        gSerialBus.SetShowPackets( gDebug != 0 );
         cmdLine.SetBus( &gSerialBus );
     }
 

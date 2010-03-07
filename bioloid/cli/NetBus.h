@@ -64,53 +64,15 @@ public:
 
     virtual bool ReadByte( uint8_t *ch );
 
-    //------------------------------------------------------------------------
-    // Reads a packet. Returns true if a packet was read successfully,
-    // false if a timeout or error occurred.
-
-    virtual bool ReadStatusPacket( BioloidPacket *pkt );
-
-    //------------------------------------------------------------------------
-    // Sends a byte. This will automatically accumulate the byte into 
-    // the checksum
-
-    virtual void SendByte( uint8_t data );
-
-    //------------------------------------------------------------------------
-    //  Send the checksum. Since the checksum byte is the last byte of the
-    //  packet, this function is made virtual to allow bus drivers to
-    //  buffer the packet bytes until the entire packet is ready to send.
-
-    virtual void SendCheckSum();
-
-    //------------------------------------------------------------------------
-    // Sends the command header, which is common to all of the commands.
-    // 2 is added to paramLen (to cover the length and cmd bytes). This
-    // way the caller is only responsible for figuring out how many extra
-    // parameter bytes are being sent.
-
-    virtual void SendCmdHeader( Bioloid::ID_t id, uint8_t paramLen, Bioloid::Command cmd );
-
-    //------------------------------------------------------------------------
-    // Sets the debug mode
-
-    void SetDebug( bool debug ) { m_debug = debug; }
-
 private:
 
     //------------------------------------------------------------------------
-    // Adds a byte to the buffer of data to send.
+    // Core portion of the WriteBuffer routine, which writes the data
+    // out the serial port.
 
-    void BufferByte( uint8_t data );
-
-    //------------------------------------------------------------------------
-    // Writes all of the buffered bytes to the serial port.
-
-    void WriteBuffer();
+    virtual void WriteBufferedData( void *data, size_t numBytes );
 
     //------------------------------------------------------------------------
-
-    bool                m_debug;
 
     bool                m_initialized;
 
