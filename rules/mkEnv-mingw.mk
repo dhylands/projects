@@ -11,11 +11,12 @@
 MK_ELF_EXT    	= .exe
 MK_EXE_EXT     = .exe
 
-CFLAGS   += -mno-cygwin
-CXXFLAGS += -mno-cygwin
+CPPFLAGS += -mno-cygwin
 LDFLAGS  += -mno-cygwin
 
 MK_COMMON_MINGW_DIR	= $(MK_COMMON_DIR)/mingw
+
+CPPFLAGS += -I $(MK_COMMON_MINGW_DIR)
 
 vpath %.c   $(MK_COMMON_MINGW_DIR)
 vpath %.cpp $(MK_COMMON_MINGW_DIR)
