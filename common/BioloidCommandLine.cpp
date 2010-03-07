@@ -24,11 +24,13 @@
 
 // ---- Include Files -------------------------------------------------------
 
+#include <stddef.h>
 #include <string.h>
 #include "Str.h"
 #include "DumpMem.h"
 #include "Log.h"
 #include "Bioloid.h"
+#include "bioloid-reg.h"
 #include "BioloidCommandLine.h"
 
 // ---- Public Variables ----------------------------------------------------
@@ -39,6 +41,79 @@ static char             gDelim[] = " \r\n\t";
 
 static uint8_t          gErrorBuf[ 80 ];
 static uint8_t          gReadBuf[ 80 ];
+
+// We use the register data structure to parse our global data, so we
+// need to make it look sort of like what a real device has (8 and 16-bit
+// data types - arranged contigupously in memory)
+
+struct Global_t
+{
+    uint8_t     m_showPackets;
+    uint8_t     m_timeout;
+
+};
+
+static  Global_t    gGlobal;
+
+#define GLBL_OFS(x) offsetof( Global_t, x )
+
+static BLD_Reg_t   gGlobalReg[] =
+{
+    { GLBL_OFS( m_showPackets ),    "show-packets",     BLD_REG_FLAG_8_RW,  0,    1,  BLD_RegFmtOnOff,  BLD_RegParseOnOff },
+    { GLBL_OFS( m_timeout ),        "timeout",          BLD_REG_FLAG_8_RW,  0,  255,  NULL,             NULL },
+};
+
+static BLD_DevType_t   gGlobalDevType =
+{
+    "global",                                       // devTypeStr
+    0,                                              // model
+    sizeof( gGlobalReg ) / sizeof( gGlobalReg[0] ), // numRegs
+    gGlobalReg,                                     // reg
+    sizeof( gGlobal ),                              // numRegBytes
+};
+
+class GlobalDevice : public BioloidDevice
+{
+public:
+    GlobalDevice();
+    virtual ~GlobalDevice();
+
+    virtual Bioloid::Error Read( uint8_t offset, void *data, uint8_t numBytes );
+    virtual Bioloid::Error Write( uint8_t offset, const void *data, uint8_t numBytes );
+
+private:
+
+};
+
+GlobalDevice::GlobalDevice()
+{
+}
+
+GlobalDevice::~GlobalDevice()
+{
+}
+
+Bioloid::Error GlobalDevice::Read( uint8_t offset, void *data, uint8_t numBytes )
+{
+    if ( offset + numBytes <= sizeof( gGlobal ))
+    {
+        memcpy( data, (uint8_t *)&gGlobal + offset, numBytes );
+        return Bioloid::ERROR_NONE;
+    }
+    return Bioloid::ERROR_RANGE;
+}
+
+Bioloid::Error GlobalDevice::Write( uint8_t offset, const void *data, uint8_t numBytes )
+{
+    if ( offset + numBytes <= sizeof( gGlobal ))
+    {
+        memcpy( (uint8_t *)&gGlobal + offset, data, numBytes );
+        return Bioloid::ERROR_NONE;
+    }
+    return Bioloid::ERROR_RANGE;
+}
+
+static  GlobalDevice    gGlobalDev;
 
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
@@ -235,7 +310,7 @@ static bool DevFound( BioloidBus *bus, BioloidDevice *dev )
 *   Called to process the get and get-raw commands
 */
 
-void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
+void BioloidCommandLine::ProcessDeviceGetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
 {
     BLD_Reg_t  *reg;
     char        str[ 40 ]; 
@@ -372,7 +447,7 @@ void BioloidCommandLine::ProcessGetCommand( BLD_DevType_t  *devType, Bioloid::ID
 *   Called to process the set and set-raw commands
 */
 
-void BioloidCommandLine::ProcessSetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
+void BioloidCommandLine::ProcessDeviceSetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
 {
     BLD_Reg_t  *reg;
     uint16_t    val16;
@@ -410,6 +485,26 @@ void BioloidCommandLine::ProcessSetCommand( BLD_DevType_t  *devType, Bioloid::ID
     }
 
     PrintError( m_device.Write( reg->address, &val16, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1 ));
+}
+
+//***************************************************************************
+/**
+*   Processes the global get command.
+*/
+
+void ProcessGlobalGetCommand( StrTokenizer &line )
+{
+    (void)line;
+}
+
+//***************************************************************************
+/**
+*   Processes the global set command.
+*/
+
+void ProcessGlobalSetCommand( StrTokenizer &line )
+{
+    (void)line;
 }
 
 //***************************************************************************
@@ -632,22 +727,22 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
     else
     if ( strcmp( cmdStr, "get" ) == 0 )
     {
-        ProcessGetCommand( devType, id, line, false );
+        ProcessDeviceGetCommand( devType, id, line, false );
     }
     else
     if ( strcmp( cmdStr, "get-raw" ) == 0 )
     {
-        ProcessGetCommand( devType, id, line, true );
+        ProcessDeviceGetCommand( devType, id, line, true );
     }
     else
     if ( strcmp( cmdStr, "set" ) == 0 )
     {
-        ProcessSetCommand( devType, id, line, false );
+        ProcessDeviceSetCommand( devType, id, line, false );
     }
     else
     if ( strcmp( cmdStr, "set-raw" ) == 0 )
     {
-        ProcessSetCommand( devType, id, line, true );
+        ProcessDeviceSetCommand( devType, id, line, true );
     }
     else
     if ( strcmp( cmdStr, "reset" ) == 0 )

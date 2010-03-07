@@ -122,7 +122,15 @@ Bioloid::Error BioloidDevice::Read( uint8_t offset, uint8_t *val )
 
 Bioloid::Error BioloidDevice::Read( uint8_t offset, uint16_t *val )
 {
-    return Read( offset, val, sizeof( *val ));
+    Bioloid::Error  rc;
+
+    uint8_t byteVal[2];
+
+    if (( rc = Read( offset, byteVal, sizeof( byteVal ))) == Bioloid::ERROR_NONE )
+    {
+        *val = (uint16_t)byteVal[0] | ((uint16_t)byteVal[1] << 8 );
+    }
+    return rc;
 }
 
 //***************************************************************************

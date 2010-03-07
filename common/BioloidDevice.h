@@ -66,7 +66,7 @@ public:
     //------------------------------------------------------------------------
     // Reads data from the devices control table.
 
-    Bioloid::Error Read( uint8_t offset, void *data, uint8_t numBytes );
+    virtual Bioloid::Error Read( uint8_t offset, void *data, uint8_t numBytes );
 
     //------------------------------------------------------------------------
     // Reads an 8 bit data register
@@ -117,7 +117,7 @@ public:
     //------------------------------------------------------------------------
     // Writes some data into the control table, and returns the result.
 
-    Bioloid::Error Write( uint8_t offset, const void *data, uint8_t numBytes );
+    virtual Bioloid::Error Write( uint8_t offset, const void *data, uint8_t numBytes );
 
 protected:
 

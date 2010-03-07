@@ -70,7 +70,7 @@ public:
     // Sends a byte. This will automatically accumulate the byte into 
     // the checksum
 
-    virtual void SendByte( uint8_t data ) = 0;
+    virtual void SendByte( uint8_t data );
 
     //------------------------------------------------------------------------
     // Reads a byte. This function returns true if a character was read, and
@@ -109,11 +109,37 @@ public:
 
     virtual bool ReadStatusPacket( BioloidPacket *pkt );
 
+    //------------------------------------------------------------------------
+    // Sets debug option which causes packet data to be printed.
+
+    void SetShowPackets( bool showPackets )
+    {
+        m_showPackets = showPackets;
+    }
+
     static  bool    m_log;
 
 protected:
 
+    //------------------------------------------------------------------------
+    // Adds a byte to the buffer of data to send.
+
+    void BufferByte( uint8_t data );
+
+    //------------------------------------------------------------------------
+    // Writes all of the buffered bytes to the serial port.
+
+    void WriteBuffer();
+
+    //------------------------------------------------------------------------
+    // Core portion of WriteBuffer which writes the data
+
+    virtual void WriteBufferedData( void *data, size_t numBytes ) = 0;
+
+    //------------------------------------------------------------------------
+
     uint8_t     m_checksum;
+    bool        m_showPackets;
 
 private:
 
@@ -123,6 +149,11 @@ private:
 
     BioloidBus( const BioloidBus & copy );
     BioloidBus &operator =( const BioloidBus &rhs );
+
+    //------------------------------------------------------------------------
+
+    size_t      m_dataBytes;
+    uint8_t     m_data[ 128 ];
 };
 
 /** @} */

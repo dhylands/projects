@@ -96,12 +96,22 @@ private:
     //------------------------------------------------------------------------
     // Processes the get and get-raw command
 
-    void ProcessGetCommand( BLD_DevType_t *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw );
+    void ProcessDeviceGetCommand( BLD_DevType_t *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw );
 
     //------------------------------------------------------------------------
     // Processes the set and set-raw command
 
-    void ProcessSetCommand( BLD_DevType_t *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw );
+    void ProcessDeviceSetCommand( BLD_DevType_t *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw );
+
+    //------------------------------------------------------------------------
+    // Processes the global get command
+
+    void ProcessGlobalGetCommand( StrTokenizer &line );
+
+    //------------------------------------------------------------------------
+    // Processes the global set command
+
+    void ProcessGlobalSetCommand( StrTokenizer &line );
 
     //------------------------------------------------------------------------
 

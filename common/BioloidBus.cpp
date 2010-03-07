@@ -28,6 +28,7 @@
 #include "Bioloid.h"
 #include "BioloidBus.h"
 #include "BioloidDevice.h"
+#include "DumpMem.h"
 
 // ---- Public Variables ----------------------------------------------------
 
@@ -49,6 +50,8 @@ bool    BioloidBus::m_log   = false;
 */
 
 BioloidBus::BioloidBus()
+    : m_showPackets( false ),
+      m_dataBytes( 0 )
 {
 }
 
@@ -65,6 +68,21 @@ BioloidBus::~BioloidBus()
 
 //***************************************************************************
 /**
+*   Adds a byte to the buffer of data to send.
+*/
+
+void BioloidBus::BufferByte( uint8_t data )
+{
+    m_data[ m_dataBytes++ ] = data;
+
+    if ( m_dataBytes >= sizeof( m_data ))
+    {
+        WriteBuffer();
+    }
+}
+
+//***************************************************************************
+/**
 *   Reads a packet. Returns true if a packet was read successfully,
 *   false if a timeout or error occurred.
 *
@@ -75,38 +93,37 @@ bool BioloidBus::ReadStatusPacket( BioloidPacket *pkt )
 {
     Bioloid::Error err;
 
+    m_dataBytes = 0;
+
     do
     {
         uint8_t         ch;
 
-#if 0
-        int i;
-
-        for ( i = 0; i < 10; i++ )
-        {
-            if ( ReadByte( &ch ))
-            {
-                break;
-            }
-        }
-        if ( i >= 10 )
-        {
-            LogError( "BioloidBus::ReadStatusPacket: ReadByte returned false\n");
-            return false;
-        }
-#else
         if ( !ReadByte( &ch ))
         {
             //LogError( "BioloidBus::ReadStatusPacket: ReadByte returned false\n");
             return false;
         }
-#endif
 
+        if ( m_dataBytes < sizeof( m_data ))
+        {
+            m_data[ m_dataBytes++ ] = ch;
+        }
         err = pkt->ProcessChar( ch );
 
     } while ( err == Bioloid::ERROR_NOT_DONE );
 
-    if ( err != Bioloid::ERROR_NONE )
+    if ( err == Bioloid::ERROR_NONE )
+    {
+        if ( m_showPackets )
+        {
+            if ( m_dataBytes > 0 )
+            {
+                DumpMem( "R", 0, m_data, m_dataBytes );
+            }
+        }
+    }
+    else
     {
         Log( "BioloidBus::ReadStatusPacket err = %d\n", err );
     }
@@ -168,6 +185,21 @@ void BioloidBus::SendAction()
 
 //***************************************************************************
 /**
+*   Sends a byte. This will automatically accumulate the byte into 
+*   the checksum)
+*
+*   virtual
+*/
+
+void BioloidBus::SendByte( uint8_t data )
+{
+    m_checksum += data;
+
+    BufferByte( data );
+}
+
+//***************************************************************************
+/**
 *   Send the checksum. Since the checksum byte is the last byte of the
 *   packet, this function is made virtual to allow bus drivers to
 *   buffer the packet bytes until the entire packet is ready to send.
@@ -178,6 +210,8 @@ void BioloidBus::SendAction()
 void BioloidBus::SendCheckSum()
 {
     SendByte( ~m_checksum );
+
+    WriteBuffer();
 }
 
 //***************************************************************************
@@ -213,6 +247,8 @@ void BioloidBus::SendCmdHeader
     Bioloid::Command    cmd
 )
 {
+    m_dataBytes = 0;
+
     SendByte( 0xff );
     SendByte( 0xff );
 
@@ -221,6 +257,23 @@ void BioloidBus::SendCmdHeader
     SendByte( id );
     SendByte( paramLen + 2 );
     SendByte( cmd );
+}
+
+//***************************************************************************
+/**
+*   Writes all of the buffered bytes to the serial port.
+*/
+
+void BioloidBus::WriteBuffer()
+{
+    if ( m_showPackets )
+    {
+        DumpMem( "W", 0, m_data, m_dataBytes );
+    }
+
+    WriteBufferedData( m_data, m_dataBytes );
+
+    m_dataBytes = 0;
 }
 
 /** @} */
