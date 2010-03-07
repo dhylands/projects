@@ -51,6 +51,8 @@ include $(MK_RULES_DIR)/mkEnv-gcc.mk
 # avr-gcc doesn't use rdynamic
 LDFLAGS_RDYNAMIC =
 
+# Note: MK_AVR_FUSES is XX HH LL
+
 MK_avrdude	 		= avrdude
 MK_avrdude_PORT		?= usb
 MK_avrdude_PROG    	?= avrispmkII
