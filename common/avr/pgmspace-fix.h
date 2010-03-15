@@ -14,10 +14,10 @@
 ****************************************************************************/
 /**
 *
-*   @file   bioloid-reg.c 
+*   @file   pgmspace-fix.h
 *
-*   @brief  Provides formatting routines for formatting various registers
-*           found on bioloid devices.
+*   @brief  Provides a workaround which allows PSTR to be used from C++
+*           without generating any warnings.
 *
 *****************************************************************************/
 
