@@ -278,7 +278,7 @@ void BLD_InitUART( void )
 
 #define UART0_DATA_BIT_8  (( 1 << UCSZ01 ) | ( 1 << UCSZ00 ))
 #define UART0_PARITY_NONE (( 0 << UPM01 )  | ( 0 << UPM00 ))
-#define UART0_STOP_BIT_1  ( 1 << USBS0 )
+#define UART0_STOP_BIT_1  ( 0 << USBS0 )
 
     // Configure TxD and RxD pins as inputs and turn off the pullups
 
@@ -309,7 +309,7 @@ void BLD_InitUART( void )
 
 #define UART1_DATA_BIT_8  (( 1 << UCSZ11 ) | ( 1 << UCSZ10 ))
 #define UART1_PARITY_NONE (( 0 << UPM11 )  | ( 0 << UPM10 ))
-#define UART1_STOP_BIT_1  ( 1 << USBS1 )
+#define UART1_STOP_BIT_1  ( 0 << USBS1 )
 
     // Configure TxD and RxD pins as inputs and turn off the pullups
 

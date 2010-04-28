@@ -45,7 +45,7 @@
 
 #define UART_DATA_BIT_8  (( 1 << UCSZ1 ) | ( 1 << UCSZ0 ))
 #define UART_PARITY_NONE (( 0 << UPM1 )  | ( 0 << UPM0 ))
-#define UART_STOP_BIT_1  ( 1 << USBS )
+#define UART_STOP_BIT_1  ( 0 << USBS )
 
 #define UBRR0_INIT   (( CFG_CPU_CLOCK / 8 / UART0_BAUD_RATE ) - 1 )
 #define UBRR1_INIT   (( CFG_CPU_CLOCK / 8 / UART1_BAUD_RATE ) - 1 )
