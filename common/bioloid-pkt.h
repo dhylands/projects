@@ -26,6 +26,7 @@
 /* ---- Include Files ---------------------------------------------------- */
 
 #include <stdint.h>
+#include "Config.h"
 
 /**
  * @addtogroup bioloid
@@ -40,8 +41,16 @@
 #define BLD_STATE_ID_RCVD       4   ///< We've received the ID
 #define BLD_STATE_LENGTH_RCVD   5   ///< We've received the length
 #define BLD_STATE_COMMAND_RCVD  6   ///< We've received the command
+#define BLD_STATE_SYNC_WRITE_CMD_RCVD       7   ///< We've received a SYNC_WRITE command
+#define BLD_STATE_SYNC_WRITE_ADDRESS_RCVD   8   ///< We've received the offset of a SYNC_WRITE
+#define BLD_STATE_SYNC_WRITE_LEN_RCVD       9   ///< We've received the length per ID of a SYNC_WRITE
+#define BLD_STATE_SYNC_WRITE_STORE_DATA    10   ///< We've received our ID for a SYNC_WRITE
+#define BLD_STATE_SYNC_WRITE_SKIP_DATA     11   ///< We've received somebody else's ID for a SYNC_WRITE
 
-#define BLD_MAX_PARAM       8
+#if !defined( CFG_BLD_MAX_PARAM )
+#   define  CFG_BLD_MAX_PARAM   8
+#endif
+#define BLD_MAX_PARAM       CFG_BLD_MAX_PARAM
 
 #define BLD_BROADCAST_ID    0xFE
 
@@ -86,6 +95,9 @@ struct BLD_Instance_s
     BLD_Packet_t        m_pkt;      ///< Contains the packet that was actually received
     BLD_PacketReceived  m_pktRcvd;  ///< Ptr to Fn called when a packet is successfully received
     BLD_SendChar        m_sendChar; ///< Ptr to Fn called to send out a character
+
+    BLD_Length_t        m_syncWriteLen; ///< Length of data for each ID in a SYNC_WRITE
+    BLD_Length_t        m_syncWriteIdx; ///< Current index if data for each ID in a SYNC_WRITE
 
     uint8_t             m_logPacket;  ///< Causes Log statements for each packet sent
 };

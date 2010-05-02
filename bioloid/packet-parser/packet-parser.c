@@ -43,6 +43,7 @@ enum
 
     OPT_HELP            = 'h',
     OPT_VERBOSE         = 'v',
+    OPT_ID              = 'i',
 
     // Options from this point onwards don't have any short option equivalents
 
@@ -57,14 +58,16 @@ enum
 
 struct option gOption[] =
 {
+    { "id",         required_argument,  NULL,       OPT_ID },
     { "verbose",    no_argument,        NULL,       OPT_VERBOSE },
     { "version",    no_argument,        NULL,       OPT_VERSION },
     { "help",       no_argument,        NULL,       OPT_HELP },
     { NULL }
 };
 
-uint8_t gLastID = 0xFF;
-uint8_t gExpectingStatus = 0;
+uint8_t     gLastID = 0xFF;
+uint8_t     gExpectingStatus = 0;
+BLD_ID_t    gId;
 
 /* ---- Private Function Prototypes --------------------------------------- */
 
@@ -166,6 +169,12 @@ int main( int argc, char **argv )
                 break;
             }
 
+            case OPT_ID:
+            {
+                gId = strtoul( optarg, NULL, 0 );
+                break;
+            }
+
             case OPT_VERBOSE:
             {
                 gVerbose = TRUE;
@@ -208,6 +217,8 @@ int main( int argc, char **argv )
     lineNum = 0;
     BLD_Init( &inst );
 
+    inst.m_id = gId;
+    inst.m_logPacket = gVerbose;
     inst.m_pktRcvd = PacketReceived;
 
     while ( fgets( line, sizeof( line ), fs ) != NULL )
@@ -225,7 +236,7 @@ int main( int argc, char **argv )
 
             // Skip leading spaces
 
-            while ( isspace( *s ))
+            while ( isspace( (int)*s ))
             {
                 s++;
             }
@@ -241,7 +252,7 @@ int main( int argc, char **argv )
 
             val = strtol( s, &endPtr, 16 );
 
-            if (( *endPtr != '\0' ) && !isspace( *endPtr ))
+            if (( *endPtr != '\0' ) && !isspace( (int)*endPtr ))
             {
                 LogError( "Line %d: Invalid number detected: '%s'\n", lineNum, s );
                 break;

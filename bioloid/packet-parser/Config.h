@@ -32,6 +32,8 @@
  */
 
 #define CFG_LOG_TO_BUFFER   0
+#define CFG_BLD_MAX_PARAM   128
+#define CFG_BLD_OPTIMIZE_SYNC_WRITE_PARSING 1
 
 #endif // CONFIG_H
 
