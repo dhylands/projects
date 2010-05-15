@@ -16,8 +16,9 @@
 *
 *   @file   Switch.h
 *
-*   @brief  Provides an API for talking to character style LCDs. These
-*           functions are designed around the HD44780 based LCD Controllers.
+*   @brief  Provides switch debounc logic. The original algorithim for this
+*           was posted by Craig Limber:
+*           http://members.shaw.ca/climber/avrbuttons.html
 *
 ****************************************************************************/
 
