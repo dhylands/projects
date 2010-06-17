@@ -1,0 +1,34 @@
+#######################################
+# Syntax Coloring Map For Test
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ADC_Sample_t	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+ADC_Init	KEYWORD2
+ADC_Read	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+ADC_PRESCALAR_2         LITERAL1
+ADC_PRESCALAR_4         LITERAL1
+ADC_PRESCALAR_8         LITERAL1
+ADC_PRESCALAR_16        LITERAL1
+ADC_PRESCALAR_32        LITERAL1
+ADC_PRESCALAR_64        LITERAL1
+ADC_PRESCALAR_128       LITERAL1
+ADC_PRESCALAR_AUTO      LITERAL1
+
