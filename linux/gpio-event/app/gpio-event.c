@@ -205,9 +205,9 @@ int main( int argc, char **argv )
     argc -= optind;
     argv += optind;
 
-    if (( fs = fopen( "/dev/gpio-event", "r" )) < 0 )
+    if (( fs = fopen( "/dev/gpio-event", "r" )) == NULL )
     {
-        perror( "Unable to open /dev/gpio-event" );
+        perror( "Check to make sure gpio_event_drv has been loaded. Unable to open /dev/gpio-event" );
         exit( 1 );
     }
 
