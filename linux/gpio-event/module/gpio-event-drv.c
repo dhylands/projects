@@ -35,6 +35,7 @@
 #include <linux/spinlock.h>
 #include <linux/version.h>
 #include <linux/sched.h>
+#include <linux/slab.h>
 
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
