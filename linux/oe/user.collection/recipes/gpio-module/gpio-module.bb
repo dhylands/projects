@@ -6,7 +6,7 @@ RDEPENDS = "kernel (${KERNEL_VERSION})"
 DEPENDS = "virtual/kernel"
 
 PV="svn${SRCDATE}"
-PR = "r0"
+PR = "r1"
 
 INITSCRIPT_NAME = "gpio"
 INITSCRIPT_PARAMS = "defaults 40"

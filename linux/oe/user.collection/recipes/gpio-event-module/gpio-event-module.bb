@@ -6,7 +6,7 @@ RDEPENDS = "kernel (${KERNEL_VERSION})"
 DEPENDS = "virtual/kernel"
 
 PV="svn${SRCDATE}"
-PR = "r2"
+PR = "r3"
 
 INITSCRIPT_NAME = "gpio-event"
 INITSCRIPT_PARAMS = "defaults 40"
