@@ -36,6 +36,7 @@
 #include <linux/version.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
+#include <linux/version.h>
 
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
@@ -68,10 +69,16 @@ static  int         gLostEvents = 0;
 
 static  struct ctl_table_header    *gSysCtlHeader;
 
+#if ( LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 33 ))
+#define CTL_NAME(x)
+#else
+#define CTL_NAME(x)     .ctl_name = x,
+#endif
+
 static struct ctl_table gSysCtlSample[] =
 {
     {
-        .ctl_name       = 1,  
+        CTL_NAME(1)
         .procname       = "lost-events",
         .data           = &gLostEvents,
         .maxlen         = sizeof( int ),
@@ -79,7 +86,7 @@ static struct ctl_table gSysCtlSample[] =
         .proc_handler   = &proc_dointvec
     },
     {
-        .ctl_name       = 101,
+        CTL_NAME(101)
         .procname       = "debug-trace",
         .data           = &gDebugTrace,
         .maxlen         = sizeof( int ),
@@ -87,7 +94,7 @@ static struct ctl_table gSysCtlSample[] =
         .proc_handler   = &proc_dointvec
     },
     {
-        .ctl_name       = 102,
+        CTL_NAME(102)
         .procname       = "debug-ioctl",
         .data           = &gDebugIoctl,
         .maxlen         = sizeof( int ),
@@ -95,7 +102,7 @@ static struct ctl_table gSysCtlSample[] =
         .proc_handler   = &proc_dointvec
     },
     {
-        .ctl_name       = 103,
+        CTL_NAME(103)
         .procname       = "debug-error",
         .data           = &gDebugError,
         .maxlen         = sizeof( int ),
@@ -108,7 +115,7 @@ static struct ctl_table gSysCtlSample[] =
 static struct ctl_table gSysCtl[] =
 {
     {
-        .ctl_name       = CTL_GPIO_EVENT,
+        CTL_NAME(CTL_GPIO_EVENT)
         .procname       = "gpio-event", 
         .mode           = 0555, 
         .child          = gSysCtlSample

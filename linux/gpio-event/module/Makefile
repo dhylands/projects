@@ -15,7 +15,7 @@ PWD       	= $(shell pwd)
 
 OVEROTOP	?= /home/gumstix/overo-oe
 CROSS_COMPILE	?= $(OVEROTOP)/tmp/cross/armv7a/bin/arm-angstrom-linux-gnueabi-
-KERNEL_PATH     ?= $(OVEROTOP)/tmp/staging/overo-angstrom-linux-gnueabi/kernel
+KERNEL_PATH     ?= $(OVEROTOP)/tmp/sysroots/overo-angstrom-linux-gnueabi/kernel
 ARCH		?= arm
 
 export ARCH CROSS_COMPILE

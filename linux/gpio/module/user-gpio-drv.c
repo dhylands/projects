@@ -26,6 +26,7 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/cdev.h>
+#include <linux/slab.h>
 
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
