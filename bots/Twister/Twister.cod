@@ -1,0 +1,2758 @@
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 1
+
+
+   1               		.file	"Twister.cpp"
+   4               	.text
+   5               	.Ltext0:
+ 169               	.globl gTickFlag
+ 170               	.data
+ 172               		.align 	2
+ 175               	gTickFlag:
+ 176 0000 0000 0000 		.long 0
+ 177               	.globl gTickOverrun
+ 179               		.align 	2
+ 182               	gTickOverrun:
+ 183 0004 0000 0000 		.long 0
+ 184               	.globl gTickCounter
+ 186               		.align 	2
+ 189               	gTickCounter:
+ 190 0008 0000 0000 		.long 0
+ 191               	.globl gLeftMotor
+ 193               		.align 	2
+ 196               	gLeftMotor:
+ 197 000c 0000 0000 		.zero	30
+ 197      0000 0000 
+ 197      0000 0000 
+ 197      0000 0000 
+ 197      0000 0000 
+ 198               	.globl gRightMotor
+ 200               		.align 	2
+ 203               	gRightMotor:
+ 204 002a 0000 0000 		.zero	30
+ 204      0000 0000 
+ 204      0000 0000 
+ 204      0000 0000 
+ 204      0000 0000 
+ 206               	.text
+ 209               	.globl IsWhite__FUi
+ 211               	IsWhite__FUi:
+ 212               	.LFB1:
+   1:Twister.cpp   **** /****************************************************************************
+   2:Twister.cpp   **** *
+   3:Twister.cpp   **** *  Program for Twister, a Line Maze robot.
+   4:Twister.cpp   **** *
+   5:Twister.cpp   **** ****************************************************************************/
+   6:Twister.cpp   **** 
+   7:Twister.cpp   **** #include <stdio.h>
+   8:Twister.cpp   **** #include <68332/isr.h>
+   9:Twister.cpp   **** #include <68332/qsm.h>
+  10:Twister.cpp   **** #include <68332/sim.h>
+  11:Twister.cpp   **** #include <68332/tpu.h>
+  12:Twister.cpp   **** #include <68332/fqd.h>
+  13:Twister.cpp   **** #include <68332/mrm/led.h>
+  14:Twister.cpp   **** #include <68332/mrm/lcd.h>
+  15:Twister.cpp   **** #include <../libsim/68332/sim_regs.h>
+  16:Twister.cpp   **** #include <assert.h>
+  17:Twister.cpp   **** 
+  18:Twister.cpp   **** #include "Motor.h"
+  19:Twister.cpp   **** #include "DebugKey.h"
+  20:Twister.cpp   **** #include "Tick.h"
+  21:Twister.cpp   **** 
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 2
+
+
+  22:Twister.cpp   **** #define BAUD_RATE 0     // 0 means use the current baud rate
+  23:Twister.cpp   **** 
+  24:Twister.cpp   **** int gTickFlag = 0;
+  25:Twister.cpp   **** int gTickOverrun = 0;
+  26:Twister.cpp   **** volatile int gTickCounter  = 0;
+  27:Twister.cpp   **** 
+  28:Twister.cpp   **** Motor    gLeftMotor(  "Left " );
+  29:Twister.cpp   **** Motor    gRightMotor( "Right" );
+  30:Twister.cpp   **** TPUChannel  *gFqdA;
+  31:Twister.cpp   **** TPUChannel  *gFqdB;
+  32:Twister.cpp   **** 
+  33:Twister.cpp   **** void ReadAD( void );
+  34:Twister.cpp   **** void TickHandler( void );
+  35:Twister.cpp   **** void StraightLine( void );
+  36:Twister.cpp   **** 
+  37:Twister.cpp   **** typedef unsigned int    sample_t;
+  38:Twister.cpp   **** 
+  39:Twister.cpp   **** volatile sample_t gAD[ 8 ];
+  40:Twister.cpp   **** volatile sample_t gMaxAD[ 8 ];
+  41:Twister.cpp   **** 
+  42:Twister.cpp   **** int  gADScale[ 8 ]; // 100 = 1.0
+  43:Twister.cpp   **** int  gADOffset[ 8 ];
+  44:Twister.cpp   **** 
+  45:Twister.cpp   **** #define CENTER_L    0
+  46:Twister.cpp   **** #define CENTER_R    1
+  47:Twister.cpp   **** #define OUTSIDE_L   2
+  48:Twister.cpp   **** #define OUTSIDE_R   3
+  49:Twister.cpp   **** 
+  50:Twister.cpp   **** #define WHITE_THRESH    ((sample_t)15)
+  51:Twister.cpp   **** #define BLACK_THRESH    ((sample_t)40)
+  52:Twister.cpp   **** #define STRAIGHT_THRESH ((sample_t)10)  // Diff allowed to keep going straight
+  53:Twister.cpp   **** 
+  54:Twister.cpp   **** bool IsWhite( sample_t sample )
+  55:Twister.cpp   **** {
+ 214               	.LM1:
+ 215 0000 4E56 0000 		link.w %a6,#0
+ 216               	.LCFI0:
+ 218               	.LM2:
+ 219               	.LBB2:
+  56:Twister.cpp   ****     return sample < WHITE_THRESH;
+ 221               	.LM3:
+ 222 0004 700E      		moveq.l #14,%d0
+ 223 0006 B0AE 0008 		cmp.l 8(%a6),%d0
+ 224 000a 54C1      		scc %d1
+ 225 000c 4401      		neg.b %d1
+ 226 000e 1001      		move.b %d1,%d0
+ 227 0010 6006      		jbra .L8
+ 228               	.LBE2:
+ 229 0012 6004      		jbra .L9
+ 230 0014 6000 0002 		jbra .L8
+ 231               	.L9:
+  57:Twister.cpp   **** }
+ 233               	.LM4:
+ 234               	.L8:
+ 235 0018 4E5E      		unlk %a6
+ 236 001a 4E75      		rts
+ 237               	.LFE1:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 3
+
+
+ 238               	.Lfe1:
+ 242               	.Lscope0:
+ 246               	.globl IsBlack__FUi
+ 248               	IsBlack__FUi:
+ 249               	.LFB2:
+  58:Twister.cpp   **** 
+  59:Twister.cpp   **** bool IsBlack( sample_t sample )
+  60:Twister.cpp   **** {
+ 251               	.LM5:
+ 252 001c 4E56 0000 		link.w %a6,#0
+ 253               	.LCFI1:
+ 255               	.LM6:
+ 256               	.LBB3:
+  61:Twister.cpp   ****     return sample > BLACK_THRESH;
+ 258               	.LM7:
+ 259 0020 7028      		moveq.l #40,%d0
+ 260 0022 B0AE 0008 		cmp.l 8(%a6),%d0
+ 261 0026 55C1      		scs %d1
+ 262 0028 4401      		neg.b %d1
+ 263 002a 1001      		move.b %d1,%d0
+ 264 002c 6006      		jbra .L10
+ 265               	.LBE3:
+ 266 002e 6004      		jbra .L11
+ 267 0030 6000 0002 		jbra .L10
+ 268               	.L11:
+  62:Twister.cpp   **** }
+ 270               	.LM8:
+ 271               	.L10:
+ 272 0034 4E5E      		unlk %a6
+ 273 0036 4E75      		rts
+ 274               	.LFE2:
+ 275               	.Lfe2:
+ 279               	.Lscope1:
+ 284               	.globl ClassifySample__FUi
+ 286               	ClassifySample__FUi:
+ 287               	.LFB3:
+  63:Twister.cpp   **** 
+  64:Twister.cpp   **** enum SampleClass
+  65:Twister.cpp   **** {
+  66:Twister.cpp   ****     Black,
+  67:Twister.cpp   ****     Gray,
+  68:Twister.cpp   ****     White
+  69:Twister.cpp   **** };
+  70:Twister.cpp   **** 
+  71:Twister.cpp   **** const char gSampleClassChar[ 3 ] = { 'b', '-', 'w' };
+  72:Twister.cpp   **** 
+  73:Twister.cpp   **** SampleClass ClassifySample( sample_t sample )
+  74:Twister.cpp   **** {
+ 289               	.LM9:
+ 290 0038 4E56 0000 		link.w %a6,#0
+ 291               	.LCFI2:
+ 293               	.LM10:
+ 294               	.LBB4:
+  75:Twister.cpp   ****     if ( IsBlack( sample ))
+ 296               	.LM11:
+ 297 003c 2F2E 0008 		move.l 8(%a6),-(%sp)
+ 298               	.LCFI3:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 4
+
+
+ 299 0040 4EBA FFDA 		jsr IsBlack__FUi
+ 300 0044 588F      		addq.l #4,%sp
+ 301 0046 4A00      		tst.b %d0
+ 302 0048 6704      		jbeq .L13
+  76:Twister.cpp   ****     {
+  77:Twister.cpp   ****         return Black;
+ 304               	.LM12:
+ 305 004a 4280      		clr.l %d0
+ 306 004c 601C      		jbra .L12
+ 307               	.L13:
+  78:Twister.cpp   ****     }
+  79:Twister.cpp   ****     if ( IsWhite( sample ))
+ 309               	.LM13:
+ 310 004e 2F2E 0008 		move.l 8(%a6),-(%sp)
+ 311 0052 4EBA FFAC 		jsr IsWhite__FUi
+ 312 0056 588F      		addq.l #4,%sp
+ 313 0058 4A00      		tst.b %d0
+ 314 005a 6704      		jbeq .L14
+  80:Twister.cpp   ****     {
+  81:Twister.cpp   ****         return White;
+ 316               	.LM14:
+ 317 005c 7002      		moveq.l #2,%d0
+ 318 005e 600A      		jbra .L12
+ 319               	.L14:
+  82:Twister.cpp   ****     }
+  83:Twister.cpp   ****     return Gray;
+ 321               	.LM15:
+ 322 0060 7001      		moveq.l #1,%d0
+ 323 0062 6006      		jbra .L12
+ 324               	.LBE4:
+ 325 0064 6004      		jbra .L15
+ 326 0066 6000 0002 		jbra .L12
+ 327               	.L15:
+  84:Twister.cpp   **** }
+ 329               	.LM16:
+ 330               	.L12:
+ 331 006a 4E5E      		unlk %a6
+ 332 006c 4E75      		rts
+ 333               	.LFE3:
+ 334               	.Lfe3:
+ 338               	.Lscope2:
+ 340               	.globl __main
+ 341               	.section	.rodata
+ 342               	.LC0:
+ 343 0000 5443 5231 		.string	"TCR1 freq = %d, TCR2 freq = %d\n"
+ 343      2066 7265 
+ 343      7120 3D20 
+ 343      2564 2C20 
+ 343      5443 5232 
+ 344               	.LC1:
+ 345 0020 0D25 3032 		.string	"\r%02d:%02d"
+ 345      643A 2530 
+ 345      3264 00
+ 346               	.LC2:
+ 347 002b 0C00      		.string	"\f"
+ 348               	.LC3:
+ 349 002d 2025 3364 		.string	" %3d~%3d~%3d~%3d~%3d~%3d~%3d~%3d"
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 5
+
+
+ 349      7E25 3364 
+ 349      7E25 3364 
+ 349      7E25 3364 
+ 349      7E25 3364 
+ 350               	.LC4:
+ 351 004e 4144 3A20 		.string	"AD: %3d %3d %3d %3d\nMx: %3d %3d %3d %3d"
+ 351      2533 6420 
+ 351      2533 6420 
+ 351      2533 6420 
+ 351      2533 640A 
+ 352               	.LC5:
+ 353 0076 2046 5144 		.string	" FQD: %5u"
+ 353      3A20 2535 
+ 353      7500 
+ 354               	.text
+ 356               	.globl main
+ 358               	main:
+ 359               	.LFB4:
+  85:Twister.cpp   **** 
+  86:Twister.cpp   **** int main( void )
+  87:Twister.cpp   **** {
+ 361               	.LM17:
+ 362 006e 4E56 FFE4 		link.w %a6,#-28
+ 363               	.LCFI4:
+ 364 0072 2F03      		move.l %d3,-(%sp)
+ 365               	.LCFI5:
+ 366 0074 2F02      		move.l %d2,-(%sp)
+ 367               	.LCFI6:
+ 368 0076 4EB9 0000 		jsr __main
+ 368      0000 
+ 370               	.LM18:
+ 371               	.LBB5:
+  88:Twister.cpp   ****     int  nextTick;
+  89:Twister.cpp   ****     int  ledState = 0;
+ 373               	.LM19:
+ 374 007c 42AE FFF8 		clr.l -8(%a6)
+  90:Twister.cpp   ****     SIM_T *sim = (SIM_T *)SIM_BASE;
+ 376               	.LM20:
+ 377 0080 2D7C FFFF 		move.l #-1536,-12(%a6)
+ 377      FA00 FFF4 
+  91:Twister.cpp   ****     
+  92:Twister.cpp   ****     set_processor_speed( CLOCK25MHZ );
+ 379               	.LM21:
+ 380 0088 2F3C 0000 		move.l #55040,-(%sp)
+ 380      D700 
+ 381               	.LCFI7:
+ 382 008e 4EB9 0000 		jsr set_processor_speed
+ 382      0000 
+ 383 0094 588F      		addq.l #4,%sp
+  93:Twister.cpp   ****     
+  94:Twister.cpp   ****     /*
+  95:Twister.cpp   ****      * since sciinit is required for all programs that do i/o
+  96:Twister.cpp   ****      * perhaps it should be in mrm_crt0.S also?  It would still
+  97:Twister.cpp   ****      * be available if the user wanted to change baud rate.
+  98:Twister.cpp   ****      */
+  99:Twister.cpp   ****     
+ 100:Twister.cpp   ****     sciinit( BAUD_RATE );
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 6
+
+
+ 385               	.LM22:
+ 386 0096 42A7      		clr.l -(%sp)
+ 387 0098 4EB9 0000 		jsr sciinit
+ 387      0000 
+ 388 009e 588F      		addq.l #4,%sp
+ 101:Twister.cpp   ****     
+ 102:Twister.cpp   ****     led_init();
+ 390               	.LM23:
+ 391               	.LCFI8:
+ 392 00a0 4EB9 0000 		jsr led_init
+ 392      0000 
+ 103:Twister.cpp   ****     lcd_init( 2, 24, 0, FALSE );
+ 394               	.LM24:
+ 395 00a6 558F      		subq.l #2,%sp
+ 396 00a8 1F7C 0000 		move.b #0,1(%sp)
+ 396      0001 
+ 397 00ae 558F      		subq.l #2,%sp
+ 398 00b0 42A7      		clr.l -(%sp)
+ 399 00b2 4878 0018 		pea 24.w
+ 400 00b6 4878 0002 		pea 2.w
+ 401               	.LCFI9:
+ 402 00ba 4EB9 0000 		jsr lcd_init
+ 402      0000 
+ 403 00c0 508F      		addq.l #8,%sp
+ 404 00c2 508F      		addq.l #8,%sp
+ 104:Twister.cpp   ****     
+ 105:Twister.cpp   ****     tpu_init( 0 );
+ 406               	.LM25:
+ 407 00c4 42A7      		clr.l -(%sp)
+ 408               	.LCFI10:
+ 409 00c6 4EB9 0000 		jsr tpu_init
+ 409      0000 
+ 410 00cc 588F      		addq.l #4,%sp
+ 106:Twister.cpp   ****     iprintf( "TCR1 freq = %d, TCR2 freq = %d\n", tpu_get_tcr1_freq( 0 ), tpu_get_tcr2_freq( 0 ));
+ 412               	.LM26:
+ 413 00ce 42A7      		clr.l -(%sp)
+ 414 00d0 4EB9 0000 		jsr tpu_get_tcr2_freq
+ 414      0000 
+ 415 00d6 588F      		addq.l #4,%sp
+ 416 00d8 2F00      		move.l %d0,-(%sp)
+ 417 00da 42A7      		clr.l -(%sp)
+ 418 00dc 4EB9 0000 		jsr tpu_get_tcr1_freq
+ 418      0000 
+ 419 00e2 588F      		addq.l #4,%sp
+ 420 00e4 2F00      		move.l %d0,-(%sp)
+ 421 00e6 4879 0000 		pea .LC0
+ 421      0000 
+ 422               	.LCFI11:
+ 423 00ec 4EB9 0000 		jsr iprintf
+ 423      0000 
+ 424 00f2 508F      		addq.l #8,%sp
+ 425 00f4 588F      		addq.l #4,%sp
+ 107:Twister.cpp   ****     
+ 108:Twister.cpp   ****     // For the Solarbotics Secret Motor Controller, we've got them plugged in
+ 109:Twister.cpp   ****     // as follows:
+ 110:Twister.cpp   ****     //             
+ 111:Twister.cpp   ****     // Right              Left
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 7
+
+
+ 112:Twister.cpp   ****     // ------------ -------------
+ 113:Twister.cpp   ****     // Green  D2  6  7 D2 Green
+ 114:Twister.cpp   ****     // Yellow En  8  9 En Yellow
+ 115:Twister.cpp   ****     // Orange D1 10 11 D1 Orange
+ 116:Twister.cpp   ****     
+ 117:Twister.cpp   ****     gRightMotor.Init( 10, 6, 8 );
+ 427               	.LM27:
+ 428 00f6 4878 0008 		pea 8.w
+ 429 00fa 4878 0006 		pea 6.w
+ 430 00fe 4878 000A 		pea 10.w
+ 431 0102 4879 0000 		pea gRightMotor
+ 431      0000 
+ 432               	.LCFI12:
+ 433 0108 4EB9 0000 		jsr Init__5Motoriii
+ 433      0000 
+ 434 010e 508F      		addq.l #8,%sp
+ 435 0110 508F      		addq.l #8,%sp
+ 118:Twister.cpp   ****     gLeftMotor.Init( 11, 7, 9 );
+ 437               	.LM28:
+ 438 0112 4878 0009 		pea 9.w
+ 439 0116 4878 0007 		pea 7.w
+ 440 011a 4878 000B 		pea 11.w
+ 441 011e 4879 0000 		pea gLeftMotor
+ 441      0000 
+ 442 0124 4EB9 0000 		jsr Init__5Motoriii
+ 442      0000 
+ 443 012a 508F      		addq.l #8,%sp
+ 444 012c 508F      		addq.l #8,%sp
+ 119:Twister.cpp   ****     
+ 120:Twister.cpp   ****     /*
+ 121:Twister.cpp   ****      * Initialize the periodic timer. A value of 8 should cause a 1024 Hz
+ 122:Twister.cpp   ****      * interrupt.
+ 123:Twister.cpp   ****      *
+ 124:Twister.cpp   ****      * With PTP == 0, you get interrupted 8192/PITM times per second.
+ 125:Twister.cpp   ****      * With PTP == 1, you get interrupted   16/PITM times per second.
+ 126:Twister.cpp   ****      */
+ 127:Twister.cpp   ****     
+ 128:Twister.cpp   ****     gTickCounter = 0;
+ 446               	.LM29:
+ 447 012e 42B9 0000 		clr.l gTickCounter
+ 447      0000 
+ 129:Twister.cpp   ****     install_isr( 64, TickHandler );
+ 449               	.LM30:
+ 450 0134 4879 0000 		pea TickHandler__Fv
+ 450      0000 
+ 451 013a 4878 0040 		pea 64.w
+ 452               	.LCFI13:
+ 453 013e 4EB9 0000 		jsr install_isr
+ 453      0000 
+ 454 0144 508F      		addq.l #8,%sp
+ 130:Twister.cpp   ****     sim->PITR.BITS.PTP   = 0;
+ 456               	.LM31:
+ 457 0146 206E FFF4 		move.l -12(%a6),%a0
+ 458 014a 0228 FFFE 		and.b #-2,36(%a0)
+ 458      0024 
+ 131:Twister.cpp   ****     sim->PITR.BITS.PITM  = 8192 / TICK_HZ;
+ 460               	.LM32:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 8
+
+
+ 461 0150 206E FFF4 		move.l -12(%a6),%a0
+ 462 0154 117C 0010 		move.b #16,37(%a0)
+ 462      0025 
+ 132:Twister.cpp   ****     sim->PICR.BITS.PIRQL = 6;
+ 464               	.LM33:
+ 465 015a 206E FFF4 		move.l -12(%a6),%a0
+ 466 015e 0228 FFF8 		and.b #-8,34(%a0)
+ 466      0022 
+ 467 0164 0028 0006 		or.b #6,34(%a0)
+ 467      0022 
+ 133:Twister.cpp   ****     sim->PICR.BITS.PIV   = 64;
+ 469               	.LM34:
+ 470 016a 206E FFF4 		move.l -12(%a6),%a0
+ 471 016e 117C 0040 		move.b #64,35(%a0)
+ 471      0023 
+ 134:Twister.cpp   **** 
+ 135:Twister.cpp   ****     gFqdA = tpu_request_channel( 0, 2 );
+ 473               	.LM35:
+ 474 0174 4878 0002 		pea 2.w
+ 475 0178 42A7      		clr.l -(%sp)
+ 476 017a 4EB9 0000 		jsr tpu_request_channel
+ 476      0000 
+ 477 0180 508F      		addq.l #8,%sp
+ 478 0182 23C0 0000 		move.l %d0,gFqdA
+ 478      0000 
+ 136:Twister.cpp   ****     gFqdB = tpu_request_channel( 0, 3 );
+ 480               	.LM36:
+ 481 0188 4878 0003 		pea 3.w
+ 482 018c 42A7      		clr.l -(%sp)
+ 483 018e 4EB9 0000 		jsr tpu_request_channel
+ 483      0000 
+ 484 0194 508F      		addq.l #8,%sp
+ 485 0196 23C0 0000 		move.l %d0,gFqdB
+ 485      0000 
+ 137:Twister.cpp   **** 
+ 138:Twister.cpp   ****     for ( int i = 0; i < 8; i++ ) 
+ 487               	.LM37:
+ 488               	.LBB6:
+ 489 019c 42AE FFF0 		clr.l -16(%a6)
+ 490               	.L17:
+ 491 01a0 7007      		moveq.l #7,%d0
+ 492 01a2 B0AE FFF0 		cmp.l -16(%a6),%d0
+ 493 01a6 6C02      		jbge .L20
+ 494 01a8 6044      		jbra .L18
+ 495               	.L20:
+ 139:Twister.cpp   ****     {
+ 140:Twister.cpp   ****         gMaxAD[ i ] = 0;
+ 497               	.LM38:
+ 498 01aa 202E FFF0 		move.l -16(%a6),%d0
+ 499 01ae 2200      		move.l %d0,%d1
+ 500 01b0 2001      		move.l %d1,%d0
+ 501 01b2 E588      		lsl.l #2,%d0
+ 502 01b4 41F9 0000 		lea gMaxAD,%a0
+ 502      0000 
+ 503 01ba 42B0 0800 		clr.l (%a0,%d0.l)
+ 141:Twister.cpp   ****         gADScale[ i ] = 100;
+ 505               	.LM39:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 9
+
+
+ 506 01be 202E FFF0 		move.l -16(%a6),%d0
+ 507 01c2 2200      		move.l %d0,%d1
+ 508 01c4 2001      		move.l %d1,%d0
+ 509 01c6 E588      		lsl.l #2,%d0
+ 510 01c8 41F9 0000 		lea gADScale,%a0
+ 510      0000 
+ 511 01ce 7264      		moveq.l #100,%d1
+ 512 01d0 2181 0800 		move.l %d1,(%a0,%d0.l)
+ 142:Twister.cpp   ****         gADOffset[ i ] = 0;
+ 514               	.LM40:
+ 515 01d4 202E FFF0 		move.l -16(%a6),%d0
+ 516 01d8 2200      		move.l %d0,%d1
+ 517 01da 2001      		move.l %d1,%d0
+ 518 01dc E588      		lsl.l #2,%d0
+ 519 01de 41F9 0000 		lea gADOffset,%a0
+ 519      0000 
+ 520 01e4 42B0 0800 		clr.l (%a0,%d0.l)
+ 143:Twister.cpp   ****     }
+ 522               	.LM41:
+ 523               	.L19:
+ 524 01e8 52AE FFF0 		addq.l #1,-16(%a6)
+ 525 01ec 60B2      		jbra .L17
+ 526               	.L18:
+ 527               	.LBE6:
+ 144:Twister.cpp   ****     gADScale[ CENTER_R ] = 150;
+ 529               	.LM42:
+ 530 01ee 23FC 0000 		move.l #150,gADScale+4
+ 530      0096 0000 
+ 530      0000 
+ 145:Twister.cpp   ****     gADOffset[ CENTER_R ] = -4;
+ 532               	.LM43:
+ 533 01f8 70FC      		moveq.l #-4,%d0
+ 534 01fa 23C0 0000 		move.l %d0,gADOffset+4
+ 534      0000 
+ 146:Twister.cpp   **** 
+ 147:Twister.cpp   ****     while ( 1 )
+ 536               	.LM44:
+ 537               	.L21:
+ 538 0200 6004      		jbra .L23
+ 539 0202 6000 01E8 		jbra .L22
+ 540               	.L23:
+ 541               	.LBB7:
+ 148:Twister.cpp   ****     {
+ 149:Twister.cpp   ****         if ( havebyte() )
+ 543               	.LM45:
+ 544               	.LCFI14:
+ 545 0206 4EB9 0000 		jsr havebyte
+ 545      0000 
+ 546 020c 4A80      		tst.l %d0
+ 547 020e 670C      		jbeq .L24
+ 150:Twister.cpp   ****         {
+ 151:Twister.cpp   ****             inbyte();
+ 549               	.LM46:
+ 550 0210 4EB9 0000 		jsr inbyte
+ 550      0000 
+ 152:Twister.cpp   ****             DebugKey();
+ 552               	.LM47:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 10
+
+
+ 553 0216 4EB9 0000 		jsr DebugKey__Fv
+ 553      0000 
+ 554               	.L24:
+ 153:Twister.cpp   ****         }
+ 154:Twister.cpp   ****         
+ 155:Twister.cpp   ****         nextTick = gTickCounter >> 8;
+ 556               	.LM48:
+ 557 021c 2039 0000 		move.l gTickCounter,%d0
+ 557      0000 
+ 558 0222 2200      		move.l %d0,%d1
+ 559 0224 E081      		asr.l #8,%d1
+ 560 0226 2D41 FFFC 		move.l %d1,-4(%a6)
+ 156:Twister.cpp   ****         while ( nextTick == ( gTickCounter >> 8 ))
+ 562               	.LM49:
+ 563               	.L25:
+ 564 022a 2239 0000 		move.l gTickCounter,%d1
+ 564      0000 
+ 565 0230 2001      		move.l %d1,%d0
+ 566 0232 E080      		asr.l #8,%d0
+ 567 0234 B0AE FFFC 		cmp.l -4(%a6),%d0
+ 568 0238 6702      		jbeq .L27
+ 569 023a 6002      		jbra .L26
+ 570               	.L27:
+ 571 023c 60EC      		jbra .L25
+ 572               	.L26:
+ 157:Twister.cpp   ****         {
+ 158:Twister.cpp   ****             ;
+ 159:Twister.cpp   ****         }
+ 160:Twister.cpp   ****         
+ 161:Twister.cpp   ****         if ( ledState )
+ 574               	.LM50:
+ 575               	.LBB8:
+ 576 023e 4AAE FFF8 		tst.l -8(%a6)
+ 577 0242 6700 0176 		jbeq .L28
+ 162:Twister.cpp   ****         {
+ 579               	.LM51:
+ 580               	.LBB9:
+ 163:Twister.cpp   ****             int min = nextTick / 120;
+ 582               	.LM52:
+ 583 0246 202E FFFC 		move.l -4(%a6),%d0
+ 584 024a 2200      		move.l %d0,%d1
+ 585 024c 4C3C 1C02 		muls.l #-2004318071,%d2:%d1
+ 585      8888 8889 
+ 586 0254 2202      		move.l %d2,%d1
+ 587 0256 D280      		add.l %d0,%d1
+ 588 0258 2401      		move.l %d1,%d2
+ 589 025a EC82      		asr.l #6,%d2
+ 590 025c 2200      		move.l %d0,%d1
+ 591 025e D281      		add.l %d1,%d1
+ 592 0260 9381      		subx.l %d1,%d1
+ 593 0262 2002      		move.l %d2,%d0
+ 594 0264 9081      		sub.l %d1,%d0
+ 595 0266 2D40 FFEC 		move.l %d0,-20(%a6)
+ 164:Twister.cpp   ****             int sec = ( nextTick / 2 ) % 60;
+ 597               	.LM53:
+ 598 026a 202E FFFC 		move.l -4(%a6),%d0
+ 599 026e 2200      		move.l %d0,%d1
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 11
+
+
+ 600 0270 D281      		add.l %d1,%d1
+ 601 0272 9381      		subx.l %d1,%d1
+ 602 0274 2401      		move.l %d1,%d2
+ 603 0276 D482      		add.l %d2,%d2
+ 604 0278 9582      		subx.l %d2,%d2
+ 605 027a 4482      		neg.l %d2
+ 606 027c 2600      		move.l %d0,%d3
+ 607 027e D682      		add.l %d2,%d3
+ 608 0280 2003      		move.l %d3,%d0
+ 609 0282 E280      		asr.l #1,%d0
+ 610 0284 2200      		move.l %d0,%d1
+ 611 0286 4C3C 1C02 		muls.l #-2004318071,%d2:%d1
+ 611      8888 8889 
+ 612 028e 2202      		move.l %d2,%d1
+ 613 0290 D280      		add.l %d0,%d1
+ 614 0292 2401      		move.l %d1,%d2
+ 615 0294 EA82      		asr.l #5,%d2
+ 616 0296 2200      		move.l %d0,%d1
+ 617 0298 D281      		add.l %d1,%d1
+ 618 029a 9381      		subx.l %d1,%d1
+ 619 029c 2042      		move.l %d2,%a0
+ 620 029e 91C1      		sub.l %d1,%a0
+ 621 02a0 2D48 FFE8 		move.l %a0,-24(%a6)
+ 622 02a4 222E FFE8 		move.l -24(%a6),%d1
+ 623 02a8 2601      		move.l %d1,%d3
+ 624 02aa 2403      		move.l %d3,%d2
+ 625 02ac E98A      		lsl.l #4,%d2
+ 626 02ae 9481      		sub.l %d1,%d2
+ 627 02b0 2202      		move.l %d2,%d1
+ 628 02b2 E589      		lsl.l #2,%d1
+ 629 02b4 2040      		move.l %d0,%a0
+ 630 02b6 91C1      		sub.l %d1,%a0
+ 631 02b8 2D48 FFE8 		move.l %a0,-24(%a6)
+ 165:Twister.cpp   ****             uint16 fqdCount = fqd( gFqdA, gFqdB );
+ 633               	.LM54:
+ 634 02bc 2F39 0000 		move.l gFqdB,-(%sp)
+ 634      0000 
+ 635 02c2 2F39 0000 		move.l gFqdA,-(%sp)
+ 635      0000 
+ 636               	.LCFI15:
+ 637 02c8 4EB9 0000 		jsr fqd
+ 637      0000 
+ 638 02ce 508F      		addq.l #8,%sp
+ 639 02d0 3D40 FFE6 		move.w %d0,-26(%a6)
+ 166:Twister.cpp   ****             
+ 167:Twister.cpp   ****             iprintf( "\r%02d:%02d", min, sec );
+ 641               	.LM55:
+ 642 02d4 2F2E FFE8 		move.l -24(%a6),-(%sp)
+ 643 02d8 2F2E FFEC 		move.l -20(%a6),-(%sp)
+ 644 02dc 4879 0000 		pea .LC1
+ 644      0000 
+ 645               	.LCFI16:
+ 646 02e2 4EB9 0000 		jsr iprintf
+ 646      0000 
+ 647 02e8 508F      		addq.l #8,%sp
+ 648 02ea 588F      		addq.l #4,%sp
+ 168:Twister.cpp   ****             
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 12
+
+
+ 169:Twister.cpp   ****             //lcd_printf( "\f%02d:%02d", min, sec );
+ 170:Twister.cpp   ****             lcd_printf( "\f" );
+ 650               	.LM56:
+ 651 02ec 4879 0000 		pea .LC2
+ 651      0000 
+ 652               	.LCFI17:
+ 653 02f2 4EB9 0000 		jsr lcd_printf
+ 653      0000 
+ 654 02f8 588F      		addq.l #4,%sp
+ 171:Twister.cpp   ****             
+ 172:Twister.cpp   ****             iprintf( " %3d~%3d~%3d~%3d~%3d~%3d~%3d~%3d", 
+ 173:Twister.cpp   ****                     gAD[0], gAD[1], gAD[2], gAD[3], gMaxAD[0], gMaxAD[1], gMaxAD[2], gMaxAD[3] );
+ 656               	.LM57:
+ 657 02fa 2F39 0000 		move.l gMaxAD+12,-(%sp)
+ 657      0000 
+ 658 0300 2F39 0000 		move.l gMaxAD+8,-(%sp)
+ 658      0000 
+ 659 0306 2F39 0000 		move.l gMaxAD+4,-(%sp)
+ 659      0000 
+ 660 030c 2F39 0000 		move.l gMaxAD,-(%sp)
+ 660      0000 
+ 661 0312 2F39 0000 		move.l gAD+12,-(%sp)
+ 661      0000 
+ 662 0318 2F39 0000 		move.l gAD+8,-(%sp)
+ 662      0000 
+ 663 031e 2F39 0000 		move.l gAD+4,-(%sp)
+ 663      0000 
+ 664 0324 2F39 0000 		move.l gAD,-(%sp)
+ 664      0000 
+ 665 032a 4879 0000 		pea .LC3
+ 665      0000 
+ 666               	.LCFI18:
+ 667 0330 4EB9 0000 		jsr iprintf
+ 667      0000 
+ 668 0336 4FEF 0024 		lea (36,%sp),%sp
+ 174:Twister.cpp   **** 
+ 175:Twister.cpp   ****             lcd_printf( "AD: %3d %3d %3d %3d\nMx: %3d %3d %3d %3d",
+ 176:Twister.cpp   ****                     gAD[0], gAD[1], gAD[2], gAD[3], gMaxAD[0], gMaxAD[1], gMaxAD[2], gMaxAD[3] );
+ 670               	.LM58:
+ 671 033a 2F39 0000 		move.l gMaxAD+12,-(%sp)
+ 671      0000 
+ 672 0340 2F39 0000 		move.l gMaxAD+8,-(%sp)
+ 672      0000 
+ 673 0346 2F39 0000 		move.l gMaxAD+4,-(%sp)
+ 673      0000 
+ 674 034c 2F39 0000 		move.l gMaxAD,-(%sp)
+ 674      0000 
+ 675 0352 2F39 0000 		move.l gAD+12,-(%sp)
+ 675      0000 
+ 676 0358 2F39 0000 		move.l gAD+8,-(%sp)
+ 676      0000 
+ 677 035e 2F39 0000 		move.l gAD+4,-(%sp)
+ 677      0000 
+ 678 0364 2F39 0000 		move.l gAD,-(%sp)
+ 678      0000 
+ 679 036a 4879 0000 		pea .LC4
+ 679      0000 
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 13
+
+
+ 680 0370 4EB9 0000 		jsr lcd_printf
+ 680      0000 
+ 681 0376 4FEF 0024 		lea (36,%sp),%sp
+ 177:Twister.cpp   **** 
+ 178:Twister.cpp   ****             iprintf( " FQD: %5u", fqdCount );
+ 683               	.LM59:
+ 684 037a 4280      		clr.l %d0
+ 685 037c 302E FFE6 		move.w -26(%a6),%d0
+ 686 0380 2F00      		move.l %d0,-(%sp)
+ 687 0382 4879 0000 		pea .LC5
+ 687      0000 
+ 688               	.LCFI19:
+ 689 0388 4EB9 0000 		jsr iprintf
+ 689      0000 
+ 690 038e 508F      		addq.l #8,%sp
+ 179:Twister.cpp   ****             //lcd_printf( " F:%u", fqdCount );
+ 180:Twister.cpp   ****             
+ 181:Twister.cpp   ****             fflush( stdout );
+ 692               	.LM60:
+ 693 0390 2079 0000 		move.l _impure_ptr,%a0
+ 693      0000 
+ 694 0396 2F28 0008 		move.l 8(%a0),-(%sp)
+ 695               	.LCFI20:
+ 696 039a 4EB9 0000 		jsr fflush
+ 696      0000 
+ 697 03a0 588F      		addq.l #4,%sp
+ 182:Twister.cpp   ****             
+ 183:Twister.cpp   ****             led_on( GreenLED );
+ 699               	.LM61:
+ 700 03a2 4878 0001 		pea 1.w
+ 701 03a6 4EB9 0000 		jsr led_on
+ 701      0000 
+ 702 03ac 588F      		addq.l #4,%sp
+ 184:Twister.cpp   ****             led_off( RedLED );
+ 704               	.LM62:
+ 705 03ae 42A7      		clr.l -(%sp)
+ 706 03b0 4EB9 0000 		jsr led_off
+ 706      0000 
+ 707 03b6 588F      		addq.l #4,%sp
+ 708               	.LBE9:
+ 709 03b8 6016      		jbra .L29
+ 710               	.L28:
+ 185:Twister.cpp   ****         }
+ 186:Twister.cpp   ****         else
+ 187:Twister.cpp   ****         {
+ 188:Twister.cpp   ****             led_off( GreenLED );
+ 712               	.LM63:
+ 713 03ba 4878 0001 		pea 1.w
+ 714 03be 4EB9 0000 		jsr led_off
+ 714      0000 
+ 715 03c4 588F      		addq.l #4,%sp
+ 189:Twister.cpp   ****             led_on( RedLED );
+ 717               	.LM64:
+ 718 03c6 42A7      		clr.l -(%sp)
+ 719 03c8 4EB9 0000 		jsr led_on
+ 719      0000 
+ 720 03ce 588F      		addq.l #4,%sp
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 14
+
+
+ 721               	.L29:
+ 722               	.LBE8:
+ 190:Twister.cpp   ****         }
+ 191:Twister.cpp   ****         ledState = !ledState;
+ 724               	.LM65:
+ 725 03d0 4AAE FFF8 		tst.l -8(%a6)
+ 726 03d4 57C0      		seq %d0
+ 727 03d6 1200      		move.b %d0,%d1
+ 728 03d8 49C1      		extb.l %d1
+ 729 03da 2D41 FFF8 		move.l %d1,-8(%a6)
+ 730 03de 202E FFF8 		move.l -8(%a6),%d0
+ 731 03e2 4480      		neg.l %d0
+ 732 03e4 2D40 FFF8 		move.l %d0,-8(%a6)
+ 733               	.LBE7:
+ 734 03e8 6000 FE16 		jbra .L21
+ 735               	.L22:
+ 192:Twister.cpp   ****    }
+ 193:Twister.cpp   **** 
+ 194:Twister.cpp   ****    exit( 0 );
+ 737               	.LM66:
+ 738 03ec 42A7      		clr.l -(%sp)
+ 739 03ee 4EB9 0000 		jsr exit
+ 739      0000 
+ 740 03f4 588F      		addq.l #4,%sp
+ 741               	.LBE5:
+ 742 03f6 4280      		clr.l %d0
+ 743 03f8 6000 0002 		jbra .L16
+ 195:Twister.cpp   **** }
+ 745               	.LM67:
+ 746               	.L16:
+ 747 03fc 242E FFDC 		move.l -36(%a6),%d2
+ 748 0400 262E FFE0 		move.l -32(%a6),%d3
+ 749 0404 4E5E      		unlk %a6
+ 750 0406 4E75      		rts
+ 751               	.LFE4:
+ 752               	.Lfe4:
+ 771               	.Lscope3:
+ 773               	.section	.rodata
+ 774               	.LC6:
+ 775 0080 6920 3D20 		.string	"i = %d gAD = %d gADOffset = %d gADScale = %d\n"
+ 775      2564 2067 
+ 775      4144 203D 
+ 775      2025 6420 
+ 775      6741 444F 
+ 776               	.text
+ 778               	.globl ReadAD__Fv
+ 780               	ReadAD__Fv:
+ 781               	.LFB5:
+ 196:Twister.cpp   **** 
+ 197:Twister.cpp   **** /****************************************************************************
+ 198:Twister.cpp   **** *
+ 199:Twister.cpp   **** *  Reads A/D channels 0 and 1, and prints the results on the LCD
+ 200:Twister.cpp   **** *
+ 201:Twister.cpp   **** ****************************************************************************/
+ 202:Twister.cpp   **** 
+ 203:Twister.cpp   **** void ReadAD( void )
+ 204:Twister.cpp   **** {
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 15
+
+
+ 783               	.LM68:
+ 784 0408 4E56 FFF8 		link.w %a6,#-8
+ 785               	.LCFI21:
+ 786 040c 2F02      		move.l %d2,-(%sp)
+ 787               	.LCFI22:
+ 789               	.LM69:
+ 790               	.LBB10:
+ 205:Twister.cpp   ****    gAD[ 0 ] = *(unsigned char *)0xf00000; // Latch address 0
+ 792               	.LM70:
+ 793 040e 4280      		clr.l %d0
+ 794 0410 1039 00F0 		move.b 15728640,%d0
+ 794      0000 
+ 795 0416 23C0 0000 		move.l %d0,gAD
+ 795      0000 
+ 206:Twister.cpp   ****    gAD[ 0 ] = *(unsigned char *)0xf00001; // Start conversion 0, latch 1
+ 797               	.LM71:
+ 798 041c 4280      		clr.l %d0
+ 799 041e 1039 00F0 		move.b 15728641,%d0
+ 799      0001 
+ 800 0424 23C0 0000 		move.l %d0,gAD
+ 800      0000 
+ 207:Twister.cpp   ****    gAD[ 0 ] = *(unsigned char *)0xf00002; // Read 0, start conversion 1, latch 2
+ 802               	.LM72:
+ 803 042a 4280      		clr.l %d0
+ 804 042c 1039 00F0 		move.b 15728642,%d0
+ 804      0002 
+ 805 0432 23C0 0000 		move.l %d0,gAD
+ 805      0000 
+ 208:Twister.cpp   ****    gAD[ 1 ] = *(unsigned char *)0xf00003; // Read 1, start conversion 2, latch 3
+ 807               	.LM73:
+ 808 0438 4280      		clr.l %d0
+ 809 043a 1039 00F0 		move.b 15728643,%d0
+ 809      0003 
+ 810 0440 23C0 0000 		move.l %d0,gAD+4
+ 810      0000 
+ 209:Twister.cpp   ****    gAD[ 2 ] = *(unsigned char *)0xf00004; // Read 2, start conversion 3, latch 4
+ 812               	.LM74:
+ 813 0446 4280      		clr.l %d0
+ 814 0448 1039 00F0 		move.b 15728644,%d0
+ 814      0004 
+ 815 044e 23C0 0000 		move.l %d0,gAD+8
+ 815      0000 
+ 210:Twister.cpp   ****    gAD[ 3 ] = *(unsigned char *)0xf00005; // Read 3, start conversion 4, latch 5
+ 817               	.LM75:
+ 818 0454 4280      		clr.l %d0
+ 819 0456 1039 00F0 		move.b 15728645,%d0
+ 819      0005 
+ 820 045c 23C0 0000 		move.l %d0,gAD+12
+ 820      0000 
+ 211:Twister.cpp   ****    gAD[ 4 ] = *(unsigned char *)0xf00006; // Read 4, start conversion 5, latch 6
+ 822               	.LM76:
+ 823 0462 4280      		clr.l %d0
+ 824 0464 1039 00F0 		move.b 15728646,%d0
+ 824      0006 
+ 825 046a 23C0 0000 		move.l %d0,gAD+16
+ 825      0000 
+ 212:Twister.cpp   ****    gAD[ 5 ] = *(unsigned char *)0xf00007; // Read 5, start conversion 6, latch 7
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 16
+
+
+ 827               	.LM77:
+ 828 0470 4280      		clr.l %d0
+ 829 0472 1039 00F0 		move.b 15728647,%d0
+ 829      0007 
+ 830 0478 23C0 0000 		move.l %d0,gAD+20
+ 830      0000 
+ 213:Twister.cpp   ****    gAD[ 6 ] = *(unsigned char *)0xf00000; // Read 6, start conversion 7
+ 832               	.LM78:
+ 833 047e 4280      		clr.l %d0
+ 834 0480 1039 00F0 		move.b 15728640,%d0
+ 834      0000 
+ 835 0486 23C0 0000 		move.l %d0,gAD+24
+ 835      0000 
+ 214:Twister.cpp   ****    gAD[ 7 ] = *(unsigned char *)0xf00000; // Read 7
+ 837               	.LM79:
+ 838 048c 4280      		clr.l %d0
+ 839 048e 1039 00F0 		move.b 15728640,%d0
+ 839      0000 
+ 840 0494 23C0 0000 		move.l %d0,gAD+28
+ 840      0000 
+ 215:Twister.cpp   **** 
+ 216:Twister.cpp   ****    for ( int i = 0; i < 8; i++ ) 
+ 842               	.LM80:
+ 843               	.LBB11:
+ 844 049a 42AE FFFC 		clr.l -4(%a6)
+ 845               	.L31:
+ 846 049e 7007      		moveq.l #7,%d0
+ 847 04a0 B0AE FFFC 		cmp.l -4(%a6),%d0
+ 848 04a4 6C04      		jbge .L34
+ 849 04a6 6000 00D0 		jbra .L32
+ 850               	.L34:
+ 851               	.LBB12:
+ 217:Twister.cpp   ****    {
+ 218:Twister.cpp   ****        sample_t newSample = ( ( gAD[ i ] + gADOffset[ i ] ) * gADScale[ i ] ) / 100;
+ 853               	.LM81:
+ 854 04aa 202E FFFC 		move.l -4(%a6),%d0
+ 855 04ae 2200      		move.l %d0,%d1
+ 856 04b0 2001      		move.l %d1,%d0
+ 857 04b2 E588      		lsl.l #2,%d0
+ 858 04b4 41F9 0000 		lea gAD,%a0
+ 858      0000 
+ 859 04ba 222E FFFC 		move.l -4(%a6),%d1
+ 860 04be 2401      		move.l %d1,%d2
+ 861 04c0 2202      		move.l %d2,%d1
+ 862 04c2 E589      		lsl.l #2,%d1
+ 863 04c4 43F9 0000 		lea gADOffset,%a1
+ 863      0000 
+ 864 04ca 2430 0800 		move.l (%a0,%d0.l),%d2
+ 865 04ce 2002      		move.l %d2,%d0
+ 866 04d0 D0B1 1800 		add.l (%a1,%d1.l),%d0
+ 867 04d4 222E FFFC 		move.l -4(%a6),%d1
+ 868 04d8 2401      		move.l %d1,%d2
+ 869 04da 2202      		move.l %d2,%d1
+ 870 04dc E589      		lsl.l #2,%d1
+ 871 04de 41F9 0000 		lea gADScale,%a0
+ 871      0000 
+ 872 04e4 2400      		move.l %d0,%d2
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 17
+
+
+ 873 04e6 4C30 2800 		muls.l (%a0,%d1.l),%d2
+ 873      1800 
+ 874 04ec 2202      		move.l %d2,%d1
+ 875 04ee 2001      		move.l %d1,%d0
+ 876 04f0 4C3C 0402 		mulu.l #1374389535,%d2:%d0
+ 876      51EB 851F 
+ 877 04f8 2002      		move.l %d2,%d0
+ 878 04fa EA88      		lsr.l #5,%d0
+ 879 04fc 2D40 FFF8 		move.l %d0,-8(%a6)
+ 219:Twister.cpp   **** 
+ 220:Twister.cpp   ****        if ( newSample > 512 )
+ 881               	.LM82:
+ 882 0500 0CAE 0000 		cmp.l #512,-8(%a6)
+ 882      0200 FFF8 
+ 883 0508 6350      		jbls .L35
+ 221:Twister.cpp   ****        {
+ 222:Twister.cpp   ****            iprintf( "i = %d gAD = %d gADOffset = %d gADScale = %d\n",
+ 223:Twister.cpp   ****                     i, gAD[ i ], gADOffset[ i ], gADScale[ i ] );
+ 885               	.LM83:
+ 886 050a 202E FFFC 		move.l -4(%a6),%d0
+ 887 050e 2200      		move.l %d0,%d1
+ 888 0510 2001      		move.l %d1,%d0
+ 889 0512 E588      		lsl.l #2,%d0
+ 890 0514 41F9 0000 		lea gADScale,%a0
+ 890      0000 
+ 891 051a 2F30 0800 		move.l (%a0,%d0.l),-(%sp)
+ 892 051e 202E FFFC 		move.l -4(%a6),%d0
+ 893 0522 2200      		move.l %d0,%d1
+ 894 0524 2001      		move.l %d1,%d0
+ 895 0526 E588      		lsl.l #2,%d0
+ 896 0528 41F9 0000 		lea gADOffset,%a0
+ 896      0000 
+ 897 052e 2F30 0800 		move.l (%a0,%d0.l),-(%sp)
+ 898 0532 202E FFFC 		move.l -4(%a6),%d0
+ 899 0536 2200      		move.l %d0,%d1
+ 900 0538 2001      		move.l %d1,%d0
+ 901 053a E588      		lsl.l #2,%d0
+ 902 053c 41F9 0000 		lea gAD,%a0
+ 902      0000 
+ 903 0542 2F30 0800 		move.l (%a0,%d0.l),-(%sp)
+ 904 0546 2F2E FFFC 		move.l -4(%a6),-(%sp)
+ 905 054a 4879 0000 		pea .LC6
+ 905      0000 
+ 906               	.LCFI23:
+ 907 0550 4EB9 0000 		jsr iprintf
+ 907      0000 
+ 908 0556 4FEF 0014 		lea (20,%sp),%sp
+ 909               	.L35:
+ 224:Twister.cpp   ****        }
+ 225:Twister.cpp   ****        
+ 226:Twister.cpp   ****        gAD[ i ] = newSample;
+ 911               	.LM84:
+ 912 055a 202E FFFC 		move.l -4(%a6),%d0
+ 913 055e 2200      		move.l %d0,%d1
+ 914 0560 2001      		move.l %d1,%d0
+ 915 0562 E588      		lsl.l #2,%d0
+ 916 0564 41F9 0000 		lea gAD,%a0
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 18
+
+
+ 916      0000 
+ 917 056a 21AE FFF8 		move.l -8(%a6),(%a0,%d0.l)
+ 917      0800 
+ 918               	.LBE12:
+ 227:Twister.cpp   ****    }
+ 920               	.LM85:
+ 921               	.L33:
+ 922 0570 52AE FFFC 		addq.l #1,-4(%a6)
+ 923 0574 6000 FF28 		jbra .L31
+ 924               	.L32:
+ 925               	.LBE11:
+ 926               	.LBE10:
+ 927 0578 6004      		jbra .L36
+ 928 057a 6000 0002 		jbra .L30
+ 929               	.L36:
+ 228:Twister.cpp   **** 
+ 229:Twister.cpp   **** } /* ReadAD */
+ 931               	.LM86:
+ 932               	.L30:
+ 933 057e 242E FFF4 		move.l -12(%a6),%d2
+ 934 0582 4E5E      		unlk %a6
+ 935 0584 4E75      		rts
+ 936               	.LFE5:
+ 937               	.Lfe5:
+ 947               	.Lscope4:
+ 950               	.globl TickHandler__Fv
+ 952               	TickHandler__Fv:
+ 953               	.LFB6:
+ 230:Twister.cpp   **** 
+ 231:Twister.cpp   **** /****************************************************************************
+ 232:Twister.cpp   **** *
+ 233:Twister.cpp   **** *  Called for each tick of the Periodic Interval Timer.
+ 234:Twister.cpp   **** *
+ 235:Twister.cpp   **** ****************************************************************************/
+ 236:Twister.cpp   **** 
+ 237:Twister.cpp   **** void TickHandler( void )
+ 238:Twister.cpp   **** {
+ 955               	.LM87:
+ 956 0586 4E56 FFFC 		link.w %a6,#-4
+ 957               	.LCFI24:
+ 958 058a 2F02      		move.l %d2,-(%sp)
+ 959               	.LCFI25:
+ 961               	.LM88:
+ 962               	.LBB13:
+ 239:Twister.cpp   **** 
+ 240:Twister.cpp   ****    if( gTickFlag )
+ 964               	.LM89:
+ 965 058c 4AB9 0000 		tst.l gTickFlag
+ 965      0000 
+ 966 0592 670A      		jbeq .L38
+ 241:Twister.cpp   ****    {
+ 242:Twister.cpp   ****       gTickOverrun++;
+ 968               	.LM90:
+ 969 0594 52B9 0000 		addq.l #1,gTickOverrun
+ 969      0000 
+ 243:Twister.cpp   ****       return;
+ 971               	.LM91:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 19
+
+
+ 972 059a 6000 00AC 		jbra .L37
+ 973               	.L38:
+ 244:Twister.cpp   ****    }
+ 245:Twister.cpp   ****    gTickFlag = 1;
+ 975               	.LM92:
+ 976 059e 7001      		moveq.l #1,%d0
+ 977 05a0 23C0 0000 		move.l %d0,gTickFlag
+ 977      0000 
+ 246:Twister.cpp   **** 
+ 247:Twister.cpp   ****    gTickCounter++;
+ 979               	.LM93:
+ 980 05a6 2039 0000 		move.l gTickCounter,%d0
+ 980      0000 
+ 981 05ac 2200      		move.l %d0,%d1
+ 982 05ae 5281      		addq.l #1,%d1
+ 983 05b0 23C1 0000 		move.l %d1,gTickCounter
+ 983      0000 
+ 248:Twister.cpp   **** 
+ 249:Twister.cpp   ****    ReadAD();
+ 985               	.LM94:
+ 986 05b6 4EBA FE50 		jsr ReadAD__Fv
+ 250:Twister.cpp   **** 
+ 251:Twister.cpp   ****    for ( int i = 0; i < 7; i++ ) 
+ 988               	.LM95:
+ 989               	.LBB14:
+ 990 05ba 42AE FFFC 		clr.l -4(%a6)
+ 991               	.L39:
+ 992 05be 7006      		moveq.l #6,%d0
+ 993 05c0 B0AE FFFC 		cmp.l -4(%a6),%d0
+ 994 05c4 6C02      		jbge .L42
+ 995 05c6 6058      		jbra .L40
+ 996               	.L42:
+ 252:Twister.cpp   ****    {
+ 253:Twister.cpp   ****        if ( gAD[ i ] > gMaxAD[ i ] )
+ 998               	.LM96:
+ 999 05c8 202E FFFC 		move.l -4(%a6),%d0
+ 1000 05cc 2200      		move.l %d0,%d1
+ 1001 05ce 2001      		move.l %d1,%d0
+ 1002 05d0 E588      		lsl.l #2,%d0
+ 1003 05d2 41F9 0000 		lea gAD,%a0
+ 1003      0000 
+ 1004 05d8 222E FFFC 		move.l -4(%a6),%d1
+ 1005 05dc 2401      		move.l %d1,%d2
+ 1006 05de 2202      		move.l %d2,%d1
+ 1007 05e0 E589      		lsl.l #2,%d1
+ 1008 05e2 43F9 0000 		lea gMaxAD,%a1
+ 1008      0000 
+ 1009 05e8 2030 0800 		move.l (%a0,%d0.l),%d0
+ 1010 05ec 2231 1800 		move.l (%a1,%d1.l),%d1
+ 1011 05f0 B280      		cmp.l %d0,%d1
+ 1012 05f2 6426      		jbcc .L41
+ 254:Twister.cpp   ****        {
+ 255:Twister.cpp   ****            gMaxAD[ i ] = gAD[ i ];
+ 1014               	.LM97:
+ 1015 05f4 202E FFFC 		move.l -4(%a6),%d0
+ 1016 05f8 2200      		move.l %d0,%d1
+ 1017 05fa 2001      		move.l %d1,%d0
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 20
+
+
+ 1018 05fc E588      		lsl.l #2,%d0
+ 1019 05fe 41F9 0000 		lea gMaxAD,%a0
+ 1019      0000 
+ 1020 0604 222E FFFC 		move.l -4(%a6),%d1
+ 1021 0608 2401      		move.l %d1,%d2
+ 1022 060a 2202      		move.l %d2,%d1
+ 1023 060c E589      		lsl.l #2,%d1
+ 1024 060e 43F9 0000 		lea gAD,%a1
+ 1024      0000 
+ 1025 0614 21B1 1800 		move.l (%a1,%d1.l),(%a0,%d0.l)
+ 1025      0800 
+ 1026               	.L43:
+ 256:Twister.cpp   ****        }
+ 257:Twister.cpp   ****    }
+ 1028               	.LM98:
+ 1029               	.L41:
+ 1030 061a 52AE FFFC 		addq.l #1,-4(%a6)
+ 1031 061e 609E      		jbra .L39
+ 1032               	.L40:
+ 1033               	.LBE14:
+ 258:Twister.cpp   **** 
+ 259:Twister.cpp   ****    gLeftMotor.ProcessTick();
+ 1035               	.LM99:
+ 1036 0620 4879 0000 		pea gLeftMotor
+ 1036      0000 
+ 1037               	.LCFI26:
+ 1038 0626 4EB9 0000 		jsr ProcessTick__5Motor
+ 1038      0000 
+ 1039 062c 588F      		addq.l #4,%sp
+ 260:Twister.cpp   ****    gRightMotor.ProcessTick();
+ 1041               	.LM100:
+ 1042 062e 4879 0000 		pea gRightMotor
+ 1042      0000 
+ 1043 0634 4EB9 0000 		jsr ProcessTick__5Motor
+ 1043      0000 
+ 1044 063a 588F      		addq.l #4,%sp
+ 261:Twister.cpp   ****    
+ 262:Twister.cpp   ****    gTickFlag = 0;
+ 1046               	.LM101:
+ 1047 063c 42B9 0000 		clr.l gTickFlag
+ 1047      0000 
+ 1048               	.LBE13:
+ 1049 0642 6004      		jbra .L44
+ 1050 0644 6000 0002 		jbra .L37
+ 1051               	.L44:
+ 263:Twister.cpp   **** }
+ 1053               	.LM102:
+ 1054               	.L37:
+ 1055 0648 242E FFF8 		move.l -8(%a6),%d2
+ 1056 064c 4E5E      		unlk %a6
+ 1057 064e 4E75      		rts
+ 1058               	.LFE6:
+ 1059               	.Lfe6:
+ 1066               	.Lscope5:
+ 1068               	.section	.rodata
+ 1069               	.LC7:
+ 1070 00ae 5374 7261 		.string	"Straight Line\n"
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 21
+
+
+ 1070      6967 6874 
+ 1070      204C 696E 
+ 1070      650A 00
+ 1072               	.LC8:
+ 1073 00bd 4D52 00   		.string	"MR"
+ 1074               	.LC9:
+ 1075 00c0 4B47 00   		.string	"KG"
+ 1076               	.LC10:
+ 1077 00c3 4D4C 00   		.string	"ML"
+ 1078               	.LC11:
+ 1079 00c6 4163 7469 		.string	"Action: %s LSpd: %4d RSpd: %4d Adj: %4d CL:%3d%c CR:%3d%c\n\n"
+ 1079      6F6E 3A20 
+ 1079      2573 204C 
+ 1079      5370 643A 
+ 1079      2025 3464 
+ 1080               	.LC12:
+ 1081 0102 434C 3A25 		.string	"CL:%3d%c "
+ 1081      3364 2563 
+ 1081      2000 
+ 1082               	.LC13:
+ 1083 010c 4352 3A25 		.string	"CR:%3d%c "
+ 1083      3364 2563 
+ 1083      2000 
+ 1084               	.LC14:
+ 1085 0116 0A00      		.string	"\n"
+ 1086               	.text
+ 1088               	.globl StraightLine__Fv
+ 1090               	StraightLine__Fv:
+ 1091               	.LFB7:
+ 264:Twister.cpp   **** 
+ 265:Twister.cpp   **** void StraightLine()
+ 266:Twister.cpp   **** {
+ 1093               	.LM103:
+ 1094 0650 4E56 FFD0 		link.w %a6,#-48
+ 1095               	.LCFI27:
+ 1096 0654 2F02      		move.l %d2,-(%sp)
+ 1097               	.LCFI28:
+ 1099               	.LM104:
+ 1100               	.LBB15:
+ 267:Twister.cpp   ****     iprintf( "Straight Line\n" );
+ 1102               	.LM105:
+ 1103 0656 4879 0000 		pea .LC7
+ 1103      0000 
+ 1104               	.LCFI29:
+ 1105 065c 4EB9 0000 		jsr iprintf
+ 1105      0000 
+ 1106 0662 588F      		addq.l #4,%sp
+ 268:Twister.cpp   **** 
+ 269:Twister.cpp   ****     tick_t prevTick = gTickCounter;
+ 1108               	.LM106:
+ 1109 0664 2D79 0000 		move.l gTickCounter,-4(%a6)
+ 1109      0000 FFFC 
+ 270:Twister.cpp   **** 
+ 271:Twister.cpp   ****     gLeftMotor.SetSpeed( Motor::MaxSpeed );
+ 1111               	.LM107:
+ 1112 066c 4878 03E8 		pea 1000.w
+ 1113 0670 4879 0000 		pea gLeftMotor
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 22
+
+
+ 1113      0000 
+ 1114               	.LCFI30:
+ 1115 0676 4EB9 0000 		jsr SetSpeed__5Motori
+ 1115      0000 
+ 1116 067c 508F      		addq.l #8,%sp
+ 272:Twister.cpp   ****     gRightMotor.SetSpeed( Motor::MaxSpeed );
+ 1118               	.LM108:
+ 1119 067e 4878 03E8 		pea 1000.w
+ 1120 0682 4879 0000 		pea gRightMotor
+ 1120      0000 
+ 1121 0688 4EB9 0000 		jsr SetSpeed__5Motori
+ 1121      0000 
+ 1122 068e 508F      		addq.l #8,%sp
+ 273:Twister.cpp   **** 
+ 274:Twister.cpp   ****     enum Action
+ 275:Twister.cpp   ****     {
+ 276:Twister.cpp   ****         MoveLeft,
+ 277:Twister.cpp   ****         MoveRight,
+ 278:Twister.cpp   ****         KeepGoing
+ 279:Twister.cpp   ****     };
+ 280:Twister.cpp   ****        
+ 281:Twister.cpp   ****     Action  action = KeepGoing;
+ 1124               	.LM109:
+ 1125 0690 7002      		moveq.l #2,%d0
+ 1126 0692 2D40 FFF8 		move.l %d0,-8(%a6)
+ 282:Twister.cpp   ****     Action  lastAction = KeepGoing;
+ 1128               	.LM110:
+ 1129 0696 7202      		moveq.l #2,%d1
+ 1130 0698 2D41 FFF4 		move.l %d1,-12(%a6)
+ 283:Twister.cpp   **** 
+ 284:Twister.cpp   ****     SampleClass classL = Gray;
+ 1132               	.LM111:
+ 1133 069c 7001      		moveq.l #1,%d0
+ 1134 069e 2D40 FFF0 		move.l %d0,-16(%a6)
+ 285:Twister.cpp   ****     SampleClass classR = Gray;
+ 1136               	.LM112:
+ 1137 06a2 7201      		moveq.l #1,%d1
+ 1138 06a4 2D41 FFEC 		move.l %d1,-20(%a6)
+ 286:Twister.cpp   ****     SampleClass lastClassL = Gray;
+ 1140               	.LM113:
+ 1141 06a8 7001      		moveq.l #1,%d0
+ 1142 06aa 2D40 FFE8 		move.l %d0,-24(%a6)
+ 287:Twister.cpp   ****     SampleClass lastClassR = Gray;
+ 1144               	.LM114:
+ 1145 06ae 7201      		moveq.l #1,%d1
+ 1146 06b0 2D41 FFE4 		move.l %d1,-28(%a6)
+ 288:Twister.cpp   **** 
+ 289:Twister.cpp   ****     #define ADJUST_SPEED_LOW    500
+ 290:Twister.cpp   ****     #define ADJUST_SPEED_HIGH   500
+ 291:Twister.cpp   **** 
+ 292:Twister.cpp   ****     int     adjustSpeed = 0;
+ 1148               	.LM115:
+ 1149 06b4 42AE FFE0 		clr.l -32(%a6)
+ 293:Twister.cpp   ****     int     lastAdjustSpeed = 0;
+ 1151               	.LM116:
+ 1152 06b8 42AE FFDC 		clr.l -36(%a6)
+ 294:Twister.cpp   **** 
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 23
+
+
+ 295:Twister.cpp   ****     tick_t  lastLineTime = gTickCounter;
+ 1154               	.LM117:
+ 1155 06bc 2D79 0000 		move.l gTickCounter,-40(%a6)
+ 1155      0000 FFD8 
+ 296:Twister.cpp   **** 
+ 297:Twister.cpp   ****     while ( true )
+ 1157               	.LM118:
+ 1158               	.L46:
+ 1159 06c4 6004      		jbra .L48
+ 1160 06c6 6000 0350 		jbra .L47
+ 1161               	.L48:
+ 1162               	.LBB16:
+ 298:Twister.cpp   ****     {
+ 299:Twister.cpp   ****         if ( havebyte() )
+ 1164               	.LM119:
+ 1165               	.LCFI31:
+ 1166 06ca 4EB9 0000 		jsr havebyte
+ 1166      0000 
+ 1167 06d0 4A80      		tst.l %d0
+ 1168 06d2 672A      		jbeq .L49
+ 300:Twister.cpp   ****         {
+ 301:Twister.cpp   ****             inbyte();
+ 1170               	.LM120:
+ 1171 06d4 4EB9 0000 		jsr inbyte
+ 1171      0000 
+ 302:Twister.cpp   ****             gLeftMotor.SetSpeed( 0 );
+ 1173               	.LM121:
+ 1174 06da 42A7      		clr.l -(%sp)
+ 1175 06dc 4879 0000 		pea gLeftMotor
+ 1175      0000 
+ 1176               	.LCFI32:
+ 1177 06e2 4EB9 0000 		jsr SetSpeed__5Motori
+ 1177      0000 
+ 1178 06e8 508F      		addq.l #8,%sp
+ 303:Twister.cpp   ****             gRightMotor.SetSpeed( 0 );
+ 1180               	.LM122:
+ 1181 06ea 42A7      		clr.l -(%sp)
+ 1182 06ec 4879 0000 		pea gRightMotor
+ 1182      0000 
+ 1183 06f2 4EB9 0000 		jsr SetSpeed__5Motori
+ 1183      0000 
+ 1184 06f8 508F      		addq.l #8,%sp
+ 304:Twister.cpp   ****             return;
+ 1186               	.LM123:
+ 1187 06fa 6000 0322 		jbra .L45
+ 1188               	.L49:
+ 1189 06fe 4E71      		nop
+ 305:Twister.cpp   ****         }
+ 306:Twister.cpp   ****         while ( prevTick == gTickCounter )
+ 1191               	.LM124:
+ 1192               	.L50:
+ 1193 0700 2039 0000 		move.l gTickCounter,%d0
+ 1193      0000 
+ 1194 0706 B0AE FFFC 		cmp.l -4(%a6),%d0
+ 1195 070a 6702      		jbeq .L52
+ 1196 070c 6036      		jbra .L51
+ 1197               	.L52:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 24
+
+
+ 307:Twister.cpp   ****         {
+ 308:Twister.cpp   ****             if ( havebyte() )
+ 1199               	.LM125:
+ 1200               	.LCFI33:
+ 1201 070e 4EB9 0000 		jsr havebyte
+ 1201      0000 
+ 1202 0714 4A80      		tst.l %d0
+ 1203 0716 672A      		jbeq .L53
+ 309:Twister.cpp   ****             {
+ 310:Twister.cpp   ****                 inbyte();
+ 1205               	.LM126:
+ 1206 0718 4EB9 0000 		jsr inbyte
+ 1206      0000 
+ 311:Twister.cpp   ****                 gLeftMotor.SetSpeed( 0 );
+ 1208               	.LM127:
+ 1209 071e 42A7      		clr.l -(%sp)
+ 1210 0720 4879 0000 		pea gLeftMotor
+ 1210      0000 
+ 1211               	.LCFI34:
+ 1212 0726 4EB9 0000 		jsr SetSpeed__5Motori
+ 1212      0000 
+ 1213 072c 508F      		addq.l #8,%sp
+ 312:Twister.cpp   ****                 gRightMotor.SetSpeed( 0 );
+ 1215               	.LM128:
+ 1216 072e 42A7      		clr.l -(%sp)
+ 1217 0730 4879 0000 		pea gRightMotor
+ 1217      0000 
+ 1218 0736 4EB9 0000 		jsr SetSpeed__5Motori
+ 1218      0000 
+ 1219 073c 508F      		addq.l #8,%sp
+ 313:Twister.cpp   ****                 return;
+ 1221               	.LM129:
+ 1222 073e 6000 02DE 		jbra .L45
+ 1223               	.L53:
+ 1224 0742 60BC      		jbra .L50
+ 1225               	.L51:
+ 314:Twister.cpp   ****             }
+ 315:Twister.cpp   ****         }
+ 316:Twister.cpp   ****         prevTick = gTickCounter;
+ 1227               	.LM130:
+ 1228 0744 2D79 0000 		move.l gTickCounter,-4(%a6)
+ 1228      0000 FFFC 
+ 317:Twister.cpp   ****         
+ 318:Twister.cpp   ****         sample_t centerL = gAD[ CENTER_L ];
+ 1230               	.LM131:
+ 1231 074c 2D79 0000 		move.l gAD,-44(%a6)
+ 1231      0000 FFD4 
+ 319:Twister.cpp   ****         sample_t centerR = gAD[ CENTER_R ];
+ 1233               	.LM132:
+ 1234 0754 2D79 0000 		move.l gAD+4,-48(%a6)
+ 1234      0000 FFD0 
+ 320:Twister.cpp   **** 
+ 321:Twister.cpp   ****         classL = ClassifySample( centerL );
+ 1236               	.LM133:
+ 1237 075c 2F2E FFD4 		move.l -44(%a6),-(%sp)
+ 1238               	.LCFI35:
+ 1239 0760 4EBA F8D6 		jsr ClassifySample__FUi
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 25
+
+
+ 1240 0764 588F      		addq.l #4,%sp
+ 1241 0766 2D40 FFF0 		move.l %d0,-16(%a6)
+ 322:Twister.cpp   ****         classR = ClassifySample( centerR );
+ 1243               	.LM134:
+ 1244 076a 2F2E FFD0 		move.l -48(%a6),-(%sp)
+ 1245 076e 4EBA F8C8 		jsr ClassifySample__FUi
+ 1246 0772 588F      		addq.l #4,%sp
+ 1247 0774 2D40 FFEC 		move.l %d0,-20(%a6)
+ 323:Twister.cpp   ****         
+ 324:Twister.cpp   ****         if (( classL == White ) && ( classR == White ))
+ 1249               	.LM135:
+ 1250 0778 7002      		moveq.l #2,%d0
+ 1251 077a B0AE FFF0 		cmp.l -16(%a6),%d0
+ 1252 077e 6646      		jbne .L54
+ 1253 0780 7202      		moveq.l #2,%d1
+ 1254 0782 B2AE FFEC 		cmp.l -20(%a6),%d1
+ 1255 0786 663E      		jbne .L54
+ 325:Twister.cpp   ****         {
+ 326:Twister.cpp   ****             // Left and Right are both white
+ 327:Twister.cpp   **** 
+ 328:Twister.cpp   ****             if (( gTickCounter - lastLineTime ) > Milliseconds2Ticks( 500 ))
+ 1257               	.LM136:
+ 1258 0788 2039 0000 		move.l gTickCounter,%d0
+ 1258      0000 
+ 1259 078e 2400      		move.l %d0,%d2
+ 1260 0790 94AE FFD8 		sub.l -40(%a6),%d2
+ 1261 0794 4878 01F4 		pea 500.w
+ 1262 0798 4EB9 0000 		jsr Milliseconds2Ticks__FUi
+ 1262      0000 
+ 1263 079e 588F      		addq.l #4,%sp
+ 1264 07a0 B082      		cmp.l %d2,%d0
+ 1265 07a2 6C20      		jbge .L55
+ 329:Twister.cpp   ****             {
+ 330:Twister.cpp   ****                 // We've run out of line
+ 331:Twister.cpp   **** 
+ 332:Twister.cpp   ****                 gLeftMotor.Coast();
+ 1267               	.LM137:
+ 1268 07a4 4879 0000 		pea gLeftMotor
+ 1268      0000 
+ 1269 07aa 4EB9 0000 		jsr Coast__5Motor
+ 1269      0000 
+ 1270 07b0 588F      		addq.l #4,%sp
+ 333:Twister.cpp   ****                 gRightMotor.Coast();
+ 1272               	.LM138:
+ 1273 07b2 4879 0000 		pea gRightMotor
+ 1273      0000 
+ 1274 07b8 4EB9 0000 		jsr Coast__5Motor
+ 1274      0000 
+ 1275 07be 588F      		addq.l #4,%sp
+ 334:Twister.cpp   ****                 return;
+ 1277               	.LM139:
+ 1278 07c0 6000 025C 		jbra .L45
+ 1279               	.L55:
+ 1280 07c4 606A      		jbra .L56
+ 1281               	.L54:
+ 335:Twister.cpp   ****             }
+ 336:Twister.cpp   ****         }
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 26
+
+
+ 337:Twister.cpp   ****         else
+ 338:Twister.cpp   ****         {
+ 339:Twister.cpp   ****             lastLineTime = gTickCounter;
+ 1283               	.LM140:
+ 1284 07c6 2D79 0000 		move.l gTickCounter,-40(%a6)
+ 1284      0000 FFD8 
+ 340:Twister.cpp   **** 
+ 341:Twister.cpp   ****             if ( classL == White )
+ 1286               	.LM141:
+ 1287 07ce 7002      		moveq.l #2,%d0
+ 1288 07d0 B0AE FFF0 		cmp.l -16(%a6),%d0
+ 1289 07d4 6610      		jbne .L57
+ 342:Twister.cpp   ****             {
+ 343:Twister.cpp   ****                 // Left is white, Right is gray or black.
+ 344:Twister.cpp   **** 
+ 345:Twister.cpp   ****                 // We're veering to the left. Adjust to the right.
+ 346:Twister.cpp   **** 
+ 347:Twister.cpp   ****                 action = MoveRight;
+ 1291               	.LM142:
+ 1292 07d6 7201      		moveq.l #1,%d1
+ 1293 07d8 2D41 FFF8 		move.l %d1,-8(%a6)
+ 348:Twister.cpp   ****                 adjustSpeed = ADJUST_SPEED_HIGH;
+ 1295               	.LM143:
+ 1296 07dc 2D7C 0000 		move.l #500,-32(%a6)
+ 1296      01F4 FFE0 
+ 1297 07e4 604A      		jbra .L56
+ 1298               	.L57:
+ 349:Twister.cpp   ****             }
+ 350:Twister.cpp   ****             else
+ 351:Twister.cpp   ****             if ( classR == White)
+ 1300               	.LM144:
+ 1301 07e6 7002      		moveq.l #2,%d0
+ 1302 07e8 B0AE FFEC 		cmp.l -20(%a6),%d0
+ 1303 07ec 660E      		jbne .L59
+ 352:Twister.cpp   ****             {
+ 353:Twister.cpp   ****                 // Right is white, Left is gray or black.
+ 354:Twister.cpp   **** 
+ 355:Twister.cpp   ****                 // We're veering to the right. Adjuts to the left.
+ 356:Twister.cpp   **** 
+ 357:Twister.cpp   ****                 action = MoveLeft;
+ 1305               	.LM145:
+ 1306 07ee 42AE FFF8 		clr.l -8(%a6)
+ 358:Twister.cpp   ****                 adjustSpeed = ADJUST_SPEED_HIGH;
+ 1308               	.LM146:
+ 1309 07f2 2D7C 0000 		move.l #500,-32(%a6)
+ 1309      01F4 FFE0 
+ 1310 07fa 6034      		jbra .L56
+ 1311               	.L59:
+ 359:Twister.cpp   ****             }
+ 360:Twister.cpp   ****             else
+ 361:Twister.cpp   ****             {
+ 362:Twister.cpp   **** #if 0
+ 363:Twister.cpp   ****                 if (( classL == Black ) || ( classR == Black ))
+ 364:Twister.cpp   ****                 {
+ 365:Twister.cpp   ****                     // We're probably over a corner, T, or cross
+ 366:Twister.cpp   **** 
+ 367:Twister.cpp   ****                     // Keep going
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 27
+
+
+ 368:Twister.cpp   **** 
+ 369:Twister.cpp   ****                     action = KeepGoing;
+ 370:Twister.cpp   ****                 }
+ 371:Twister.cpp   ****                 else
+ 372:Twister.cpp   **** #endif
+ 373:Twister.cpp   ****                 {
+ 374:Twister.cpp   ****                     if (( centerL + STRAIGHT_THRESH ) < centerR )
+ 1313               	.LM147:
+ 1314 07fc 700A      		moveq.l #10,%d0
+ 1315 07fe D0AE FFD4 		add.l -44(%a6),%d0
+ 1316 0802 B0AE FFD0 		cmp.l -48(%a6),%d0
+ 1317 0806 6410      		jbcc .L61
+ 375:Twister.cpp   ****                     {
+ 376:Twister.cpp   ****                         action = MoveRight;
+ 1319               	.LM148:
+ 1320 0808 7201      		moveq.l #1,%d1
+ 1321 080a 2D41 FFF8 		move.l %d1,-8(%a6)
+ 377:Twister.cpp   ****                         adjustSpeed = ADJUST_SPEED_LOW;
+ 1323               	.LM149:
+ 1324 080e 2D7C 0000 		move.l #500,-32(%a6)
+ 1324      01F4 FFE0 
+ 1325 0816 6018      		jbra .L56
+ 1326               	.L61:
+ 378:Twister.cpp   ****                     }
+ 379:Twister.cpp   ****                     else
+ 380:Twister.cpp   ****                     if (( centerR + STRAIGHT_THRESH ) < centerL )
+ 1328               	.LM150:
+ 1329 0818 700A      		moveq.l #10,%d0
+ 1330 081a D0AE FFD0 		add.l -48(%a6),%d0
+ 1331 081e B0AE FFD4 		cmp.l -44(%a6),%d0
+ 1332 0822 640C      		jbcc .L56
+ 381:Twister.cpp   ****                     {
+ 382:Twister.cpp   ****                         action = MoveLeft;
+ 1334               	.LM151:
+ 1335 0824 42AE FFF8 		clr.l -8(%a6)
+ 383:Twister.cpp   ****                         adjustSpeed = ADJUST_SPEED_LOW;
+ 1337               	.LM152:
+ 1338 0828 2D7C 0000 		move.l #500,-32(%a6)
+ 1338      01F4 FFE0 
+ 1339               	.L63:
+ 1340               	.L62:
+ 1341               	.L60:
+ 1342               	.L58:
+ 1343               	.L56:
+ 384:Twister.cpp   ****                     }
+ 385:Twister.cpp   ****                 }
+ 386:Twister.cpp   ****             }
+ 387:Twister.cpp   ****         }
+ 388:Twister.cpp   **** 
+ 389:Twister.cpp   **** #if 1
+ 390:Twister.cpp   ****         if (( action != lastAction ) || ( adjustSpeed != lastAdjustSpeed ) || ( classL != lastClass
+ 1345               	.LM153:
+ 1346 0830 202E FFF8 		move.l -8(%a6),%d0
+ 1347 0834 B0AE FFF4 		cmp.l -12(%a6),%d0
+ 1348 0838 6622      		jbne .L65
+ 1349 083a 222E FFE0 		move.l -32(%a6),%d1
+ 1350 083e B2AE FFDC 		cmp.l -36(%a6),%d1
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 28
+
+
+ 1351 0842 6618      		jbne .L65
+ 1352 0844 202E FFF0 		move.l -16(%a6),%d0
+ 1353 0848 B0AE FFE8 		cmp.l -24(%a6),%d0
+ 1354 084c 660E      		jbne .L65
+ 1355 084e 222E FFEC 		move.l -20(%a6),%d1
+ 1356 0852 B2AE FFE4 		cmp.l -28(%a6),%d1
+ 1357 0856 6604      		jbne .L65
+ 1358 0858 6000 00A0 		jbra .L64
+ 1359               	.L65:
+ 391:Twister.cpp   ****         {
+ 392:Twister.cpp   ****             iprintf( "Action: %s LSpd: %4d RSpd: %4d Adj: %4d CL:%3d%c CR:%3d%c\n\n",
+ 393:Twister.cpp   ****                      ( action == MoveLeft ) ? "ML" : ( action == MoveRight ) ? "MR" : "KG",
+ 394:Twister.cpp   ****                      gLeftMotor.GetSpeed(), gRightMotor.GetSpeed(),
+ 395:Twister.cpp   ****                      adjustSpeed,
+ 396:Twister.cpp   ****                      centerL, gSampleClassChar[ classL ],
+ 397:Twister.cpp   ****                      centerR, gSampleClassChar[ classR ] );
+ 1361               	.LM154:
+ 1362 085c 41F9 0000 		lea gSampleClassChar,%a0
+ 1362      0000 
+ 1363 0862 202E FFEC 		move.l -20(%a6),%d0
+ 1364 0866 1230 0800 		move.b (%a0,%d0.l),%d1
+ 1365 086a 49C1      		extb.l %d1
+ 1366 086c 2F01      		move.l %d1,-(%sp)
+ 1367 086e 2F2E FFD0 		move.l -48(%a6),-(%sp)
+ 1368 0872 41F9 0000 		lea gSampleClassChar,%a0
+ 1368      0000 
+ 1369 0878 202E FFF0 		move.l -16(%a6),%d0
+ 1370 087c 1230 0800 		move.b (%a0,%d0.l),%d1
+ 1371 0880 49C1      		extb.l %d1
+ 1372 0882 2F01      		move.l %d1,-(%sp)
+ 1373 0884 2F2E FFD4 		move.l -44(%a6),-(%sp)
+ 1374 0888 2F2E FFE0 		move.l -32(%a6),-(%sp)
+ 1375 088c 4879 0000 		pea gRightMotor
+ 1375      0000 
+ 1376 0892 4EB9 0000 		jsr GetSpeed__5Motor
+ 1376      0000 
+ 1377 0898 588F      		addq.l #4,%sp
+ 1378 089a 2F00      		move.l %d0,-(%sp)
+ 1379 089c 4879 0000 		pea gLeftMotor
+ 1379      0000 
+ 1380 08a2 4EB9 0000 		jsr GetSpeed__5Motor
+ 1380      0000 
+ 1381 08a8 588F      		addq.l #4,%sp
+ 1382 08aa 2F00      		move.l %d0,-(%sp)
+ 1383 08ac 4AAE FFF8 		tst.l -8(%a6)
+ 1384 08b0 6718      		jbeq .L66
+ 1385 08b2 7001      		moveq.l #1,%d0
+ 1386 08b4 B0AE FFF8 		cmp.l -8(%a6),%d0
+ 1387 08b8 6608      		jbne .L68
+ 1388 08ba 203C 0000 		move.l #.LC8,%d0
+ 1388      0000 
+ 1389 08c0 6006      		jbra .L69
+ 1390               	.L68:
+ 1391 08c2 203C 0000 		move.l #.LC9,%d0
+ 1391      0000 
+ 1392               	.L69:
+ 1393 08c8 6006      		jbra .L67
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 29
+
+
+ 1394               	.L66:
+ 1395 08ca 203C 0000 		move.l #.LC10,%d0
+ 1395      0000 
+ 1396               	.L67:
+ 1397 08d0 2F00      		move.l %d0,-(%sp)
+ 1398 08d2 4879 0000 		pea .LC11
+ 1398      0000 
+ 1399               	.LCFI36:
+ 1400 08d8 4EB9 0000 		jsr iprintf
+ 1400      0000 
+ 1401 08de 4FEF 0024 		lea (36,%sp),%sp
+ 398:Twister.cpp   **** 
+ 399:Twister.cpp   ****             lastAction = action;
+ 1403               	.LM155:
+ 1404 08e2 2D6E FFF8 		move.l -8(%a6),-12(%a6)
+ 1404      FFF4 
+ 400:Twister.cpp   ****             lastAdjustSpeed = adjustSpeed;
+ 1406               	.LM156:
+ 1407 08e8 2D6E FFE0 		move.l -32(%a6),-36(%a6)
+ 1407      FFDC 
+ 401:Twister.cpp   ****             lastClassL = classL;
+ 1409               	.LM157:
+ 1410 08ee 2D6E FFF0 		move.l -16(%a6),-24(%a6)
+ 1410      FFE8 
+ 402:Twister.cpp   ****             lastClassR = classR;
+ 1412               	.LM158:
+ 1413 08f4 2D6E FFEC 		move.l -20(%a6),-28(%a6)
+ 1413      FFE4 
+ 1414               	.L64:
+ 403:Twister.cpp   ****         }
+ 404:Twister.cpp   **** #endif
+ 405:Twister.cpp   **** 
+ 406:Twister.cpp   ****         switch ( action )
+ 1416               	.LM159:
+ 1417 08fa 202E FFF8 		move.l -8(%a6),%d0
+ 1418 08fe 4A80      		tst.l %d0
+ 1419 0900 6700 008E 		jbeq .L72
+ 1420 0904 7201      		moveq.l #1,%d1
+ 1421 0906 B280      		cmp.l %d0,%d1
+ 1422 0908 6704      		jbeq .L71
+ 1423 090a 6000 0104 		jbra .L73
+ 1424               	.L71:
+ 407:Twister.cpp   ****         {
+ 408:Twister.cpp   ****             case MoveRight:
+ 409:Twister.cpp   ****             {
+ 410:Twister.cpp   ****                 // Need to move right (i.e. speed up left side/slow down right side)
+ 411:Twister.cpp   **** 
+ 412:Twister.cpp   **** #if 1
+ 413:Twister.cpp   ****                 iprintf( "CL:%3d%c ",
+ 414:Twister.cpp   ****                          centerL, gSampleClassChar[ classL ] );
+ 1426               	.LM160:
+ 1427 090e 41F9 0000 		lea gSampleClassChar,%a0
+ 1427      0000 
+ 1428 0914 202E FFF0 		move.l -16(%a6),%d0
+ 1429 0918 1230 0800 		move.b (%a0,%d0.l),%d1
+ 1430 091c 49C1      		extb.l %d1
+ 1431 091e 2F01      		move.l %d1,-(%sp)
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 30
+
+
+ 1432 0920 2F2E FFD4 		move.l -44(%a6),-(%sp)
+ 1433 0924 4879 0000 		pea .LC12
+ 1433      0000 
+ 1434               	.LCFI37:
+ 1435 092a 4EB9 0000 		jsr iprintf
+ 1435      0000 
+ 1436 0930 508F      		addq.l #8,%sp
+ 1437 0932 588F      		addq.l #4,%sp
+ 415:Twister.cpp   ****                 
+ 416:Twister.cpp   ****                 gLeftMotor.SetSpeed( Motor::MaxSpeed );
+ 1439               	.LM161:
+ 1440 0934 4878 03E8 		pea 1000.w
+ 1441 0938 4879 0000 		pea gLeftMotor
+ 1441      0000 
+ 1442               	.LCFI38:
+ 1443 093e 4EB9 0000 		jsr SetSpeed__5Motori
+ 1443      0000 
+ 1444 0944 508F      		addq.l #8,%sp
+ 417:Twister.cpp   ****                 
+ 418:Twister.cpp   ****                 iprintf( "CR:%3d%c ",
+ 419:Twister.cpp   ****                          centerR, gSampleClassChar[ classR ] );
+ 1446               	.LM162:
+ 1447 0946 41F9 0000 		lea gSampleClassChar,%a0
+ 1447      0000 
+ 1448 094c 202E FFEC 		move.l -20(%a6),%d0
+ 1449 0950 1230 0800 		move.b (%a0,%d0.l),%d1
+ 1450 0954 49C1      		extb.l %d1
+ 1451 0956 2F01      		move.l %d1,-(%sp)
+ 1452 0958 2F2E FFD0 		move.l -48(%a6),-(%sp)
+ 1453 095c 4879 0000 		pea .LC13
+ 1453      0000 
+ 1454               	.LCFI39:
+ 1455 0962 4EB9 0000 		jsr iprintf
+ 1455      0000 
+ 1456 0968 508F      		addq.l #8,%sp
+ 1457 096a 588F      		addq.l #4,%sp
+ 420:Twister.cpp   **** 
+ 421:Twister.cpp   ****                 gRightMotor.SetSpeed( 800 );
+ 1459               	.LM163:
+ 1460 096c 4878 0320 		pea 800.w
+ 1461 0970 4879 0000 		pea gRightMotor
+ 1461      0000 
+ 1462               	.LCFI40:
+ 1463 0976 4EB9 0000 		jsr SetSpeed__5Motori
+ 1463      0000 
+ 1464 097c 508F      		addq.l #8,%sp
+ 422:Twister.cpp   **** #else
+ 423:Twister.cpp   ****                 iprintf( "CL:%3d%c ",
+ 424:Twister.cpp   ****                          centerL, gSampleClassChar[ classL ] );
+ 425:Twister.cpp   ****                 
+ 426:Twister.cpp   ****                 int unused = gLeftMotor.AdjustSpeed( adjustSpeed );
+ 427:Twister.cpp   ****                 
+ 428:Twister.cpp   ****                 iprintf( "CR:%3d%c ",
+ 429:Twister.cpp   ****                          centerR, gSampleClassChar[ classR ] );
+ 430:Twister.cpp   **** 
+ 431:Twister.cpp   ****                 gRightMotor.AdjustSpeed( -unused );
+ 432:Twister.cpp   **** #endif
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 31
+
+
+ 433:Twister.cpp   ****                 iprintf( "\n" );
+ 1466               	.LM164:
+ 1467 097e 4879 0000 		pea .LC14
+ 1467      0000 
+ 1468               	.LCFI41:
+ 1469 0984 4EB9 0000 		jsr iprintf
+ 1469      0000 
+ 1470 098a 588F      		addq.l #4,%sp
+ 434:Twister.cpp   ****                 break;
+ 1472               	.LM165:
+ 1473 098c 6000 0086 		jbra .L70
+ 1474               	.L72:
+ 435:Twister.cpp   ****             }
+ 436:Twister.cpp   **** 
+ 437:Twister.cpp   ****             case MoveLeft:
+ 438:Twister.cpp   ****             {
+ 439:Twister.cpp   ****                 // Need to move left (i.e. speed up right side/slow down left side)
+ 440:Twister.cpp   **** 
+ 441:Twister.cpp   **** #if 1
+ 442:Twister.cpp   ****                 iprintf( "CR:%3d%c ",
+ 443:Twister.cpp   ****                          centerR, gSampleClassChar[ classR ] );
+ 1476               	.LM166:
+ 1477 0990 41F9 0000 		lea gSampleClassChar,%a0
+ 1477      0000 
+ 1478 0996 202E FFEC 		move.l -20(%a6),%d0
+ 1479 099a 1230 0800 		move.b (%a0,%d0.l),%d1
+ 1480 099e 49C1      		extb.l %d1
+ 1481 09a0 2F01      		move.l %d1,-(%sp)
+ 1482 09a2 2F2E FFD0 		move.l -48(%a6),-(%sp)
+ 1483 09a6 4879 0000 		pea .LC13
+ 1483      0000 
+ 1484               	.LCFI42:
+ 1485 09ac 4EB9 0000 		jsr iprintf
+ 1485      0000 
+ 1486 09b2 508F      		addq.l #8,%sp
+ 1487 09b4 588F      		addq.l #4,%sp
+ 444:Twister.cpp   **** 
+ 445:Twister.cpp   ****                 gRightMotor.SetSpeed( Motor::MaxSpeed );
+ 1489               	.LM167:
+ 1490 09b6 4878 03E8 		pea 1000.w
+ 1491 09ba 4879 0000 		pea gRightMotor
+ 1491      0000 
+ 1492               	.LCFI43:
+ 1493 09c0 4EB9 0000 		jsr SetSpeed__5Motori
+ 1493      0000 
+ 1494 09c6 508F      		addq.l #8,%sp
+ 446:Twister.cpp   **** 
+ 447:Twister.cpp   ****                 iprintf( "CL:%3d%c ",
+ 448:Twister.cpp   ****                          centerL, gSampleClassChar[ classL ] );
+ 1496               	.LM168:
+ 1497 09c8 41F9 0000 		lea gSampleClassChar,%a0
+ 1497      0000 
+ 1498 09ce 202E FFF0 		move.l -16(%a6),%d0
+ 1499 09d2 1230 0800 		move.b (%a0,%d0.l),%d1
+ 1500 09d6 49C1      		extb.l %d1
+ 1501 09d8 2F01      		move.l %d1,-(%sp)
+ 1502 09da 2F2E FFD4 		move.l -44(%a6),-(%sp)
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 32
+
+
+ 1503 09de 4879 0000 		pea .LC12
+ 1503      0000 
+ 1504               	.LCFI44:
+ 1505 09e4 4EB9 0000 		jsr iprintf
+ 1505      0000 
+ 1506 09ea 508F      		addq.l #8,%sp
+ 1507 09ec 588F      		addq.l #4,%sp
+ 449:Twister.cpp   **** 
+ 450:Twister.cpp   ****                 gLeftMotor.SetSpeed( 800 );
+ 1509               	.LM169:
+ 1510 09ee 4878 0320 		pea 800.w
+ 1511 09f2 4879 0000 		pea gLeftMotor
+ 1511      0000 
+ 1512               	.LCFI45:
+ 1513 09f8 4EB9 0000 		jsr SetSpeed__5Motori
+ 1513      0000 
+ 1514 09fe 508F      		addq.l #8,%sp
+ 451:Twister.cpp   **** #else
+ 452:Twister.cpp   ****                 iprintf( "CR:%3d%c ",
+ 453:Twister.cpp   ****                          centerR, gSampleClassChar[ classR ] );
+ 454:Twister.cpp   **** 
+ 455:Twister.cpp   ****                 int unused = gRightMotor.AdjustSpeed( adjustSpeed );
+ 456:Twister.cpp   **** 
+ 457:Twister.cpp   ****                 iprintf( "CL:%3d%c ",
+ 458:Twister.cpp   ****                          centerL, gSampleClassChar[ classL ] );
+ 459:Twister.cpp   **** 
+ 460:Twister.cpp   ****                 gLeftMotor.AdjustSpeed( -unused );
+ 461:Twister.cpp   **** #endif
+ 462:Twister.cpp   ****                 iprintf( "\n" );
+ 1516               	.LM170:
+ 1517 0a00 4879 0000 		pea .LC14
+ 1517      0000 
+ 1518               	.LCFI46:
+ 1519 0a06 4EB9 0000 		jsr iprintf
+ 1519      0000 
+ 1520 0a0c 588F      		addq.l #4,%sp
+ 463:Twister.cpp   ****                 break;
+ 1522               	.LM171:
+ 1523 0a0e 6004      		jbra .L70
+ 1524               	.L73:
+ 464:Twister.cpp   ****             }
+ 465:Twister.cpp   **** 
+ 466:Twister.cpp   ****             default:
+ 467:Twister.cpp   ****             {
+ 468:Twister.cpp   ****                 // Keep going
+ 469:Twister.cpp   ****                 break;
+ 1526               	.LM172:
+ 1527 0a10 6000 0002 		jbra .L70
+ 1528               	.L70:
+ 1529               	.LBE16:
+ 1530 0a14 6000 FCAE 		jbra .L46
+ 1531               	.L47:
+ 1532               	.LBE15:
+ 1533 0a18 6004      		jbra .L75
+ 1534 0a1a 6000 0002 		jbra .L45
+ 1535               	.L75:
+ 470:Twister.cpp   ****             }
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 33
+
+
+ 471:Twister.cpp   ****         }
+ 472:Twister.cpp   ****     }
+ 473:Twister.cpp   **** 
+ 474:Twister.cpp   **** } // StraightLine
+ 1537               	.LM173:
+ 1538               	.L45:
+ 1539 0a1e 242E FFCC 		move.l -52(%a6),%d2
+ 1540 0a22 4E5E      		unlk %a6
+ 1541 0a24 4E75      		rts
+ 1542               	.LFE7:
+ 1543               	.Lfe7:
+ 1561               	.Lscope6:
+ 1563               	.section	.rodata
+ 1564               	.LC15:
+ 1565 0118 4C65 6674 		.string	"Left "
+ 1565      2000 
+ 1566               	.LC16:
+ 1567 011e 5269 6768 		.string	"Right"
+ 1567      7400 
+ 1568               	.text
+ 1573               	__static_initialization_and_destruction_0:
+ 1574               	.LFB8:
+ 475:Twister.cpp   **** 
+ 1576               	.LM174:
+ 1577 0a26 4E56 0000 		link.w %a6,#0
+ 1578               	.LCFI47:
+ 1579               	.LBB17:
+ 1580 0a2a 0CAE 0000 		cmp.l #65535,12(%a6)
+ 1580      FFFF 000C 
+ 1581 0a32 6654      		jbne .L77
+ 1582 0a34 4AAE 0008 		tst.l 8(%a6)
+ 1583 0a38 672A      		jbeq .L78
+ 1585               	.LM175:
+ 1586 0a3a 4879 0000 		pea .LC15
+ 1586      0000 
+ 1587 0a40 4879 0000 		pea gLeftMotor
+ 1587      0000 
+ 1588               	.LCFI48:
+ 1589 0a46 4EB9 0000 		jsr __5MotorPCc
+ 1589      0000 
+ 1590 0a4c 508F      		addq.l #8,%sp
+ 1592               	.LM176:
+ 1593 0a4e 4879 0000 		pea .LC16
+ 1593      0000 
+ 1594 0a54 4879 0000 		pea gRightMotor
+ 1594      0000 
+ 1595 0a5a 4EB9 0000 		jsr __5MotorPCc
+ 1595      0000 
+ 1596 0a60 508F      		addq.l #8,%sp
+ 1597 0a62 6024      		jbra .L77
+ 1598               	.L78:
+ 1599 0a64 4878 0002 		pea 2.w
+ 1600 0a68 4879 0000 		pea gRightMotor
+ 1600      0000 
+ 1601 0a6e 4EB9 0000 		jsr _._5Motor
+ 1601      0000 
+ 1602 0a74 508F      		addq.l #8,%sp
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 34
+
+
+ 1603 0a76 4878 0002 		pea 2.w
+ 1604 0a7a 4879 0000 		pea gLeftMotor
+ 1604      0000 
+ 1605 0a80 4EB9 0000 		jsr _._5Motor
+ 1605      0000 
+ 1606 0a86 508F      		addq.l #8,%sp
+ 1607               	.L79:
+ 1608               	.L77:
+ 1609               	.LBE17:
+ 1610 0a88 6004      		jbra .L80
+ 1611 0a8a 6000 0002 		jbra .L76
+ 1612               	.L80:
+ 1614               	.LM177:
+ 1615               	.L76:
+ 1616 0a8e 4E5E      		unlk %a6
+ 1617 0a90 4E75      		rts
+ 1618               	.LFE8:
+ 1619               	.Lfe8:
+ 1623               	.Lscope7:
+ 1625               	.section	.gnu.linkonce.t.GetSpeed__5Motor,"ax",@progbits
+ 1628               		.weak	GetSpeed__5Motor
+ 1630               	GetSpeed__5Motor:
+ 1631               	.LFB9:
+ 1633               	.Ltext1:
+   1:Motor.h       **** /****************************************************************************
+   2:Motor.h       **** *
+   3:Motor.h       **** *     Copyright (c) 2003 Dave Hylands
+   4:Motor.h       **** *           All Rights Reserved
+   5:Motor.h       **** *
+   6:Motor.h       **** *   Permission is granted to any individual or institution to use, copy, or
+   7:Motor.h       **** *   redistribute this software so long as it is not sold for profit, and that
+   8:Motor.h       **** *   this copyright notice is retained.
+   9:Motor.h       **** *
+  10:Motor.h       **** ****************************************************************************/
+  11:Motor.h       **** /**
+  12:Motor.h       **** *
+  13:Motor.h       **** *   @file   Motor.h
+  14:Motor.h       **** *
+  15:Motor.h       **** *   @brief  Describes the interface to a motor.
+  16:Motor.h       **** *
+  17:Motor.h       **** ****************************************************************************/
+  18:Motor.h       **** 
+  19:Motor.h       **** #if !defined( MOTOR_H )
+  20:Motor.h       **** #define MOTOR_H                   ///< Include Guard
+  21:Motor.h       **** 
+  22:Motor.h       **** // ---- Include Files -------------------------------------------------------
+  23:Motor.h       **** 
+  24:Motor.h       **** #include <68332/tpu.h>
+  25:Motor.h       **** 
+  26:Motor.h       **** /**
+  27:Motor.h       ****  * @addtogroup Peripheral
+  28:Motor.h       ****  * @{
+  29:Motor.h       ****  */
+  30:Motor.h       **** 
+  31:Motor.h       **** //---------------------------------------------------------------------------
+  32:Motor.h       **** /**
+  33:Motor.h       **** *   The Motor class encapsulates the TPU signals required to drive a motor.
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 35
+
+
+  34:Motor.h       **** */
+  35:Motor.h       **** 
+  36:Motor.h       **** class Motor
+  37:Motor.h       **** {
+  38:Motor.h       **** public:
+  39:Motor.h       **** 
+  40:Motor.h       ****     enum
+  41:Motor.h       ****     {
+  42:Motor.h       ****         StartSpeed  = 0,
+  43:Motor.h       ****         MaxSpeed    = 1000,
+  44:Motor.h       **** 
+  45:Motor.h       ****         AccelRate   = 20,    // increments per tick
+  46:Motor.h       ****     };
+  47:Motor.h       **** 
+  48:Motor.h       ****     //------------------------------------------------------------------------
+  49:Motor.h       ****     // Default constructor
+  50:Motor.h       **** 
+  51:Motor.h       ****     Motor( const char *name );
+  52:Motor.h       **** 
+  53:Motor.h       ****     //------------------------------------------------------------------------
+  54:Motor.h       ****     // Destructor
+  55:Motor.h       **** 
+  56:Motor.h       ****     ~Motor();
+  57:Motor.h       **** 
+  58:Motor.h       ****     //------------------------------------------------------------------------
+  59:Motor.h       ****     // Initialize the TPU pins
+  60:Motor.h       **** 
+  61:Motor.h       ****     void Init( int d1Pin, int d2pin, int enablePin );
+  62:Motor.h       **** 
+  63:Motor.h       ****     //------------------------------------------------------------------------
+  64:Motor.h       ****     // Brake - causes the motor to stop quickly.
+  65:Motor.h       **** 
+  66:Motor.h       ****     void Brake();
+  67:Motor.h       **** 
+  68:Motor.h       ****     //------------------------------------------------------------------------
+  69:Motor.h       ****     // Coast - causes the motor to coast to a stop.
+  70:Motor.h       **** 
+  71:Motor.h       ****     void Coast();
+  72:Motor.h       **** 
+  73:Motor.h       ****     //------------------------------------------------------------------------
+  74:Motor.h       ****     // SetSpeed - Sets the speed +ve = forward, -ve = backward.
+  75:Motor.h       **** 
+  76:Motor.h       ****     void SetSpeed( int speed );
+  77:Motor.h       ****     int GetSpeed() { return m_speed; }
+ 1635               	.LM178:
+ 1636 0000 4E56 0000 		link.w %a6,#0
+ 1637               	.LCFI49:
+ 1638 0004 206E 0008 		move.l 8(%a6),%a0
+ 1640               	.LM179:
+ 1641               	.LBB18:
+ 1642 0008 2228 0016 		move.l 22(%a0),%d1
+ 1643 000c 2001      		move.l %d1,%d0
+ 1644 000e 6006      		jbra .L2
+ 1645               	.LBE18:
+ 1646 0010 6004      		jbra .L3
+ 1647 0012 6000 0002 		jbra .L2
+ 1648               	.L3:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 36
+
+
+ 1650               	.LM180:
+ 1651               	.L2:
+ 1652 0016 4E5E      		unlk %a6
+ 1653 0018 4E75      		rts
+ 1654               	.LFE9:
+ 1655               	.Lfe9:
+ 1660               	.Lscope8:
+ 1662               	.text
+ 1666               	Milliseconds2Ticks__FUi:
+ 1667               	.LFB10:
+ 1669               	.Ltext2:
+   1:Tick.h        **** /****************************************************************************
+   2:Tick.h        **** *
+   3:Tick.h        **** *     Copyright (c) 2003 Dave Hylands
+   4:Tick.h        **** *           All Rights Reserved
+   5:Tick.h        **** *
+   6:Tick.h        **** *   Permission is granted to any individual or institution to use, copy, or
+   7:Tick.h        **** *   redistribute this software so long as it is not sold for profit, and that
+   8:Tick.h        **** *   this copyright notice is retained.
+   9:Tick.h        **** *
+  10:Tick.h        **** ****************************************************************************/
+  11:Tick.h        **** /**
+  12:Tick.h        **** *
+  13:Tick.h        **** *   @file   Tick.h
+  14:Tick.h        **** *
+  15:Tick.h        **** *   @brief  Definitions for the system tick.
+  16:Tick.h        **** *
+  17:Tick.h        **** ****************************************************************************/
+  18:Tick.h        **** 
+  19:Tick.h        **** #if !defined( TICK_H )
+  20:Tick.h        **** #define TICK_H                   ///< Include Guard
+  21:Tick.h        **** 
+  22:Tick.h        **** // ---- Include Files -------------------------------------------------------
+  23:Tick.h        **** 
+  24:Tick.h        **** //---------------------------------------------------------------------------
+  25:Tick.h        **** 
+  26:Tick.h        **** #define TICK_HZ  512
+  27:Tick.h        **** 
+  28:Tick.h        **** typedef int tick_t;
+  29:Tick.h        **** 
+  30:Tick.h        **** extern int gTickFlag;
+  31:Tick.h        **** extern int gTickOverrun;
+  32:Tick.h        **** extern volatile tick_t gTickCounter;
+  33:Tick.h        **** 
+  34:Tick.h        **** static inline tick_t Milliseconds2Ticks( unsigned mSec )
+  35:Tick.h        **** {
+ 1671               	.LM181:
+ 1672 0a92 4E56 0000 		link.w %a6,#0
+ 1673               	.LCFI50:
+ 1674 0a96 48E7 3800 		movm.l #0x3800,-(%sp)
+ 1675               	.LCFI51:
+ 1676 0a9a 222E 0008 		move.l 8(%a6),%d1
+ 1678               	.LM182:
+ 1679               	.LBB19:
+  36:Tick.h        ****     return mSec * TICK_HZ / 1000;
+ 1681               	.LM183:
+ 1682 0a9e 2401      		move.l %d1,%d2
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 37
+
+
+ 1683 0aa0 2602      		move.l %d2,%d3
+ 1684 0aa2 7009      		moveq.l #9,%d0
+ 1685 0aa4 E1AB      		lsl.l %d0,%d3
+ 1686 0aa6 2003      		move.l %d3,%d0
+ 1687 0aa8 4C3C 0404 		mulu.l #274877907,%d4:%d0
+ 1687      1062 4DD3 
+ 1688 0ab0 2404      		move.l %d4,%d2
+ 1689 0ab2 EC8A      		lsr.l #6,%d2
+ 1690 0ab4 2002      		move.l %d2,%d0
+ 1691 0ab6 6006      		jbra .L6
+ 1692               	.LBE19:
+ 1693 0ab8 6004      		jbra .L7
+ 1694 0aba 6000 0002 		jbra .L6
+ 1695               	.L7:
+  37:Tick.h        **** }
+ 1697               	.LM184:
+ 1698               	.L6:
+ 1699 0abe 4CDF 001C 		movm.l (%sp)+,#0x1c
+ 1700 0ac2 4E5E      		unlk %a6
+ 1701 0ac4 4E75      		rts
+ 1702               	.LFE10:
+ 1703               	.Lfe10:
+ 1708               	.Lscope9:
+ 1710               	.globl gFqdA
+ 1711               	.data
+ 1713               		.align 	2
+ 1716               	gFqdA:
+ 1717 0048 0000 0000 		.zero	4
+ 1718               	.globl gFqdB
+ 1720               		.align 	2
+ 1723               	gFqdB:
+ 1724 004c 0000 0000 		.zero	4
+ 1725               	.globl gAD
+ 1727               		.align 	2
+ 1730               	gAD:
+ 1731 0050 0000 0000 		.zero	32
+ 1731      0000 0000 
+ 1731      0000 0000 
+ 1731      0000 0000 
+ 1731      0000 0000 
+ 1732               	.globl gMaxAD
+ 1734               		.align 	2
+ 1737               	gMaxAD:
+ 1738 0070 0000 0000 		.zero	32
+ 1738      0000 0000 
+ 1738      0000 0000 
+ 1738      0000 0000 
+ 1738      0000 0000 
+ 1739               	.globl gADScale
+ 1741               		.align 	2
+ 1744               	gADScale:
+ 1745 0090 0000 0000 		.zero	32
+ 1745      0000 0000 
+ 1745      0000 0000 
+ 1745      0000 0000 
+ 1745      0000 0000 
+ 1746               	.globl gADOffset
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 38
+
+
+ 1748               		.align 	2
+ 1751               	gADOffset:
+ 1752 00b0 0000 0000 		.zero	32
+ 1752      0000 0000 
+ 1752      0000 0000 
+ 1752      0000 0000 
+ 1752      0000 0000 
+ 1753               	.section	.rodata
+ 1757               	gSampleClassChar:
+ 1758 0124 62        		.byte 98
+ 1759 0125 2D        		.byte 45
+ 1760 0126 77        		.byte 119
+ 1761               	.text
+ 1764               	_GLOBAL_.I.gTickFlag:
+ 1765               	.LFB11:
+ 1767               	.Ltext3:
+ 1769               	.LM185:
+ 1770 0ac6 4E56 0000 		link.w %a6,#0
+ 1771               	.LCFI52:
+ 1772               	.LBB20:
+ 1773 0aca 2F3C 0000 		move.l #65535,-(%sp)
+ 1773      FFFF 
+ 1774 0ad0 4878 0001 		pea 1.w
+ 1775               	.LCFI53:
+ 1776 0ad4 4EBA FF50 		jsr __static_initialization_and_destruction_0
+ 1777 0ad8 508F      		addq.l #8,%sp
+ 1778               	.LBE20:
+ 1779 0ada 6004      		jbra .L82
+ 1780 0adc 6000 0002 		jbra .L81
+ 1781               	.L82:
+ 1783               	.LM186:
+ 1784               	.L81:
+ 1785 0ae0 4E5E      		unlk %a6
+ 1786 0ae2 4E75      		rts
+ 1787               	.LFE11:
+ 1788               	.Lfe11:
+ 1792               	.Lscope10:
+ 1794               	.section	.ctors,"aw"
+ 1795 0000 0000 0000 		.long	 _GLOBAL_.I.gTickFlag
+ 1796               	.text
+ 1799               	_GLOBAL_.D.gTickFlag:
+ 1800               	.LFB12:
+ 1802               	.LM187:
+ 1803 0ae4 4E56 0000 		link.w %a6,#0
+ 1804               	.LCFI54:
+ 1805               	.LBB21:
+ 1806 0ae8 2F3C 0000 		move.l #65535,-(%sp)
+ 1806      FFFF 
+ 1807 0aee 42A7      		clr.l -(%sp)
+ 1808               	.LCFI55:
+ 1809 0af0 4EBA FF34 		jsr __static_initialization_and_destruction_0
+ 1810 0af4 508F      		addq.l #8,%sp
+ 1811               	.LBE21:
+ 1812 0af6 6004      		jbra .L84
+ 1813 0af8 6000 0002 		jbra .L83
+ 1814               	.L84:
+ 1816               	.LM188:
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 39
+
+
+ 1817               	.L83:
+ 1818 0afc 4E5E      		unlk %a6
+ 1819 0afe 4E75      		rts
+ 1820               	.LFE12:
+ 1821               	.Lfe12:
+ 1825               	.Lscope11:
+ 1827               	.section	.dtors,"aw"
+ 1828 0000 0000 0000 		.long	 _GLOBAL_.D.gTickFlag
+ 1829               		.text
+ 1831               	.Letext:
+ 1832               	
+ 1833               	.data
+ 1834               		.align 	4
+ 1835               	.globl _GLOBAL_.F.gTickFlag
+ 1836               	_GLOBAL_.F.gTickFlag:
+ 1837               	__FRAME_BEGIN__:
+ 1838 00d0 0000 0010 		.4byte	.LLCIE1
+ 1839               	.LSCIE1:
+ 1840 00d4 0000 0000 		.4byte	0x0
+ 1841 00d8 01        		.byte	0x1
+ 1842 00d9 00        		.byte	0x0
+ 1843 00da 01        		.byte	0x1
+ 1844 00db 7C        		.byte	0x7c
+ 1845 00dc 18        		.byte	0x18
+ 1846 00dd 0C        		.byte	0xc
+ 1847 00de 0F        		.byte	0xf
+ 1848 00df 04        		.byte	0x4
+ 1849 00e0 98        		.byte	0x98
+ 1850 00e1 01        		.byte	0x1
+ 1851 00e2 0000      		.align 	4
+ 1852               	.LECIE1:
+ 1853               		.set	.LLCIE1,.LECIE1-.LSCIE1
+ 1854 00e4 0000 0018 		.4byte	.LLFDE1
+ 1855               	.LSFDE1:
+ 1856 00e8 0000 0018 		.4byte	.LSFDE1-__FRAME_BEGIN__
+ 1857 00ec 0000 0000 		.4byte	.LFB1
+ 1858 00f0 0000 001C 		.4byte	.LFE1-.LFB1
+ 1859 00f4 04        		.byte	0x4
+ 1860 00f5 0000 0004 		.4byte	.LCFI0-.LFB1
+ 1861 00f9 0C        		.byte	0xc
+ 1862 00fa 0E        		.byte	0xe
+ 1863 00fb 08        		.byte	0x8
+ 1864 00fc 8E        		.byte	0x8e
+ 1865 00fd 02        		.byte	0x2
+ 1866 00fe 0000      		.align 	4
+ 1867               	.LEFDE1:
+ 1868               		.set	.LLFDE1,.LEFDE1-.LSFDE1
+ 1869 0100 0000 0018 		.4byte	.LLFDE3
+ 1870               	.LSFDE3:
+ 1871 0104 0000 0034 		.4byte	.LSFDE3-__FRAME_BEGIN__
+ 1872 0108 0000 0000 		.4byte	.LFB2
+ 1873 010c 0000 001C 		.4byte	.LFE2-.LFB2
+ 1874 0110 04        		.byte	0x4
+ 1875 0111 0000 0004 		.4byte	.LCFI1-.LFB2
+ 1876 0115 0C        		.byte	0xc
+ 1877 0116 0E        		.byte	0xe
+ 1878 0117 08        		.byte	0x8
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 40
+
+
+ 1879 0118 8E        		.byte	0x8e
+ 1880 0119 02        		.byte	0x2
+ 1881 011a 0000      		.align 	4
+ 1882               	.LEFDE3:
+ 1883               		.set	.LLFDE3,.LEFDE3-.LSFDE3
+ 1884 011c 0000 0020 		.4byte	.LLFDE5
+ 1885               	.LSFDE5:
+ 1886 0120 0000 0050 		.4byte	.LSFDE5-__FRAME_BEGIN__
+ 1887 0124 0000 0000 		.4byte	.LFB3
+ 1888 0128 0000 0036 		.4byte	.LFE3-.LFB3
+ 1889 012c 04        		.byte	0x4
+ 1890 012d 0000 0004 		.4byte	.LCFI2-.LFB3
+ 1891 0131 0C        		.byte	0xc
+ 1892 0132 0E        		.byte	0xe
+ 1893 0133 08        		.byte	0x8
+ 1894 0134 8E        		.byte	0x8e
+ 1895 0135 02        		.byte	0x2
+ 1896 0136 04        		.byte	0x4
+ 1897 0137 0000 0004 		.4byte	.LCFI3-.LCFI2
+ 1898 013b 2E        		.byte	0x2e
+ 1899 013c 04        		.byte	0x4
+ 1900 013d 0000 00   		.align 	4
+ 1901               	.LEFDE5:
+ 1902               		.set	.LLFDE5,.LEFDE5-.LSFDE5
+ 1903 0140 0000 0088 		.4byte	.LLFDE7
+ 1904               	.LSFDE7:
+ 1905 0144 0000 0074 		.4byte	.LSFDE7-__FRAME_BEGIN__
+ 1906 0148 0000 0000 		.4byte	.LFB4
+ 1907 014c 0000 039A 		.4byte	.LFE4-.LFB4
+ 1908 0150 04        		.byte	0x4
+ 1909 0151 0000 0004 		.4byte	.LCFI4-.LFB4
+ 1910 0155 0C        		.byte	0xc
+ 1911 0156 0E        		.byte	0xe
+ 1912 0157 08        		.byte	0x8
+ 1913 0158 8E        		.byte	0x8e
+ 1914 0159 02        		.byte	0x2
+ 1915 015a 04        		.byte	0x4
+ 1916 015b 0000 0002 		.4byte	.LCFI5-.LCFI4
+ 1917 015f 83        		.byte	0x83
+ 1918 0160 0A        		.byte	0xa
+ 1919 0161 04        		.byte	0x4
+ 1920 0162 0000 0002 		.4byte	.LCFI6-.LCFI5
+ 1921 0166 82        		.byte	0x82
+ 1922 0167 0B        		.byte	0xb
+ 1923 0168 04        		.byte	0x4
+ 1924 0169 0000 0018 		.4byte	.LCFI7-.LCFI6
+ 1925 016d 2E        		.byte	0x2e
+ 1926 016e 04        		.byte	0x4
+ 1927 016f 04        		.byte	0x4
+ 1928 0170 0000 0012 		.4byte	.LCFI8-.LCFI7
+ 1929 0174 2E        		.byte	0x2e
+ 1930 0175 00        		.byte	0x0
+ 1931 0176 04        		.byte	0x4
+ 1932 0177 0000 001A 		.4byte	.LCFI9-.LCFI8
+ 1933 017b 2E        		.byte	0x2e
+ 1934 017c 10        		.byte	0x10
+ 1935 017d 04        		.byte	0x4
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 41
+
+
+ 1936 017e 0000 000C 		.4byte	.LCFI10-.LCFI9
+ 1937 0182 2E        		.byte	0x2e
+ 1938 0183 04        		.byte	0x4
+ 1939 0184 04        		.byte	0x4
+ 1940 0185 0000 0026 		.4byte	.LCFI11-.LCFI10
+ 1941 0189 2E        		.byte	0x2e
+ 1942 018a 0C        		.byte	0xc
+ 1943 018b 04        		.byte	0x4
+ 1944 018c 0000 001C 		.4byte	.LCFI12-.LCFI11
+ 1945 0190 2E        		.byte	0x2e
+ 1946 0191 10        		.byte	0x10
+ 1947 0192 04        		.byte	0x4
+ 1948 0193 0000 0036 		.4byte	.LCFI13-.LCFI12
+ 1949 0197 2E        		.byte	0x2e
+ 1950 0198 08        		.byte	0x8
+ 1951 0199 04        		.byte	0x4
+ 1952 019a 0000 00C8 		.4byte	.LCFI14-.LCFI13
+ 1953 019e 2E        		.byte	0x2e
+ 1954 019f 00        		.byte	0x0
+ 1955 01a0 04        		.byte	0x4
+ 1956 01a1 0000 00C2 		.4byte	.LCFI15-.LCFI14
+ 1957 01a5 2E        		.byte	0x2e
+ 1958 01a6 08        		.byte	0x8
+ 1959 01a7 04        		.byte	0x4
+ 1960 01a8 0000 001A 		.4byte	.LCFI16-.LCFI15
+ 1961 01ac 2E        		.byte	0x2e
+ 1962 01ad 0C        		.byte	0xc
+ 1963 01ae 04        		.byte	0x4
+ 1964 01af 0000 0010 		.4byte	.LCFI17-.LCFI16
+ 1965 01b3 2E        		.byte	0x2e
+ 1966 01b4 04        		.byte	0x4
+ 1967 01b5 04        		.byte	0x4
+ 1968 01b6 0000 003E 		.4byte	.LCFI18-.LCFI17
+ 1969 01ba 2E        		.byte	0x2e
+ 1970 01bb 24        		.byte	0x24
+ 1971 01bc 04        		.byte	0x4
+ 1972 01bd 0000 0058 		.4byte	.LCFI19-.LCFI18
+ 1973 01c1 2E        		.byte	0x2e
+ 1974 01c2 08        		.byte	0x8
+ 1975 01c3 04        		.byte	0x4
+ 1976 01c4 0000 0012 		.4byte	.LCFI20-.LCFI19
+ 1977 01c8 2E        		.byte	0x2e
+ 1978 01c9 04        		.byte	0x4
+ 1979 01ca 0000      		.align 	4
+ 1980               	.LEFDE7:
+ 1981               		.set	.LLFDE7,.LEFDE7-.LSFDE7
+ 1982 01cc 0000 0024 		.4byte	.LLFDE9
+ 1983               	.LSFDE9:
+ 1984 01d0 0000 0100 		.4byte	.LSFDE9-__FRAME_BEGIN__
+ 1985 01d4 0000 0000 		.4byte	.LFB5
+ 1986 01d8 0000 017E 		.4byte	.LFE5-.LFB5
+ 1987 01dc 04        		.byte	0x4
+ 1988 01dd 0000 0004 		.4byte	.LCFI21-.LFB5
+ 1989 01e1 0C        		.byte	0xc
+ 1990 01e2 0E        		.byte	0xe
+ 1991 01e3 08        		.byte	0x8
+ 1992 01e4 8E        		.byte	0x8e
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 42
+
+
+ 1993 01e5 02        		.byte	0x2
+ 1994 01e6 04        		.byte	0x4
+ 1995 01e7 0000 0002 		.4byte	.LCFI22-.LCFI21
+ 1996 01eb 82        		.byte	0x82
+ 1997 01ec 05        		.byte	0x5
+ 1998 01ed 04        		.byte	0x4
+ 1999 01ee 0000 0142 		.4byte	.LCFI23-.LCFI22
+ 2000 01f2 2E        		.byte	0x2e
+ 2001 01f3 14        		.byte	0x14
+ 2002               		.align 	4
+ 2003               	.LEFDE9:
+ 2004               		.set	.LLFDE9,.LEFDE9-.LSFDE9
+ 2005 01f4 0000 0024 		.4byte	.LLFDE11
+ 2006               	.LSFDE11:
+ 2007 01f8 0000 0128 		.4byte	.LSFDE11-__FRAME_BEGIN__
+ 2008 01fc 0000 0000 		.4byte	.LFB6
+ 2009 0200 0000 00CA 		.4byte	.LFE6-.LFB6
+ 2010 0204 04        		.byte	0x4
+ 2011 0205 0000 0004 		.4byte	.LCFI24-.LFB6
+ 2012 0209 0C        		.byte	0xc
+ 2013 020a 0E        		.byte	0xe
+ 2014 020b 08        		.byte	0x8
+ 2015 020c 8E        		.byte	0x8e
+ 2016 020d 02        		.byte	0x2
+ 2017 020e 04        		.byte	0x4
+ 2018 020f 0000 0002 		.4byte	.LCFI25-.LCFI24
+ 2019 0213 82        		.byte	0x82
+ 2020 0214 04        		.byte	0x4
+ 2021 0215 04        		.byte	0x4
+ 2022 0216 0000 009A 		.4byte	.LCFI26-.LCFI25
+ 2023 021a 2E        		.byte	0x2e
+ 2024 021b 04        		.byte	0x4
+ 2025               		.align 	4
+ 2026               	.LEFDE11:
+ 2027               		.set	.LLFDE11,.LEFDE11-.LSFDE11
+ 2028 021c 0000 009C 		.4byte	.LLFDE13
+ 2029               	.LSFDE13:
+ 2030 0220 0000 0150 		.4byte	.LSFDE13-__FRAME_BEGIN__
+ 2031 0224 0000 0000 		.4byte	.LFB7
+ 2032 0228 0000 03D6 		.4byte	.LFE7-.LFB7
+ 2033 022c 04        		.byte	0x4
+ 2034 022d 0000 0004 		.4byte	.LCFI27-.LFB7
+ 2035 0231 0C        		.byte	0xc
+ 2036 0232 0E        		.byte	0xe
+ 2037 0233 08        		.byte	0x8
+ 2038 0234 8E        		.byte	0x8e
+ 2039 0235 02        		.byte	0x2
+ 2040 0236 04        		.byte	0x4
+ 2041 0237 0000 0002 		.4byte	.LCFI28-.LCFI27
+ 2042 023b 82        		.byte	0x82
+ 2043 023c 0F        		.byte	0xf
+ 2044 023d 04        		.byte	0x4
+ 2045 023e 0000 0006 		.4byte	.LCFI29-.LCFI28
+ 2046 0242 2E        		.byte	0x2e
+ 2047 0243 04        		.byte	0x4
+ 2048 0244 04        		.byte	0x4
+ 2049 0245 0000 001A 		.4byte	.LCFI30-.LCFI29
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 43
+
+
+ 2050 0249 2E        		.byte	0x2e
+ 2051 024a 08        		.byte	0x8
+ 2052 024b 04        		.byte	0x4
+ 2053 024c 0000 0054 		.4byte	.LCFI31-.LCFI30
+ 2054 0250 2E        		.byte	0x2e
+ 2055 0251 00        		.byte	0x0
+ 2056 0252 04        		.byte	0x4
+ 2057 0253 0000 0018 		.4byte	.LCFI32-.LCFI31
+ 2058 0257 2E        		.byte	0x2e
+ 2059 0258 08        		.byte	0x8
+ 2060 0259 04        		.byte	0x4
+ 2061 025a 0000 002C 		.4byte	.LCFI33-.LCFI32
+ 2062 025e 2E        		.byte	0x2e
+ 2063 025f 00        		.byte	0x0
+ 2064 0260 04        		.byte	0x4
+ 2065 0261 0000 0018 		.4byte	.LCFI34-.LCFI33
+ 2066 0265 2E        		.byte	0x2e
+ 2067 0266 08        		.byte	0x8
+ 2068 0267 04        		.byte	0x4
+ 2069 0268 0000 003A 		.4byte	.LCFI35-.LCFI34
+ 2070 026c 2E        		.byte	0x2e
+ 2071 026d 04        		.byte	0x4
+ 2072 026e 04        		.byte	0x4
+ 2073 026f 0000 0178 		.4byte	.LCFI36-.LCFI35
+ 2074 0273 2E        		.byte	0x2e
+ 2075 0274 24        		.byte	0x24
+ 2076 0275 04        		.byte	0x4
+ 2077 0276 0000 0052 		.4byte	.LCFI37-.LCFI36
+ 2078 027a 2E        		.byte	0x2e
+ 2079 027b 0C        		.byte	0xc
+ 2080 027c 04        		.byte	0x4
+ 2081 027d 0000 0014 		.4byte	.LCFI38-.LCFI37
+ 2082 0281 2E        		.byte	0x2e
+ 2083 0282 08        		.byte	0x8
+ 2084 0283 04        		.byte	0x4
+ 2085 0284 0000 0024 		.4byte	.LCFI39-.LCFI38
+ 2086 0288 2E        		.byte	0x2e
+ 2087 0289 0C        		.byte	0xc
+ 2088 028a 04        		.byte	0x4
+ 2089 028b 0000 0014 		.4byte	.LCFI40-.LCFI39
+ 2090 028f 2E        		.byte	0x2e
+ 2091 0290 08        		.byte	0x8
+ 2092 0291 04        		.byte	0x4
+ 2093 0292 0000 000E 		.4byte	.LCFI41-.LCFI40
+ 2094 0296 2E        		.byte	0x2e
+ 2095 0297 04        		.byte	0x4
+ 2096 0298 04        		.byte	0x4
+ 2097 0299 0000 0028 		.4byte	.LCFI42-.LCFI41
+ 2098 029d 2E        		.byte	0x2e
+ 2099 029e 0C        		.byte	0xc
+ 2100 029f 04        		.byte	0x4
+ 2101 02a0 0000 0014 		.4byte	.LCFI43-.LCFI42
+ 2102 02a4 2E        		.byte	0x2e
+ 2103 02a5 08        		.byte	0x8
+ 2104 02a6 04        		.byte	0x4
+ 2105 02a7 0000 0024 		.4byte	.LCFI44-.LCFI43
+ 2106 02ab 2E        		.byte	0x2e
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 44
+
+
+ 2107 02ac 0C        		.byte	0xc
+ 2108 02ad 04        		.byte	0x4
+ 2109 02ae 0000 0014 		.4byte	.LCFI45-.LCFI44
+ 2110 02b2 2E        		.byte	0x2e
+ 2111 02b3 08        		.byte	0x8
+ 2112 02b4 04        		.byte	0x4
+ 2113 02b5 0000 000E 		.4byte	.LCFI46-.LCFI45
+ 2114 02b9 2E        		.byte	0x2e
+ 2115 02ba 04        		.byte	0x4
+ 2116 02bb 00        		.align 	4
+ 2117               	.LEFDE13:
+ 2118               		.set	.LLFDE13,.LEFDE13-.LSFDE13
+ 2119 02bc 0000 0020 		.4byte	.LLFDE15
+ 2120               	.LSFDE15:
+ 2121 02c0 0000 01F0 		.4byte	.LSFDE15-__FRAME_BEGIN__
+ 2122 02c4 0000 0000 		.4byte	.LFB8
+ 2123 02c8 0000 006C 		.4byte	.LFE8-.LFB8
+ 2124 02cc 04        		.byte	0x4
+ 2125 02cd 0000 0004 		.4byte	.LCFI47-.LFB8
+ 2126 02d1 0C        		.byte	0xc
+ 2127 02d2 0E        		.byte	0xe
+ 2128 02d3 08        		.byte	0x8
+ 2129 02d4 8E        		.byte	0x8e
+ 2130 02d5 02        		.byte	0x2
+ 2131 02d6 04        		.byte	0x4
+ 2132 02d7 0000 001C 		.4byte	.LCFI48-.LCFI47
+ 2133 02db 2E        		.byte	0x2e
+ 2134 02dc 08        		.byte	0x8
+ 2135 02dd 0000 00   		.align 	4
+ 2136               	.LEFDE15:
+ 2137               		.set	.LLFDE15,.LEFDE15-.LSFDE15
+ 2138 02e0 0000 0018 		.4byte	.LLFDE17
+ 2139               	.LSFDE17:
+ 2140 02e4 0000 0214 		.4byte	.LSFDE17-__FRAME_BEGIN__
+ 2141 02e8 0000 0000 		.4byte	.LFB9
+ 2142 02ec 0000 001A 		.4byte	.LFE9-.LFB9
+ 2143 02f0 04        		.byte	0x4
+ 2144 02f1 0000 0004 		.4byte	.LCFI49-.LFB9
+ 2145 02f5 0C        		.byte	0xc
+ 2146 02f6 0E        		.byte	0xe
+ 2147 02f7 08        		.byte	0x8
+ 2148 02f8 8E        		.byte	0x8e
+ 2149 02f9 02        		.byte	0x2
+ 2150 02fa 0000      		.align 	4
+ 2151               	.LEFDE17:
+ 2152               		.set	.LLFDE17,.LEFDE17-.LSFDE17
+ 2153 02fc 0000 0024 		.4byte	.LLFDE19
+ 2154               	.LSFDE19:
+ 2155 0300 0000 0230 		.4byte	.LSFDE19-__FRAME_BEGIN__
+ 2156 0304 0000 0000 		.4byte	.LFB10
+ 2157 0308 0000 0034 		.4byte	.LFE10-.LFB10
+ 2158 030c 04        		.byte	0x4
+ 2159 030d 0000 0004 		.4byte	.LCFI50-.LFB10
+ 2160 0311 0C        		.byte	0xc
+ 2161 0312 0E        		.byte	0xe
+ 2162 0313 08        		.byte	0x8
+ 2163 0314 8E        		.byte	0x8e
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 45
+
+
+ 2164 0315 02        		.byte	0x2
+ 2165 0316 04        		.byte	0x4
+ 2166 0317 0000 0004 		.4byte	.LCFI51-.LCFI50
+ 2167 031b 82        		.byte	0x82
+ 2168 031c 05        		.byte	0x5
+ 2169 031d 83        		.byte	0x83
+ 2170 031e 04        		.byte	0x4
+ 2171 031f 84        		.byte	0x84
+ 2172 0320 03        		.byte	0x3
+ 2173 0321 0000 00   		.align 	4
+ 2174               	.LEFDE19:
+ 2175               		.set	.LLFDE19,.LEFDE19-.LSFDE19
+ 2176 0324 0000 0020 		.4byte	.LLFDE21
+ 2177               	.LSFDE21:
+ 2178 0328 0000 0258 		.4byte	.LSFDE21-__FRAME_BEGIN__
+ 2179 032c 0000 0000 		.4byte	.LFB11
+ 2180 0330 0000 001E 		.4byte	.LFE11-.LFB11
+ 2181 0334 04        		.byte	0x4
+ 2182 0335 0000 0004 		.4byte	.LCFI52-.LFB11
+ 2183 0339 0C        		.byte	0xc
+ 2184 033a 0E        		.byte	0xe
+ 2185 033b 08        		.byte	0x8
+ 2186 033c 8E        		.byte	0x8e
+ 2187 033d 02        		.byte	0x2
+ 2188 033e 04        		.byte	0x4
+ 2189 033f 0000 000A 		.4byte	.LCFI53-.LCFI52
+ 2190 0343 2E        		.byte	0x2e
+ 2191 0344 08        		.byte	0x8
+ 2192 0345 0000 00   		.align 	4
+ 2193               	.LEFDE21:
+ 2194               		.set	.LLFDE21,.LEFDE21-.LSFDE21
+ 2195 0348 0000 0020 		.4byte	.LLFDE23
+ 2196               	.LSFDE23:
+ 2197 034c 0000 027C 		.4byte	.LSFDE23-__FRAME_BEGIN__
+ 2198 0350 0000 0000 		.4byte	.LFB12
+ 2199 0354 0000 001C 		.4byte	.LFE12-.LFB12
+ 2200 0358 04        		.byte	0x4
+ 2201 0359 0000 0004 		.4byte	.LCFI54-.LFB12
+ 2202 035d 0C        		.byte	0xc
+ 2203 035e 0E        		.byte	0xe
+ 2204 035f 08        		.byte	0x8
+ 2205 0360 8E        		.byte	0x8e
+ 2206 0361 02        		.byte	0x2
+ 2207 0362 04        		.byte	0x4
+ 2208 0363 0000 0008 		.4byte	.LCFI55-.LCFI54
+ 2209 0367 2E        		.byte	0x2e
+ 2210 0368 08        		.byte	0x8
+ 2211 0369 0000 00   		.align 	4
+ 2212               	.LEFDE23:
+ 2213               		.set	.LLFDE23,.LEFDE23-.LSFDE23
+ 2214 036c 0000 0000 		.4byte	0x0
+ 2215               		.ident	"GCC: (GNU) 2.95.3 20010315 (release)(ColdFire patches - 20010318 from http://fiddes.net/co
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 46
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 Twister.cpp
+  /c/Temp/ccwoIoXQ.s:175    .data:00000000 gTickFlag
+  /c/Temp/ccwoIoXQ.s:182    .data:00000004 gTickOverrun
+  /c/Temp/ccwoIoXQ.s:189    .data:00000008 gTickCounter
+  /c/Temp/ccwoIoXQ.s:196    .data:0000000c gLeftMotor
+  /c/Temp/ccwoIoXQ.s:203    .data:0000002a gRightMotor
+  /c/Temp/ccwoIoXQ.s:211    .text:00000000 IsWhite__FUi
+  /c/Temp/ccwoIoXQ.s:248    .text:0000001c IsBlack__FUi
+  /c/Temp/ccwoIoXQ.s:286    .text:00000038 ClassifySample__FUi
+  /c/Temp/ccwoIoXQ.s:358    .text:0000006e main
+  /c/Temp/ccwoIoXQ.s:952    .text:00000586 TickHandler__Fv
+  /c/Temp/ccwoIoXQ.s:1716   .data:00000048 gFqdA
+  /c/Temp/ccwoIoXQ.s:1723   .data:0000004c gFqdB
+  /c/Temp/ccwoIoXQ.s:1737   .data:00000070 gMaxAD
+  /c/Temp/ccwoIoXQ.s:1744   .data:00000090 gADScale
+  /c/Temp/ccwoIoXQ.s:1751   .data:000000b0 gADOffset
+  /c/Temp/ccwoIoXQ.s:1730   .data:00000050 gAD
+  /c/Temp/ccwoIoXQ.s:780    .text:00000408 ReadAD__Fv
+  /c/Temp/ccwoIoXQ.s:1090   .text:00000650 StraightLine__Fv
+  /c/Temp/ccwoIoXQ.s:1666   .text:00000a92 Milliseconds2Ticks__FUi
+  /c/Temp/ccwoIoXQ.s:1757   .rodata:00000124 gSampleClassChar
+  /c/Temp/ccwoIoXQ.s:1630   .gnu.linkonce.t.GetSpeed__5Motor:00000000 GetSpeed__5Motor
+  /c/Temp/ccwoIoXQ.s:1573   .text:00000a26 __static_initialization_and_destruction_0
+  /c/Temp/ccwoIoXQ.s:1764   .text:00000ac6 _GLOBAL_.I.gTickFlag
+  /c/Temp/ccwoIoXQ.s:1799   .text:00000ae4 _GLOBAL_.D.gTickFlag
+  /c/Temp/ccwoIoXQ.s:1836   .data:000000d0 _GLOBAL_.F.gTickFlag
+  /c/Temp/ccwoIoXQ.s:1837   .data:000000d0 __FRAME_BEGIN__
+
+UNDEFINED SYMBOLS
+__main
+set_processor_speed
+sciinit
+led_init
+lcd_init
+tpu_init
+tpu_get_tcr2_freq
+tpu_get_tcr1_freq
+iprintf
+Init__5Motoriii
+install_isr
+tpu_request_channel
+havebyte
+inbyte
+DebugKey__Fv
+fqd
+lcd_printf
+_impure_ptr
+fflush
+led_on
+led_off
+exit
+ProcessTick__5Motor
+SetSpeed__5Motori
+Coast__5Motor
+__5MotorPCc
+_._5Motor
+68K GAS  /c/Temp/ccwoIoXQ.s 			page 47
+
+

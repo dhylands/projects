@@ -1,0 +1,898 @@
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 1
+
+
+   1               		.file	"Motor.cpp"
+   4               	.text
+   5               	.Ltext0:
+ 132               	.globl __5MotorPCc
+ 134               	__5MotorPCc:
+ 135               	.LFB1:
+   1:Motor.cpp     **** /****************************************************************************
+   2:Motor.cpp     **** *
+   3:Motor.cpp     **** *     Copyright (c) 2003 Dave Hylands
+   4:Motor.cpp     **** *           All Rights Reserved
+   5:Motor.cpp     **** *
+   6:Motor.cpp     **** *   Permission is granted to any individual or institution to use, copy, or
+   7:Motor.cpp     **** *   redistribute this software so long as it is not sold for profit, and that
+   8:Motor.cpp     **** *   this copyright notice is retained.
+   9:Motor.cpp     **** *
+  10:Motor.cpp     **** ****************************************************************************/
+  11:Motor.cpp     **** /**
+  12:Motor.cpp     **** *
+  13:Motor.cpp     **** *   @file   Motor.cpp
+  14:Motor.cpp     **** *
+  15:Motor.cpp     **** *   @brief  Implementation of the Motor class
+  16:Motor.cpp     **** *
+  17:Motor.cpp     **** ****************************************************************************/
+  18:Motor.cpp     **** 
+  19:Motor.cpp     **** // ---- Include Files -------------------------------------------------------
+  20:Motor.cpp     **** 
+  21:Motor.cpp     **** #include <stdio.h>
+  22:Motor.cpp     **** 
+  23:Motor.cpp     **** #include "Log.h"
+  24:Motor.cpp     **** #include "Motor.h"
+  25:Motor.cpp     **** 
+  26:Motor.cpp     **** #include <68332/tpu.h>
+  27:Motor.cpp     **** #include <68332/qomdo.h>
+  28:Motor.cpp     **** #include <68332/qompwm.h>
+  29:Motor.cpp     **** 
+  30:Motor.cpp     **** // ---- Public Variables ----------------------------------------------------
+  31:Motor.cpp     **** // ---- Private Constants and Types -----------------------------------------
+  32:Motor.cpp     **** 
+  33:Motor.cpp     **** #if !defined( MOTOR_PWM_FREQ )
+  34:Motor.cpp     **** #define MOTOR_PWM_FREQ  1000
+  35:Motor.cpp     **** #endif
+  36:Motor.cpp     **** 
+  37:Motor.cpp     **** // ---- Private Variables ---------------------------------------------------
+  38:Motor.cpp     **** // ---- Private Function Prototypes -----------------------------------------
+  39:Motor.cpp     **** 
+  40:Motor.cpp     **** #if 1
+  41:Motor.cpp     **** #   define MOTOR_DEBUG(x)  LOG(x)
+  42:Motor.cpp     **** #else
+  43:Motor.cpp     **** #   define MOTOR_DEBUG(x)
+  44:Motor.cpp     **** #endif
+  45:Motor.cpp     **** 
+  46:Motor.cpp     **** // ---- Functions -----------------------------------------------------------
+  47:Motor.cpp     **** 
+  48:Motor.cpp     **** // En D1 D2
+  49:Motor.cpp     **** //  H  H  H - Motor Brake
+  50:Motor.cpp     **** //  H  L  L - Motor Brake
+  51:Motor.cpp     **** //  H  H  L - Direction 1
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 2
+
+
+  52:Motor.cpp     **** //  H  L  H - Direction 2 
+  53:Motor.cpp     **** //  L  x  x - Motor Coasts
+  54:Motor.cpp     **** 
+  55:Motor.cpp     **** /**
+  56:Motor.cpp     ****  * @addtogroup Peripheral
+  57:Motor.cpp     ****  * @{
+  58:Motor.cpp     ****  */
+  59:Motor.cpp     **** 
+  60:Motor.cpp     **** //***************************************************************************
+  61:Motor.cpp     **** /**
+  62:Motor.cpp     **** *   Constructor
+  63:Motor.cpp     **** */
+  64:Motor.cpp     **** 
+  65:Motor.cpp     **** Motor::Motor( const char *name )
+  66:Motor.cpp     **** {
+ 137               	.LM1:
+ 138 0000 4E56 0000 		link.w %a6,#0
+ 139               	.LCFI0:
+ 140 0004 206E 0008 		move.l 8(%a6),%a0
+ 142               	.LM2:
+ 143               	.LBB2:
+  67:Motor.cpp     ****     m_name = name;
+ 145               	.LM3:
+ 146 0008 20AE 000C 		move.l 12(%a6),(%a0)
+  68:Motor.cpp     ****     m_d1 = NULL;
+ 148               	.LM4:
+ 149 000c 42A8 0004 		clr.l 4(%a0)
+  69:Motor.cpp     ****     m_d2 = NULL;
+ 151               	.LM5:
+ 152 0010 42A8 0008 		clr.l 8(%a0)
+  70:Motor.cpp     ****     m_enable = NULL;
+ 154               	.LM6:
+ 155 0014 42A8 000C 		clr.l 12(%a0)
+  71:Motor.cpp     ****     m_pulseWidth = 0;
+ 157               	.LM7:
+ 158 0018 4268 0010 		clr.w 16(%a0)
+ 159               	.LBE2:
+ 160               	.L3:
+ 161 001c 2008      		move.l %a0,%d0
+ 162 001e 6000 0002 		jbra .L2
+  72:Motor.cpp     **** }
+ 164               	.LM8:
+ 165               	.L2:
+ 166 0022 4E5E      		unlk %a6
+ 167 0024 4E75      		rts
+ 168               	.LFE1:
+ 169               	.Lfe1:
+ 174               	.Lscope0:
+ 179               	.globl _._5Motor
+ 181               	_._5Motor:
+ 182               	.LFB2:
+  73:Motor.cpp     **** 
+  74:Motor.cpp     **** //***************************************************************************
+  75:Motor.cpp     **** /**
+  76:Motor.cpp     **** *   Destructor
+  77:Motor.cpp     **** */
+  78:Motor.cpp     **** 
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 3
+
+
+  79:Motor.cpp     **** Motor::~Motor()
+  80:Motor.cpp     **** {
+ 184               	.LM9:
+ 185 0026 4E56 0000 		link.w %a6,#0
+ 186               	.LCFI1:
+ 187 002a 2F0A      		move.l %a2,-(%sp)
+ 188               	.LCFI2:
+ 189 002c 246E 0008 		move.l 8(%a6),%a2
+ 191               	.LM10:
+ 192               	.LBB3:
+  81:Motor.cpp     ****     if ( m_d1 != NULL )
+ 194               	.LM11:
+ 195 0030 4AAA 0004 		tst.l 4(%a2)
+ 196 0034 6714      		jbeq .L5
+  82:Motor.cpp     ****     {
+  83:Motor.cpp     ****         tpu_release_channel( 0, m_d1->channel_num );
+ 198               	.LM12:
+ 199 0036 206A 0004 		move.l 4(%a2),%a0
+ 200 003a 4280      		clr.l %d0
+ 201 003c 3010      		move.w (%a0),%d0
+ 202 003e 2F00      		move.l %d0,-(%sp)
+ 203 0040 42A7      		clr.l -(%sp)
+ 204               	.LCFI3:
+ 205 0042 4EB9 0000 		jsr tpu_release_channel
+ 205      0000 
+ 206 0048 508F      		addq.l #8,%sp
+ 207               	.L5:
+  84:Motor.cpp     ****     }
+  85:Motor.cpp     ****     if ( m_d2 != NULL )
+ 209               	.LM13:
+ 210 004a 4AAA 0008 		tst.l 8(%a2)
+ 211 004e 6714      		jbeq .L6
+  86:Motor.cpp     ****     {
+  87:Motor.cpp     ****         tpu_release_channel( 0, m_d2->channel_num );
+ 213               	.LM14:
+ 214 0050 206A 0008 		move.l 8(%a2),%a0
+ 215 0054 4280      		clr.l %d0
+ 216 0056 3010      		move.w (%a0),%d0
+ 217 0058 2F00      		move.l %d0,-(%sp)
+ 218 005a 42A7      		clr.l -(%sp)
+ 219 005c 4EB9 0000 		jsr tpu_release_channel
+ 219      0000 
+ 220 0062 508F      		addq.l #8,%sp
+ 221               	.L6:
+  88:Motor.cpp     ****     }
+  89:Motor.cpp     ****     if ( m_enable != NULL )
+ 223               	.LM15:
+ 224 0064 4AAA 000C 		tst.l 12(%a2)
+ 225 0068 6714      		jbeq .L8
+  90:Motor.cpp     ****     {
+  91:Motor.cpp     ****         tpu_release_channel( 0, m_enable->channel_num );
+ 227               	.LM16:
+ 228 006a 206A 000C 		move.l 12(%a2),%a0
+ 229 006e 4280      		clr.l %d0
+ 230 0070 3010      		move.w (%a0),%d0
+ 231 0072 2F00      		move.l %d0,-(%sp)
+ 232 0074 42A7      		clr.l -(%sp)
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 4
+
+
+ 233 0076 4EB9 0000 		jsr tpu_release_channel
+ 233      0000 
+ 234 007c 508F      		addq.l #8,%sp
+ 235               	.L7:
+ 236               	.LBE3:
+ 237               	.L8:
+ 238 007e 7001      		moveq.l #1,%d0
+ 239 0080 C0AE 000C 		and.l 12(%a6),%d0
+ 240 0084 4A80      		tst.l %d0
+ 241 0086 670E      		jbeq .L10
+ 242 0088 2F0A      		move.l %a2,-(%sp)
+ 243               	.LCFI4:
+ 244 008a 4EB9 0000 		jsr __builtin_delete
+ 244      0000 
+ 245 0090 588F      		addq.l #4,%sp
+ 246 0092 6000 0002 		jbra .L10
+ 247               	.L9:
+ 248               	.L10:
+  92:Motor.cpp     ****     }
+  93:Motor.cpp     **** }
+ 250               	.LM17:
+ 251               	.L4:
+ 252 0096 246E FFFC 		move.l -4(%a6),%a2
+ 253 009a 4E5E      		unlk %a6
+ 254 009c 4E75      		rts
+ 255               	.LFE2:
+ 256               	.Lfe2:
+ 261               	.Lscope1:
+ 263               	.section	.rodata
+ 264               	.LC0:
+ 265 0000 556E 6162 		.string	"Unable to get TPU pin %d for %s Motor D1"
+ 265      6C65 2074 
+ 265      6F20 6765 
+ 265      7420 5450 
+ 265      5520 7069 
+ 266               	.LC1:
+ 267 0029 556E 6162 		.string	"Unable to get TPU pin %d for %s Motor D2"
+ 267      6C65 2074 
+ 267      6F20 6765 
+ 267      7420 5450 
+ 267      5520 7069 
+ 268               	.LC2:
+ 269 0052 556E 6162 		.string	"Unable to get TPU pin %d for %s Motor Enable"
+ 269      6C65 2074 
+ 269      6F20 6765 
+ 269      7420 5450 
+ 269      5520 7069 
+ 270               	.text
+ 276               	.globl Init__5Motoriii
+ 278               	Init__5Motoriii:
+ 279               	.LFB3:
+  94:Motor.cpp     ****     
+  95:Motor.cpp     **** //***************************************************************************
+  96:Motor.cpp     **** /**
+  97:Motor.cpp     **** *  Init - Initialize the TPU pins
+  98:Motor.cpp     **** */
+  99:Motor.cpp     **** 
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 5
+
+
+ 100:Motor.cpp     **** void Motor::Init( int d1Pin, int d2Pin, int enablePin )
+ 101:Motor.cpp     **** {
+ 281               	.LM18:
+ 282 009e 4E56 0000 		link.w %a6,#0
+ 283               	.LCFI5:
+ 284 00a2 2F0A      		move.l %a2,-(%sp)
+ 285               	.LCFI6:
+ 286 00a4 2F02      		move.l %d2,-(%sp)
+ 287               	.LCFI7:
+ 288 00a6 246E 0008 		move.l 8(%a6),%a2
+ 290               	.LM19:
+ 291               	.LBB4:
+ 102:Motor.cpp     ****     if (( m_d1 = tpu_request_channel( 0, d1Pin )) == NULL )
+ 293               	.LM20:
+ 294 00aa 4280      		clr.l %d0
+ 295 00ac 302E 000E 		move.w 14(%a6),%d0
+ 296 00b0 2F00      		move.l %d0,-(%sp)
+ 297 00b2 42A7      		clr.l -(%sp)
+ 298               	.LCFI8:
+ 299 00b4 4EB9 0000 		jsr tpu_request_channel
+ 299      0000 
+ 300 00ba 508F      		addq.l #8,%sp
+ 301 00bc 2200      		move.l %d0,%d1
+ 302 00be 2541 0004 		move.l %d1,4(%a2)
+ 303 00c2 4A81      		tst.l %d1
+ 304 00c4 661A      		jbne .L12
+ 103:Motor.cpp     ****     {
+ 104:Motor.cpp     ****         LOG_ERROR(( "Unable to get TPU pin %d for %s Motor D1", d1Pin, m_name ));
+ 306               	.LM21:
+ 307 00c6 2F12      		move.l (%a2),-(%sp)
+ 308 00c8 2F2E 000C 		move.l 12(%a6),-(%sp)
+ 309 00cc 4879 0000 		pea .LC0
+ 309      0000 
+ 310               	.LCFI9:
+ 311 00d2 4EB9 0000 		jsr iprintf
+ 311      0000 
+ 312 00d8 508F      		addq.l #8,%sp
+ 313 00da 588F      		addq.l #4,%sp
+ 105:Motor.cpp     ****         return;
+ 315               	.LM22:
+ 316 00dc 6000 0092 		jbra .L11
+ 317               	.L12:
+ 106:Motor.cpp     ****     }
+ 107:Motor.cpp     ****     if (( m_d2 = tpu_request_channel( 0, d2Pin )) == NULL )
+ 319               	.LM23:
+ 320 00e0 4280      		clr.l %d0
+ 321 00e2 302E 0012 		move.w 18(%a6),%d0
+ 322 00e6 2F00      		move.l %d0,-(%sp)
+ 323 00e8 42A7      		clr.l -(%sp)
+ 324               	.LCFI10:
+ 325 00ea 4EB9 0000 		jsr tpu_request_channel
+ 325      0000 
+ 326 00f0 508F      		addq.l #8,%sp
+ 327 00f2 2200      		move.l %d0,%d1
+ 328 00f4 2541 0008 		move.l %d1,8(%a2)
+ 329 00f8 4A81      		tst.l %d1
+ 330 00fa 6618      		jbne .L13
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 6
+
+
+ 108:Motor.cpp     ****     {
+ 109:Motor.cpp     ****         LOG_ERROR(( "Unable to get TPU pin %d for %s Motor D2", d2Pin, m_name ));
+ 332               	.LM24:
+ 333 00fc 2F12      		move.l (%a2),-(%sp)
+ 334 00fe 2F2E 0010 		move.l 16(%a6),-(%sp)
+ 335 0102 4879 0000 		pea .LC1
+ 335      0000 
+ 336               	.LCFI11:
+ 337 0108 4EB9 0000 		jsr iprintf
+ 337      0000 
+ 338 010e 508F      		addq.l #8,%sp
+ 339 0110 588F      		addq.l #4,%sp
+ 110:Motor.cpp     ****         return;
+ 341               	.LM25:
+ 342 0112 605C      		jbra .L11
+ 343               	.L13:
+ 111:Motor.cpp     ****     }
+ 112:Motor.cpp     ****     if (( m_enable = tpu_request_channel( 0, enablePin )) == NULL )
+ 345               	.LM26:
+ 346 0114 4280      		clr.l %d0
+ 347 0116 302E 0016 		move.w 22(%a6),%d0
+ 348 011a 2F00      		move.l %d0,-(%sp)
+ 349 011c 42A7      		clr.l -(%sp)
+ 350               	.LCFI12:
+ 351 011e 4EB9 0000 		jsr tpu_request_channel
+ 351      0000 
+ 352 0124 508F      		addq.l #8,%sp
+ 353 0126 2200      		move.l %d0,%d1
+ 354 0128 2541 000C 		move.l %d1,12(%a2)
+ 355 012c 4A81      		tst.l %d1
+ 356 012e 6618      		jbne .L14
+ 113:Motor.cpp     ****     {
+ 114:Motor.cpp     ****         LOG_ERROR(( "Unable to get TPU pin %d for %s Motor Enable", enablePin, m_name ));
+ 358               	.LM27:
+ 359 0130 2F12      		move.l (%a2),-(%sp)
+ 360 0132 2F2E 0014 		move.l 20(%a6),-(%sp)
+ 361 0136 4879 0000 		pea .LC2
+ 361      0000 
+ 362               	.LCFI13:
+ 363 013c 4EB9 0000 		jsr iprintf
+ 363      0000 
+ 364 0142 508F      		addq.l #8,%sp
+ 365 0144 588F      		addq.l #4,%sp
+ 115:Motor.cpp     ****         return;
+ 367               	.LM28:
+ 368 0146 6028      		jbra .L11
+ 369               	.L14:
+ 116:Motor.cpp     ****     }
+ 117:Motor.cpp     **** 
+ 118:Motor.cpp     ****     m_pulseWidth = tpu_get_tcr1_freq( 0 ) / MOTOR_PWM_FREQ;
+ 371               	.LM29:
+ 372 0148 42A7      		clr.l -(%sp)
+ 373               	.LCFI14:
+ 374 014a 4EB9 0000 		jsr tpu_get_tcr1_freq
+ 374      0000 
+ 375 0150 588F      		addq.l #4,%sp
+ 376 0152 2200      		move.l %d0,%d1
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 7
+
+
+ 377 0154 2001      		move.l %d1,%d0
+ 378 0156 4C3C 0402 		mulu.l #274877907,%d2:%d0
+ 378      1062 4DD3 
+ 379 015e 2002      		move.l %d2,%d0
+ 380 0160 EC88      		lsr.l #6,%d0
+ 381 0162 3540 0010 		move.w %d0,16(%a2)
+ 119:Motor.cpp     **** 
+ 120:Motor.cpp     ****     Coast();
+ 383               	.LM30:
+ 384 0166 2F0A      		move.l %a2,-(%sp)
+ 385 0168 4EB9 0000 		jsr Coast__5Motor
+ 385      0000 
+ 386 016e 588F      		addq.l #4,%sp
+ 387               	.LBE4:
+ 121:Motor.cpp     **** 
+ 122:Motor.cpp     **** } // Init
+ 389               	.LM31:
+ 390               	.L11:
+ 391 0170 242E FFF8 		move.l -8(%a6),%d2
+ 392 0174 246E FFFC 		move.l -4(%a6),%a2
+ 393 0178 4E5E      		unlk %a6
+ 394 017a 4E75      		rts
+ 395               	.LFE3:
+ 396               	.Lfe3:
+ 401               	.Lscope2:
+ 403               	.section	.rodata
+ 404               	.LC3:
+ 405 007f 2573 204D 		.string	"%s Motor: Brake\n"
+ 405      6F74 6F72 
+ 405      3A20 4272 
+ 405      616B 650A 
+ 405      00
+ 406               	.text
+ 409               	.globl Brake__5Motor
+ 411               	Brake__5Motor:
+ 412               	.LFB4:
+ 123:Motor.cpp     **** 
+ 124:Motor.cpp     **** //***************************************************************************
+ 125:Motor.cpp     **** /**
+ 126:Motor.cpp     **** *  Brake - causes the motor to stop quickly.
+ 127:Motor.cpp     **** */
+ 128:Motor.cpp     **** 
+ 129:Motor.cpp     **** void Motor::Brake()
+ 130:Motor.cpp     **** {
+ 414               	.LM32:
+ 415 017c 4E56 0000 		link.w %a6,#0
+ 416               	.LCFI15:
+ 417 0180 2F0A      		move.l %a2,-(%sp)
+ 418               	.LCFI16:
+ 419 0182 246E 0008 		move.l 8(%a6),%a2
+ 421               	.LM33:
+ 422               	.LBB5:
+ 131:Motor.cpp     ****     MOTOR_DEBUG(( "%s Motor: Brake\n", m_name ));
+ 424               	.LM34:
+ 425 0186 2F12      		move.l (%a2),-(%sp)
+ 426 0188 4879 0000 		pea .LC3
+ 426      0000 
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 8
+
+
+ 427               	.LCFI17:
+ 428 018e 4EB9 0000 		jsr iprintf
+ 428      0000 
+ 429 0194 508F      		addq.l #8,%sp
+ 132:Motor.cpp     **** 
+ 133:Motor.cpp     ****     qomdo( m_d1, false );
+ 431               	.LM35:
+ 432 0196 558F      		subq.l #2,%sp
+ 433 0198 1F7C 0000 		move.b #0,1(%sp)
+ 433      0001 
+ 434 019e 558F      		subq.l #2,%sp
+ 435 01a0 2F2A 0004 		move.l 4(%a2),-(%sp)
+ 436 01a4 4EB9 0000 		jsr qomdo
+ 436      0000 
+ 437 01aa 508F      		addq.l #8,%sp
+ 134:Motor.cpp     ****     qomdo( m_d2, false );
+ 439               	.LM36:
+ 440 01ac 558F      		subq.l #2,%sp
+ 441 01ae 1F7C 0000 		move.b #0,1(%sp)
+ 441      0001 
+ 442 01b4 558F      		subq.l #2,%sp
+ 443 01b6 2F2A 0008 		move.l 8(%a2),-(%sp)
+ 444 01ba 4EB9 0000 		jsr qomdo
+ 444      0000 
+ 445 01c0 508F      		addq.l #8,%sp
+ 135:Motor.cpp     ****     qomdo( m_enable, true );
+ 447               	.LM37:
+ 448 01c2 558F      		subq.l #2,%sp
+ 449 01c4 1F7C 0001 		move.b #1,1(%sp)
+ 449      0001 
+ 450 01ca 558F      		subq.l #2,%sp
+ 451 01cc 2F2A 000C 		move.l 12(%a2),-(%sp)
+ 452 01d0 4EB9 0000 		jsr qomdo
+ 452      0000 
+ 453 01d6 508F      		addq.l #8,%sp
+ 454               	.LBE5:
+ 136:Motor.cpp     **** 
+ 137:Motor.cpp     **** } // Brake
+ 456               	.LM38:
+ 457               	.L15:
+ 458 01d8 246E FFFC 		move.l -4(%a6),%a2
+ 459 01dc 4E5E      		unlk %a6
+ 460 01de 4E75      		rts
+ 461               	.LFE4:
+ 462               	.Lfe4:
+ 467               	.Lscope3:
+ 469               	.section	.rodata
+ 470               	.LC4:
+ 471 0090 2573 204D 		.string	"%s Motor: Coast\n"
+ 471      6F74 6F72 
+ 471      3A20 436F 
+ 471      6173 740A 
+ 471      00
+ 472               	.text
+ 475               	.globl Coast__5Motor
+ 477               	Coast__5Motor:
+ 478               	.LFB5:
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 9
+
+
+ 138:Motor.cpp     **** 
+ 139:Motor.cpp     **** //***************************************************************************
+ 140:Motor.cpp     **** /**
+ 141:Motor.cpp     **** *  Coast - causes the motor to coast to a stop.
+ 142:Motor.cpp     **** */
+ 143:Motor.cpp     **** 
+ 144:Motor.cpp     **** void Motor::Coast()
+ 145:Motor.cpp     **** {
+ 480               	.LM39:
+ 481 01e0 4E56 0000 		link.w %a6,#0
+ 482               	.LCFI18:
+ 483 01e4 2F0A      		move.l %a2,-(%sp)
+ 484               	.LCFI19:
+ 485 01e6 246E 0008 		move.l 8(%a6),%a2
+ 487               	.LM40:
+ 488               	.LBB6:
+ 146:Motor.cpp     ****     MOTOR_DEBUG(( "%s Motor: Coast\n", m_name ));
+ 490               	.LM41:
+ 491 01ea 2F12      		move.l (%a2),-(%sp)
+ 492 01ec 4879 0000 		pea .LC4
+ 492      0000 
+ 493               	.LCFI20:
+ 494 01f2 4EB9 0000 		jsr iprintf
+ 494      0000 
+ 495 01f8 508F      		addq.l #8,%sp
+ 147:Motor.cpp     **** 
+ 148:Motor.cpp     ****     qomdo( m_enable, false );
+ 497               	.LM42:
+ 498 01fa 558F      		subq.l #2,%sp
+ 499 01fc 1F7C 0000 		move.b #0,1(%sp)
+ 499      0001 
+ 500 0202 558F      		subq.l #2,%sp
+ 501 0204 2F2A 000C 		move.l 12(%a2),-(%sp)
+ 502 0208 4EB9 0000 		jsr qomdo
+ 502      0000 
+ 503 020e 508F      		addq.l #8,%sp
+ 504               	.LBE6:
+ 149:Motor.cpp     **** 
+ 150:Motor.cpp     **** } // Coast
+ 506               	.LM43:
+ 507               	.L16:
+ 508 0210 246E FFFC 		move.l -4(%a6),%a2
+ 509 0214 4E5E      		unlk %a6
+ 510 0216 4E75      		rts
+ 511               	.LFE5:
+ 512               	.Lfe5:
+ 517               	.Lscope4:
+ 519               	.section	.rodata
+ 520               	.LC5:
+ 521 00a1 2573 204D 		.string	"%s Motor: SetSpeed( %d )\n"
+ 521      6F74 6F72 
+ 521      3A20 5365 
+ 521      7453 7065 
+ 521      6564 2820 
+ 522               	.text
+ 526               	.globl SetSpeed__5MotorSc
+ 528               	SetSpeed__5MotorSc:
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 10
+
+
+ 529               	.LFB6:
+ 151:Motor.cpp     **** 
+ 152:Motor.cpp     **** //***************************************************************************
+ 153:Motor.cpp     **** /**
+ 154:Motor.cpp     **** *   SetSpeed - Sets the speed +ve = forward, -ve = backward.
+ 155:Motor.cpp     **** *
+ 156:Motor.cpp     **** *   @param   pct     (in)  Percentage of speed. (0-100)
+ 157:Motor.cpp     **** */
+ 158:Motor.cpp     **** 
+ 159:Motor.cpp     **** void Motor::SetSpeed( int8 speed )
+ 160:Motor.cpp     **** {
+ 531               	.LM44:
+ 532 0218 4E56 FFF8 		link.w %a6,#-8
+ 533               	.LCFI21:
+ 534 021c 2F0A      		move.l %a2,-(%sp)
+ 535               	.LCFI22:
+ 536 021e 2F02      		move.l %d2,-(%sp)
+ 537               	.LCFI23:
+ 538 0220 246E 0008 		move.l 8(%a6),%a2
+ 539 0224 202E 000C 		move.l 12(%a6),%d0
+ 540 0228 1D40 FFFF 		move.b %d0,-1(%a6)
+ 542               	.LM45:
+ 543               	.LBB7:
+ 161:Motor.cpp     ****     uint16  hiTime;
+ 162:Motor.cpp     ****     uint16  loTime;
+ 163:Motor.cpp     **** 
+ 164:Motor.cpp     ****     MOTOR_DEBUG(( "%s Motor: SetSpeed( %d )\n", m_name, speed ));
+ 545               	.LM46:
+ 546 022c 102E FFFF 		move.b -1(%a6),%d0
+ 547 0230 49C0      		extb.l %d0
+ 548 0232 2F00      		move.l %d0,-(%sp)
+ 549 0234 2F12      		move.l (%a2),-(%sp)
+ 550 0236 4879 0000 		pea .LC5
+ 550      0000 
+ 551               	.LCFI24:
+ 552 023c 4EB9 0000 		jsr iprintf
+ 552      0000 
+ 553 0242 508F      		addq.l #8,%sp
+ 554 0244 588F      		addq.l #4,%sp
+ 165:Motor.cpp     **** 
+ 166:Motor.cpp     ****     if ( speed > 0 )
+ 556               	.LM47:
+ 557 0246 4A2E FFFF 		tst.b -1(%a6)
+ 558 024a 6F2E      		jble .L18
+ 167:Motor.cpp     ****     {
+ 168:Motor.cpp     ****         qomdo( m_d1, true );
+ 560               	.LM48:
+ 561 024c 558F      		subq.l #2,%sp
+ 562 024e 1F7C 0001 		move.b #1,1(%sp)
+ 562      0001 
+ 563 0254 558F      		subq.l #2,%sp
+ 564 0256 2F2A 0004 		move.l 4(%a2),-(%sp)
+ 565               	.LCFI25:
+ 566 025a 4EB9 0000 		jsr qomdo
+ 566      0000 
+ 567 0260 508F      		addq.l #8,%sp
+ 169:Motor.cpp     ****         qomdo( m_d2, false );
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 11
+
+
+ 569               	.LM49:
+ 570 0262 558F      		subq.l #2,%sp
+ 571 0264 1F7C 0000 		move.b #0,1(%sp)
+ 571      0001 
+ 572 026a 558F      		subq.l #2,%sp
+ 573 026c 2F2A 0008 		move.l 8(%a2),-(%sp)
+ 574 0270 4EB9 0000 		jsr qomdo
+ 574      0000 
+ 575 0276 508F      		addq.l #8,%sp
+ 576 0278 602C      		jbra .L19
+ 577               	.L18:
+ 170:Motor.cpp     ****     }
+ 171:Motor.cpp     ****     else
+ 172:Motor.cpp     ****     {
+ 173:Motor.cpp     ****         qomdo( m_d1, false );
+ 579               	.LM50:
+ 580 027a 558F      		subq.l #2,%sp
+ 581 027c 1F7C 0000 		move.b #0,1(%sp)
+ 581      0001 
+ 582 0282 558F      		subq.l #2,%sp
+ 583 0284 2F2A 0004 		move.l 4(%a2),-(%sp)
+ 584 0288 4EB9 0000 		jsr qomdo
+ 584      0000 
+ 585 028e 508F      		addq.l #8,%sp
+ 174:Motor.cpp     ****         qomdo( m_d2, true );
+ 587               	.LM51:
+ 588 0290 558F      		subq.l #2,%sp
+ 589 0292 1F7C 0001 		move.b #1,1(%sp)
+ 589      0001 
+ 590 0298 558F      		subq.l #2,%sp
+ 591 029a 2F2A 0008 		move.l 8(%a2),-(%sp)
+ 592 029e 4EB9 0000 		jsr qomdo
+ 592      0000 
+ 593 02a4 508F      		addq.l #8,%sp
+ 594               	.L19:
+ 175:Motor.cpp     ****     }
+ 176:Motor.cpp     **** 
+ 177:Motor.cpp     ****     hiTime = (uint32)m_pulseWidth * (uint32)speed / 100;
+ 596               	.LM52:
+ 597 02a6 4280      		clr.l %d0
+ 598 02a8 302A 0010 		move.w 16(%a2),%d0
+ 599 02ac 122E FFFF 		move.b -1(%a6),%d1
+ 600 02b0 49C1      		extb.l %d1
+ 601 02b2 2400      		move.l %d0,%d2
+ 602 02b4 4C01 2800 		muls.l %d1,%d2
+ 603 02b8 2002      		move.l %d2,%d0
+ 604 02ba 4C3C 0401 		mulu.l #1374389535,%d1:%d0
+ 604      51EB 851F 
+ 605 02c2 2001      		move.l %d1,%d0
+ 606 02c4 EA88      		lsr.l #5,%d0
+ 607 02c6 3D40 FFFC 		move.w %d0,-4(%a6)
+ 178:Motor.cpp     ****     loTime = m_pulseWidth - hiTime;
+ 609               	.LM53:
+ 610 02ca 302A 0010 		move.w 16(%a2),%d0
+ 611 02ce 906E FFFC 		sub.w -4(%a6),%d0
+ 612 02d2 3D40 FFFA 		move.w %d0,-6(%a6)
+ 179:Motor.cpp     **** 
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 12
+
+
+ 180:Motor.cpp     ****     qompwm( m_enable, hiTime, loTime );
+ 614               	.LM54:
+ 615 02d6 4280      		clr.l %d0
+ 616 02d8 302E FFFA 		move.w -6(%a6),%d0
+ 617 02dc 2F00      		move.l %d0,-(%sp)
+ 618 02de 4280      		clr.l %d0
+ 619 02e0 302E FFFC 		move.w -4(%a6),%d0
+ 620 02e4 2F00      		move.l %d0,-(%sp)
+ 621 02e6 2F2A 000C 		move.l 12(%a2),-(%sp)
+ 622               	.LCFI26:
+ 623 02ea 4EB9 0000 		jsr qompwm
+ 623      0000 
+ 624 02f0 508F      		addq.l #8,%sp
+ 625 02f2 588F      		addq.l #4,%sp
+ 626               	.LBE7:
+ 181:Motor.cpp     **** 
+ 182:Motor.cpp     **** } // SetSpeed
+ 628               	.LM55:
+ 629               	.L17:
+ 630 02f4 242E FFF0 		move.l -16(%a6),%d2
+ 631 02f8 246E FFF4 		move.l -12(%a6),%a2
+ 632 02fc 4E5E      		unlk %a6
+ 633 02fe 4E75      		rts
+ 634               	.LFE6:
+ 635               	.Lfe6:
+ 643               	.Lscope5:
+ 645               		.text
+ 647               	.Letext:
+ 648               	
+ 649               	.data
+ 650               		.align 	4
+ 651               	.globl _GLOBAL_.F.__5MotorPCc
+ 652               	_GLOBAL_.F.__5MotorPCc:
+ 653               	__FRAME_BEGIN__:
+ 654 0000 0000 0010 		.4byte	.LLCIE1
+ 655               	.LSCIE1:
+ 656 0004 0000 0000 		.4byte	0x0
+ 657 0008 01        		.byte	0x1
+ 658 0009 00        		.byte	0x0
+ 659 000a 01        		.byte	0x1
+ 660 000b 7C        		.byte	0x7c
+ 661 000c 18        		.byte	0x18
+ 662 000d 0C        		.byte	0xc
+ 663 000e 0F        		.byte	0xf
+ 664 000f 04        		.byte	0x4
+ 665 0010 98        		.byte	0x98
+ 666 0011 01        		.byte	0x1
+ 667 0012 0000      		.align 	4
+ 668               	.LECIE1:
+ 669               		.set	.LLCIE1,.LECIE1-.LSCIE1
+ 670 0014 0000 0018 		.4byte	.LLFDE1
+ 671               	.LSFDE1:
+ 672 0018 0000 0018 		.4byte	.LSFDE1-__FRAME_BEGIN__
+ 673 001c 0000 0000 		.4byte	.LFB1
+ 674 0020 0000 0026 		.4byte	.LFE1-.LFB1
+ 675 0024 04        		.byte	0x4
+ 676 0025 0000 0004 		.4byte	.LCFI0-.LFB1
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 13
+
+
+ 677 0029 0C        		.byte	0xc
+ 678 002a 0E        		.byte	0xe
+ 679 002b 08        		.byte	0x8
+ 680 002c 8E        		.byte	0x8e
+ 681 002d 02        		.byte	0x2
+ 682 002e 0000      		.align 	4
+ 683               	.LEFDE1:
+ 684               		.set	.LLFDE1,.LEFDE1-.LSFDE1
+ 685 0030 0000 002C 		.4byte	.LLFDE3
+ 686               	.LSFDE3:
+ 687 0034 0000 0034 		.4byte	.LSFDE3-__FRAME_BEGIN__
+ 688 0038 0000 0000 		.4byte	.LFB2
+ 689 003c 0000 0078 		.4byte	.LFE2-.LFB2
+ 690 0040 04        		.byte	0x4
+ 691 0041 0000 0004 		.4byte	.LCFI1-.LFB2
+ 692 0045 0C        		.byte	0xc
+ 693 0046 0E        		.byte	0xe
+ 694 0047 08        		.byte	0x8
+ 695 0048 8E        		.byte	0x8e
+ 696 0049 02        		.byte	0x2
+ 697 004a 04        		.byte	0x4
+ 698 004b 0000 0002 		.4byte	.LCFI2-.LCFI1
+ 699 004f 8A        		.byte	0x8a
+ 700 0050 03        		.byte	0x3
+ 701 0051 04        		.byte	0x4
+ 702 0052 0000 0016 		.4byte	.LCFI3-.LCFI2
+ 703 0056 2E        		.byte	0x2e
+ 704 0057 08        		.byte	0x8
+ 705 0058 04        		.byte	0x4
+ 706 0059 0000 0048 		.4byte	.LCFI4-.LCFI3
+ 707 005d 2E        		.byte	0x2e
+ 708 005e 04        		.byte	0x4
+ 709 005f 00        		.align 	4
+ 710               	.LEFDE3:
+ 711               		.set	.LLFDE3,.LEFDE3-.LSFDE3
+ 712 0060 0000 0058 		.4byte	.LLFDE5
+ 713               	.LSFDE5:
+ 714 0064 0000 0064 		.4byte	.LSFDE5-__FRAME_BEGIN__
+ 715 0068 0000 0000 		.4byte	.LFB3
+ 716 006c 0000 00DE 		.4byte	.LFE3-.LFB3
+ 717 0070 04        		.byte	0x4
+ 718 0071 0000 0004 		.4byte	.LCFI5-.LFB3
+ 719 0075 0C        		.byte	0xc
+ 720 0076 0E        		.byte	0xe
+ 721 0077 08        		.byte	0x8
+ 722 0078 8E        		.byte	0x8e
+ 723 0079 02        		.byte	0x2
+ 724 007a 04        		.byte	0x4
+ 725 007b 0000 0002 		.4byte	.LCFI6-.LCFI5
+ 726 007f 8A        		.byte	0x8a
+ 727 0080 03        		.byte	0x3
+ 728 0081 04        		.byte	0x4
+ 729 0082 0000 0002 		.4byte	.LCFI7-.LCFI6
+ 730 0086 82        		.byte	0x82
+ 731 0087 04        		.byte	0x4
+ 732 0088 04        		.byte	0x4
+ 733 0089 0000 000E 		.4byte	.LCFI8-.LCFI7
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 14
+
+
+ 734 008d 2E        		.byte	0x2e
+ 735 008e 08        		.byte	0x8
+ 736 008f 04        		.byte	0x4
+ 737 0090 0000 001E 		.4byte	.LCFI9-.LCFI8
+ 738 0094 2E        		.byte	0x2e
+ 739 0095 0C        		.byte	0xc
+ 740 0096 04        		.byte	0x4
+ 741 0097 0000 0018 		.4byte	.LCFI10-.LCFI9
+ 742 009b 2E        		.byte	0x2e
+ 743 009c 08        		.byte	0x8
+ 744 009d 04        		.byte	0x4
+ 745 009e 0000 001E 		.4byte	.LCFI11-.LCFI10
+ 746 00a2 2E        		.byte	0x2e
+ 747 00a3 0C        		.byte	0xc
+ 748 00a4 04        		.byte	0x4
+ 749 00a5 0000 0016 		.4byte	.LCFI12-.LCFI11
+ 750 00a9 2E        		.byte	0x2e
+ 751 00aa 08        		.byte	0x8
+ 752 00ab 04        		.byte	0x4
+ 753 00ac 0000 001E 		.4byte	.LCFI13-.LCFI12
+ 754 00b0 2E        		.byte	0x2e
+ 755 00b1 0C        		.byte	0xc
+ 756 00b2 04        		.byte	0x4
+ 757 00b3 0000 000E 		.4byte	.LCFI14-.LCFI13
+ 758 00b7 2E        		.byte	0x2e
+ 759 00b8 04        		.byte	0x4
+ 760 00b9 0000 00   		.align 	4
+ 761               	.LEFDE5:
+ 762               		.set	.LLFDE5,.LEFDE5-.LSFDE5
+ 763 00bc 0000 0024 		.4byte	.LLFDE7
+ 764               	.LSFDE7:
+ 765 00c0 0000 00C0 		.4byte	.LSFDE7-__FRAME_BEGIN__
+ 766 00c4 0000 0000 		.4byte	.LFB4
+ 767 00c8 0000 0064 		.4byte	.LFE4-.LFB4
+ 768 00cc 04        		.byte	0x4
+ 769 00cd 0000 0004 		.4byte	.LCFI15-.LFB4
+ 770 00d1 0C        		.byte	0xc
+ 771 00d2 0E        		.byte	0xe
+ 772 00d3 08        		.byte	0x8
+ 773 00d4 8E        		.byte	0x8e
+ 774 00d5 02        		.byte	0x2
+ 775 00d6 04        		.byte	0x4
+ 776 00d7 0000 0002 		.4byte	.LCFI16-.LCFI15
+ 777 00db 8A        		.byte	0x8a
+ 778 00dc 03        		.byte	0x3
+ 779 00dd 04        		.byte	0x4
+ 780 00de 0000 000C 		.4byte	.LCFI17-.LCFI16
+ 781 00e2 2E        		.byte	0x2e
+ 782 00e3 08        		.byte	0x8
+ 783               		.align 	4
+ 784               	.LEFDE7:
+ 785               		.set	.LLFDE7,.LEFDE7-.LSFDE7
+ 786 00e4 0000 0024 		.4byte	.LLFDE9
+ 787               	.LSFDE9:
+ 788 00e8 0000 00E8 		.4byte	.LSFDE9-__FRAME_BEGIN__
+ 789 00ec 0000 0000 		.4byte	.LFB5
+ 790 00f0 0000 0038 		.4byte	.LFE5-.LFB5
+68K GAS  /c/Temp/ccCNDpvQ.s 			page 15
+
+
+ 791 00f4 04        		.byte	0x4
+ 792 00f5 0000 0004 		.4byte	.LCFI18-.LFB5
+ 793 00f9 0C        		.byte	0xc
+ 794 00fa 0E        		.byte	0xe
+ 795 00fb 08        		.byte	0x8
+ 796 00fc 8E        		.byte	0x8e
+ 797 00fd 02        		.byte	0x2
+ 798 00fe 04        		.byte	0x4
+ 799 00ff 0000 0002 		.4byte	.LCFI19-.LCFI18
+ 800 0103 8A        		.byte	0x8a
+ 801 0104 03        		.byte	0x3
+ 802 0105 04        		.byte	0x4
+ 803 0106 0000 000C 		.4byte	.LCFI20-.LCFI19
+ 804 010a 2E        		.byte	0x2e
+ 805 010b 08        		.byte	0x8
+ 806               		.align 	4
+ 807               	.LEFDE9:
+ 808               		.set	.LLFDE9,.LEFDE9-.LSFDE9
+ 809 010c 0000 003C 		.4byte	.LLFDE11
+ 810               	.LSFDE11:
+ 811 0110 0000 0110 		.4byte	.LSFDE11-__FRAME_BEGIN__
+ 812 0114 0000 0000 		.4byte	.LFB6
+ 813 0118 0000 00E8 		.4byte	.LFE6-.LFB6
+ 814 011c 04        		.byte	0x4
+ 815 011d 0000 0004 		.4byte	.LCFI21-.LFB6
+ 816 0121 0C        		.byte	0xc
+ 817 0122 0E        		.byte	0xe
+ 818 0123 08        		.byte	0x8
+ 819 0124 8E        		.byte	0x8e
+ 820 0125 02        		.byte	0x2
+ 821 0126 04        		.byte	0x4
+ 822 0127 0000 0002 		.4byte	.LCFI22-.LCFI21
+ 823 012b 8A        		.byte	0x8a
+ 824 012c 05        		.byte	0x5
+ 825 012d 04        		.byte	0x4
+ 826 012e 0000 0002 		.4byte	.LCFI23-.LCFI22
+ 827 0132 82        		.byte	0x82
+ 828 0133 06        		.byte	0x6
+ 829 0134 04        		.byte	0x4
+ 830 0135 0000 001C 		.4byte	.LCFI24-.LCFI23
+ 831 0139 2E        		.byte	0x2e
+ 832 013a 0C        		.byte	0xc
+ 833 013b 04        		.byte	0x4
+ 834 013c 0000 001E 		.4byte	.LCFI25-.LCFI24
+ 835 0140 2E        		.byte	0x2e
+ 836 0141 08        		.byte	0x8
+ 837 0142 04        		.byte	0x4
+ 838 0143 0000 0090 		.4byte	.LCFI26-.LCFI25
+ 839 0147 2E        		.byte	0x2e
+ 840 0148 0C        		.byte	0xc
+ 841 0149 0000 00   		.align 	4
+ 842               	.LEFDE11:
+ 843               		.set	.LLFDE11,.LEFDE11-.LSFDE11
+ 844 014c 0000 0000 		.4byte	0x0
+ 845               		.ident	"GCC: (GNU) 2.95.3 20010315 (release)(ColdFire patches - 20010318 from http://fiddes.net/co
