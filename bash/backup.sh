@@ -7,7 +7,7 @@
 # Note: 
 
 LOG=/var/log/backup.log
-BACKUP_DIR=/var/cache/rsnapshot
+BACKUP_DIR=/backup-dave/dave-ubuntu
 
 HOSTNAME=$(hostname)
 
@@ -33,7 +33,7 @@ case ${HOSTNAME} in
         exit 0
         ;;
 
-asac
+esac
 
 if [ ${CHECK_WIRELESS} = 1 ];
 then
@@ -83,6 +83,7 @@ nice /usr/bin/rsnapshot -v daily >> ${LOG} 2>&1
 echo "$(date): Finished daily rsnapshot" >> ${LOG}
 
 weekStamp=$(find ${BACKUP_DIR}/ -maxdepth 1 -name weekly.0 -printf '%T@\n')
+weekStamp=${weekStamp%.*}
 
 if [ $(( $weekStamp + $weekSecs + $weekSecs )) -lt $currTime ]
 then
