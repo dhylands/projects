@@ -97,6 +97,7 @@ then
 fi
 
 monthStamp=$(find ${BACKUP_DIR}/ -maxdepth 1 -name monthly.0 -printf '%T@\n')
+monthStamp=${monthStamp%.*}
 
 if [ $(( $monthStamp + $monthSecs + $monthSecs )) -lt $currTime ]
 then
