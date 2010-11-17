@@ -24,7 +24,8 @@ $(error MK_AVR_FREQ not specified)
 endif
 
 MK_OS_DIR = avr-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
-MK_AVR_FREQ_DEF = -DCFG_CPU_CLOCK=$(patsubst %MHz,%000000,$(MK_AVR_FREQ))
+MK_AVR_FREQ_HZ  = $(patsubst %MHz,%000000,$(MK_AVR_FREQ))
+MK_AVR_FREQ_DEF = -DCFG_CPU_CLOCK=$(MK_AVR_FREQ_HZ) -DF_CPU=$(MK_AVR_FREQ_HZ)
 
 MK_AVR_MCU_FLAGS	= -mmcu=$(MK_AVR_MCU_LONG)
 
@@ -72,4 +73,6 @@ MK_stk500_CMD 		= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -e -
 MK_stk500_CMD_FUSE	= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -E$(word 1,$(MK_AVR_FUSES)) -f$(word 2,$(MK_AVR_FUSES))$(word 3,$(MK_AVR_FUSES))
 MK_stk500_RD_FUSE	= $(Q)$(MK_stk500) -c$(MK_stk500_PORT) -d$(MK_AVR_MCU_LONG) -s -q
 
+MK_teensy			= teensy_loader_cli
+MK_teensy_CMD		= $(Q)$(MK_teensy) -mmcu=$(MK_AVR_MCU_LONG) -v -w $<
 

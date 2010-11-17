@@ -69,6 +69,7 @@ a  ren='cmd /c ren'
 a  rehash='hash -r'
 a  which='type'
 a  whereis='type'
+a  open='cygstart'
 
 a  sa='. ~/.startup.d/20-aliases.sh'
 a  sb='. ~/.bashrc'

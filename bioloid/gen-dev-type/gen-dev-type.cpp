@@ -247,7 +247,7 @@ void GenerateDeviceType( BLD_DevType_t *devType )
         fprintf( genFs, "        REG_%-24s = 0x%02x, // %2d\n", CUpperSymbol( reg->name ), reg->address, reg->address );
     }
 
-    fprintf( genFs, "    };\n" );
+    fprintf( genFs, "    };\n\n" );
 
     // Generate the inline get/set methods
 
@@ -283,8 +283,6 @@ void GenerateDeviceType( BLD_DevType_t *devType )
         }
     }
 
-
-    fprintf( genFs, "\n" );
     fprintf( genFs, "};\n" );
     fprintf( genFs, "\n" );
     fprintf( genFs, "#endif // %s\n", guardStr );
