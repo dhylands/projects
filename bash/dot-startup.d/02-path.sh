@@ -6,23 +6,38 @@
 # environment using the 'sp' alias.
 #
 
-PATH='/usr/local/bin'
-PATH=${PATH}:"${HOME}/bin"
-#PATH=${PATH}:"${HOME}/Utils"
-#PATH=${PATH}:'/c/Program Files/ImageMagick-6.2.8-Q16'
-PATH=${PATH}:'/usr/local/bin'
-PATH=${PATH}:'/usr/local/sbin'
-PATH=${PATH}:'/bin'
-PATH=${PATH}:'/sbin'
-PATH=${PATH}:'/usr/bin'
-PATH=${PATH}:'/usr/sbin'
-PATH=${PATH}:'/usr/X11R6/bin'
-PATH=${PATH}:'.'
-#PATH=${PATH}:'/c/WinAVR/bin'
-#PATH=${PATH}:'/c/Program Files/CodeSourcery/Sourcery G++/bin'
-#PATH=${PATH}:'/c/WINDOWS'
-#PATH=${PATH}:'/c/WINDOWS/system32'
-#PATH=${PATH}:'/c/WINDOWS/system32/Wbem'   # Needed for netsh
+AddPath()
+{
+    if [ -d "$1" ]
+    then
+        if [ -z "${PATH}" ]
+        then
+            PATH="$1"
+        else
+            PATH=${PATH}:"$1"
+        fi
+    fi
+}
+
+PATH=''
+AddPath "${HOME}/bin"
+AddPath "${HOME}/utils"
+AddPath '/usr/local/bin'
+AddPath '/usr/local/bin'
+AddPath '/usr/local/sbin'
+AddPath '/bin'
+AddPath '/sbin'
+AddPath '/usr/bin'
+AddPath '/usr/sbin'
+AddPath '/usr/X11R6/bin'
+AddPath '.'
+AddPath '/c/WinAVR/bin'
+AddPath '/c/Program Files/CodeSourcery/Sourcery G++/bin'
+AddPath '/c/WINDOWS'
+AddPath '/c/WINDOWS/system32'
+
+#needed for netsh
+AddPath '/c/WINDOWS/system32/Wbem'
 
 export PATH
 
