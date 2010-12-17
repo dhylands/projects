@@ -5,17 +5,26 @@
 #  partcular variables are setup for VC++ 6
 #
 
-export MSSDK="/c/Program Files/Microsoft Platform SDK"
-export VSDIR="/c/Program Files/Microsoft Visual Studio"
-export VSCOMMONDIR="${VSDIR}/Common"
-export MSDEVDIR="${VSDIR}/Common/msdev98"
-export MSVCDIR="${VSDIR}/VC98"
+export VSDIR="/c/Program Files/Microsoft Visual Studio 8"
+export MSSDK="${VSDIR}/SDK"
 
-export LIB=$(cygpath -p -w "${MSSDK}/lib:${MSVCDIR}/lib:${MSVCDIR}/mfc/lib")
-export INCLUDE=$(cygpath -p -w "${MSSDK}/include:${MSVCDIR}/atl/include:${MSVCDIR}/include:${MSVCDIR}/mfc/include")
+if [ -d "${VSDIR}" ]
+then
+    export VSCOMMONDIR="${VSDIR}/Common7"
+    export MSDEVDIR="${VSCOMMONDIR}/IDE"
+    export MSVCDIR="${VSDIR}/VC"
+    
+    vc_LIB="${MSVCDIR}/lib:${MSVCDIR}/mfc/lib"
+    vc_INCLUDE="${MSVCDIR}/atl/include:${MSVCDIR}/include:${MSVCDIR}/mfc/include"
 
-PATH=${PATH}:"${VSCOMMONDIR}/Tools/WinNT"
-PATH=${PATH}:"${VSCOMMONDIR}/Tools"
-PATH=${PATH}:"${MSDEVDIR}/bin"
-PATH=${PATH}:"${MSVCDIR}/bin"
-
+    vc_LIB="${MSSDK}/lib:${vc_LIB}"
+    vc_INCLUDE="${MSSDK}/include:${vc_INCLUDE}"
+    
+    export LIB=$(cygpath -p -w "${vc_LIB}")
+    export INCLUDE=$(cygpath -p -w "${vc_INCLUDE}")
+    
+    PATH=${PATH}:"${MSDEVDIR}"
+    PATH=${PATH}:"${MSVCDIR}/bin"
+    PATH=${PATH}:"${VSCOMMONDIR}/Tools"
+    PATH=${PATH}:"${MSSDK}/v2.0/bin"
+fi
