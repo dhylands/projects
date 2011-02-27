@@ -785,7 +785,7 @@ out:
 *
 *****************************************************************************/
 
-int gpio_event_ioctl( struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg )
+long gpio_event_ioctl( struct file *file, unsigned int cmd, unsigned long arg )
 {
     GPIO_FileData_t    *fileData;
 
@@ -1068,12 +1068,12 @@ static int gpio_event_release( struct inode *inode, struct file *file )
 
 struct file_operations gpio_event_fops =
 {
-    owner:      THIS_MODULE,
-    ioctl:      gpio_event_ioctl,
-    open:       gpio_event_open,
-    poll:       gpio_event_poll,
-    release:    gpio_event_release,
-    read:       gpio_event_read,
+    owner:      	THIS_MODULE,
+    unlocked_ioctl:     gpio_event_ioctl,
+    open:       	gpio_event_open,
+    poll:       	gpio_event_poll,
+    release:    	gpio_event_release,
+    read:       	gpio_event_read,
 };
 
 /****************************************************************************

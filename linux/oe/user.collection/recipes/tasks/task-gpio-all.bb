@@ -2,7 +2,7 @@ DESCRIPTION = "All user space GPIO manipulation packages"
 
 inherit task
 
-PR = "r1"
+PR = "r2"
 
 RRECOMMENDS_${PN} = " \
 	gpio-app gpio-lib gpio-module \

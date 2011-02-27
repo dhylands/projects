@@ -59,7 +59,7 @@ static  struct  cdev    gGpioDrvCDev;
 *
 ***************************************************************************/
 
-int gpio_drv_ioctl( struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg )
+long gpio_drv_ioctl( struct file *file, unsigned int cmd, unsigned long arg )
 {
     int     rc = 0;
 
@@ -166,7 +166,7 @@ int gpio_drv_ioctl( struct inode *inode, struct file *file, unsigned int cmd, un
 struct file_operations gpio_fops =
 {
     owner:      THIS_MODULE,
-    ioctl:      gpio_drv_ioctl,
+    unlocked_ioctl:      gpio_drv_ioctl,
 };
 
 /****************************************************************************
