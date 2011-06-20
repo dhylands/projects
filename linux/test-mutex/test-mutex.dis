@@ -1,0 +1,208 @@
+
+test-mutex.ko:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <launch_test_threads>:
+   0:	e1a0c00d 	mov	ip, sp
+   4:	e92dd870 	push	{r4, r5, r6, fp, ip, lr, pc}
+   8:	e24cb004 	sub	fp, ip, #4	; 0x4
+   c:	e24dd00c 	sub	sp, sp, #12	; 0xc
+  10:	e1a06000 	mov	r6, r0
+  14:	e59f00a8 	ldr	r0, [pc, #168]	; c4 <launch_test_threads+0xc4>
+  18:	e1a05001 	mov	r5, r1
+  1c:	ebfffffe 	bl	0 <printk>
+  20:	e3a04000 	mov	r4, #0	; 0x0
+  24:	e1a00004 	mov	r0, r4
+  28:	e3a0100a 	mov	r1, #10	; 0xa
+  2c:	ebfffffe 	bl	0 <__aeabi_idivmod>
+  30:	e3510000 	cmp	r1, #0	; 0x0
+  34:	1a000001 	bne	40 <launch_test_threads+0x40>
+  38:	e59f0088 	ldr	r0, [pc, #136]	; c8 <launch_test_threads+0xc8>
+  3c:	ebfffffe 	bl	0 <printk>
+  40:	e1a00005 	mov	r0, r5
+  44:	e3a01000 	mov	r1, #0	; 0x0
+  48:	e59f207c 	ldr	r2, [pc, #124]	; cc <launch_test_threads+0xcc>
+  4c:	e1a03006 	mov	r3, r6
+  50:	e58d4000 	str	r4, [sp]
+  54:	ebfffffe 	bl	0 <kthread_create>
+  58:	e3700a01 	cmn	r0, #4096	; 0x1000
+  5c:	8a000000 	bhi	64 <launch_test_threads+0x64>
+  60:	ebfffffe 	bl	0 <wake_up_process>
+  64:	e2844001 	add	r4, r4, #1	; 0x1
+  68:	e3540064 	cmp	r4, #100	; 0x64
+  6c:	1affffec 	bne	24 <launch_test_threads+0x24>
+  70:	e59f0058 	ldr	r0, [pc, #88]	; d0 <launch_test_threads+0xd0>
+  74:	e3a04000 	mov	r4, #0	; 0x0
+  78:	ebfffffe 	bl	0 <printk>
+  7c:	e59f0050 	ldr	r0, [pc, #80]	; d4 <launch_test_threads+0xd4>
+  80:	ebfffffe 	bl	0 <printk>
+  84:	e1a00004 	mov	r0, r4
+  88:	e3a0100a 	mov	r1, #10	; 0xa
+  8c:	ebfffffe 	bl	0 <__aeabi_idivmod>
+  90:	e3510000 	cmp	r1, #0	; 0x0
+  94:	1a000001 	bne	a0 <launch_test_threads+0xa0>
+  98:	e59f0028 	ldr	r0, [pc, #40]	; c8 <launch_test_threads+0xc8>
+  9c:	ebfffffe 	bl	0 <printk>
+  a0:	e59f0030 	ldr	r0, [pc, #48]	; d8 <launch_test_threads+0xd8>
+  a4:	e2844001 	add	r4, r4, #1	; 0x1
+  a8:	ebfffffe 	bl	0 <down>
+  ac:	e3540064 	cmp	r4, #100	; 0x64
+  b0:	1afffff3 	bne	84 <launch_test_threads+0x84>
+  b4:	e59f0014 	ldr	r0, [pc, #20]	; d0 <launch_test_threads+0xd0>
+  b8:	ebfffffe 	bl	0 <printk>
+  bc:	e24bd018 	sub	sp, fp, #24	; 0x18
+  c0:	e89da870 	ldm	sp, {r4, r5, r6, fp, sp, pc}
+  c4:	00000000 	.word	0x00000000
+  c8:	0000001a 	.word	0x0000001a
+  cc:	0000001c 	.word	0x0000001c
+  d0:	00000027 	.word	0x00000027
+  d4:	00000029 	.word	0x00000029
+  d8:	00000000 	.word	0x00000000
+
+000000dc <test_atomic_thread>:
+  dc:	e1a0c00d 	mov	ip, sp
+  e0:	e92dd818 	push	{r3, r4, fp, ip, lr, pc}
+  e4:	e24cb004 	sub	fp, ip, #4	; 0x4
+  e8:	e59f402c 	ldr	r4, [pc, #44]	; 11c <test_atomic_thread+0x40>
+  ec:	e59f302c 	ldr	r3, [pc, #44]	; 120 <test_atomic_thread+0x44>
+  f0:	e1932f9f 	ldrex	r2, [r3]
+  f4:	e2822001 	add	r2, r2, #1	; 0x1
+  f8:	e1831f92 	strex	r1, r2, [r3]
+  fc:	e3310000 	teq	r1, #0	; 0x0
+ 100:	1afffffa 	bne	f0 <test_atomic_thread+0x14>
+ 104:	e2544001 	subs	r4, r4, #1	; 0x1
+ 108:	1afffff8 	bne	f0 <test_atomic_thread+0x14>
+ 10c:	e59f0010 	ldr	r0, [pc, #16]	; 124 <test_atomic_thread+0x48>
+ 110:	ebfffffe 	bl	0 <up>
+ 114:	e1a00004 	mov	r0, r4
+ 118:	e89da818 	ldm	sp, {r3, r4, fp, sp, pc}
+ 11c:	000186a0 	.word	0x000186a0
+	...
+
+00000128 <test_semaphore_thread>:
+ 128:	e1a0c00d 	mov	ip, sp
+ 12c:	e92dd830 	push	{r4, r5, fp, ip, lr, pc}
+ 130:	e24cb004 	sub	fp, ip, #4	; 0x4
+ 134:	e59f5034 	ldr	r5, [pc, #52]	; 170 <test_semaphore_thread+0x48>
+ 138:	e3024710 	movw	r4, #10000	; 0x2710
+ 13c:	e59f0030 	ldr	r0, [pc, #48]	; 174 <test_semaphore_thread+0x4c>
+ 140:	ebfffffe 	bl	0 <down>
+ 144:	e5953004 	ldr	r3, [r5, #4]
+ 148:	e59f0024 	ldr	r0, [pc, #36]	; 174 <test_semaphore_thread+0x4c>
+ 14c:	e2833001 	add	r3, r3, #1	; 0x1
+ 150:	e5853004 	str	r3, [r5, #4]
+ 154:	ebfffffe 	bl	0 <up>
+ 158:	e2544001 	subs	r4, r4, #1	; 0x1
+ 15c:	1afffff6 	bne	13c <test_semaphore_thread+0x14>
+ 160:	e59f0010 	ldr	r0, [pc, #16]	; 178 <test_semaphore_thread+0x50>
+ 164:	ebfffffe 	bl	0 <up>
+ 168:	e1a00004 	mov	r0, r4
+ 16c:	e89da830 	ldm	sp, {r4, r5, fp, sp, pc}
+ 170:	00000000 	.word	0x00000000
+ 174:	0000000c 	.word	0x0000000c
+ 178:	00000000 	.word	0x00000000
+
+0000017c <test_mutex_thread>:
+ 17c:	e1a0c00d 	mov	ip, sp
+ 180:	e92dd830 	push	{r4, r5, fp, ip, lr, pc}
+ 184:	e24cb004 	sub	fp, ip, #4	; 0x4
+ 188:	e59f5034 	ldr	r5, [pc, #52]	; 1c4 <test_mutex_thread+0x48>
+ 18c:	e3024710 	movw	r4, #10000	; 0x2710
+ 190:	e59f0030 	ldr	r0, [pc, #48]	; 1c8 <test_mutex_thread+0x4c>
+ 194:	ebfffffe 	bl	0 <mutex_lock>
+ 198:	e5953008 	ldr	r3, [r5, #8]
+ 19c:	e59f0024 	ldr	r0, [pc, #36]	; 1c8 <test_mutex_thread+0x4c>
+ 1a0:	e2833001 	add	r3, r3, #1	; 0x1
+ 1a4:	e5853008 	str	r3, [r5, #8]
+ 1a8:	ebfffffe 	bl	0 <mutex_unlock>
+ 1ac:	e2544001 	subs	r4, r4, #1	; 0x1
+ 1b0:	1afffff6 	bne	190 <test_mutex_thread+0x14>
+ 1b4:	e59f0010 	ldr	r0, [pc, #16]	; 1cc <test_mutex_thread+0x50>
+ 1b8:	ebfffffe 	bl	0 <up>
+ 1bc:	e1a00004 	mov	r0, r4
+ 1c0:	e89da830 	ldm	sp, {r4, r5, fp, sp, pc}
+ 1c4:	00000000 	.word	0x00000000
+ 1c8:	00000018 	.word	0x00000018
+ 1cc:	00000000 	.word	0x00000000
+
+Disassembly of section .init.text:
+
+00000000 <init_module>:
+   0:	e1a0c00d 	mov	ip, sp
+   4:	e92dd9f8 	push	{r3, r4, r5, r6, r7, r8, fp, ip, lr, pc}
+   8:	e24cb004 	sub	fp, ip, #4	; 0x4
+   c:	e59f40a8 	ldr	r4, [pc, #168]	; bc <init_module+0xbc>
+  10:	e3a05000 	mov	r5, #0	; 0x0
+  14:	e59f00a4 	ldr	r0, [pc, #164]	; c0 <init_module+0xc0>
+  18:	ebfffffe 	bl	0 <printk>
+  1c:	e59f00a0 	ldr	r0, [pc, #160]	; c4 <init_module+0xc4>
+  20:	e59f10a0 	ldr	r1, [pc, #160]	; c8 <init_module+0xc8>
+  24:	e59f80a0 	ldr	r8, [pc, #160]	; cc <init_module+0xcc>
+  28:	e5845008 	str	r5, [r4, #8]
+  2c:	ebfffffe 	bl	0 <init_module>
+  30:	e5941008 	ldr	r1, [r4, #8]
+  34:	e59f7094 	ldr	r7, [pc, #148]	; d0 <init_module+0xd0>
+  38:	e59f6094 	ldr	r6, [pc, #148]	; d4 <init_module+0xd4>
+  3c:	e1510008 	cmp	r1, r8
+  40:	11a02007 	movne	r2, r7
+  44:	e59f008c 	ldr	r0, [pc, #140]	; d8 <init_module+0xd8>
+  48:	01a02006 	moveq	r2, r6
+  4c:	ebfffffe 	bl	0 <printk>
+  50:	e59f0084 	ldr	r0, [pc, #132]	; dc <init_module+0xdc>
+  54:	ebfffffe 	bl	0 <printk>
+  58:	e59f0080 	ldr	r0, [pc, #128]	; e0 <init_module+0xe0>
+  5c:	e59f1080 	ldr	r1, [pc, #128]	; e4 <init_module+0xe4>
+  60:	e5845004 	str	r5, [r4, #4]
+  64:	ebfffffe 	bl	0 <init_module>
+  68:	e5941004 	ldr	r1, [r4, #4]
+  6c:	e59f0064 	ldr	r0, [pc, #100]	; d8 <init_module+0xd8>
+  70:	e1510008 	cmp	r1, r8
+  74:	11a02007 	movne	r2, r7
+  78:	01a02006 	moveq	r2, r6
+  7c:	ebfffffe 	bl	0 <printk>
+  80:	e59f0060 	ldr	r0, [pc, #96]	; e8 <init_module+0xe8>
+  84:	ebfffffe 	bl	0 <printk>
+  88:	e59f005c 	ldr	r0, [pc, #92]	; ec <init_module+0xec>
+  8c:	e59f105c 	ldr	r1, [pc, #92]	; f0 <init_module+0xf0>
+  90:	e5845000 	str	r5, [r4]
+  94:	ebfffffe 	bl	0 <init_module>
+  98:	e59f2054 	ldr	r2, [pc, #84]	; f4 <init_module+0xf4>
+  9c:	e5941000 	ldr	r1, [r4]
+  a0:	e59f0050 	ldr	r0, [pc, #80]	; f8 <init_module+0xf8>
+  a4:	e1510002 	cmp	r1, r2
+  a8:	11a02007 	movne	r2, r7
+  ac:	01a02006 	moveq	r2, r6
+  b0:	ebfffffe 	bl	0 <printk>
+  b4:	e1a00005 	mov	r0, r5
+  b8:	e89da9f8 	ldm	sp, {r3, r4, r5, r6, r7, r8, fp, sp, pc}
+  bc:	00000000 	.word	0x00000000
+  c0:	00000059 	.word	0x00000059
+  c4:	0000006e 	.word	0x0000006e
+  c8:	00000000 	.word	0x00000000
+  cc:	000f4240 	.word	0x000f4240
+  d0:	00000054 	.word	0x00000054
+  d4:	0000004f 	.word	0x0000004f
+  d8:	00000072 	.word	0x00000072
+  dc:	00000088 	.word	0x00000088
+  e0:	000000a1 	.word	0x000000a1
+  e4:	00000000 	.word	0x00000000
+  e8:	000000a5 	.word	0x000000a5
+  ec:	000000bb 	.word	0x000000bb
+  f0:	00000000 	.word	0x00000000
+  f4:	00989680 	.word	0x00989680
+  f8:	000000bf 	.word	0x000000bf
+
+Disassembly of section .exit.text:
+
+00000000 <cleanup_module>:
+   0:	e1a0c00d 	mov	ip, sp
+   4:	e92dd800 	push	{fp, ip, lr, pc}
+   8:	e24cb004 	sub	fp, ip, #4	; 0x4
+   c:	e59f1008 	ldr	r1, [pc, #8]	; 1c <cleanup_module+0x1c>
+  10:	e59f0008 	ldr	r0, [pc, #8]	; 20 <cleanup_module+0x20>
+  14:	ebfffffe 	bl	0 <printk>
+  18:	e89da800 	ldm	sp, {fp, sp, pc}
+  1c:	00000000 	.word	0x00000000
+  20:	000000d4 	.word	0x000000d4
