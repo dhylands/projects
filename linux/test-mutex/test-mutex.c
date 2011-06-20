@@ -2,77 +2,121 @@
 #include <linux/module.h>
 #include <linux/semaphore.h>
 #include <linux/kthread.h>
+#include <asm/atomic.h>
 
-#define TEST_MUTEX  1
-
-#if TEST_MUTEX
 static DEFINE_MUTEX( lock );
-#else
 static DEFINE_SEMAPHORE( sem_lock );
-#endif
 
-static volatile int counter = 0;
+static volatile int mutex_counter = 0;
+static volatile int sema_counter = 0;
+static atomic_t     atomic_counter;
 
-#define NUM_THREADS 100
+#define NUM_THREADS     100
+#define NUM_MUTEX_ITER  10000
+#define NUM_SEMA_ITER   10000
+#define NUM_ATOMIC_ITER 100000
 
 static DEFINE_SEMAPHORE( thread_wait );
+
+static inline void stuff_after_lock( void )
+{
+}
+
+static inline void stuff_before_unlock( void )
+{
+}
 
 static int test_mutex_thread( void *param )
 {
     int     i;
 
-    for ( i = 0; i < 10000; i++ )
+    for ( i = 0; i < NUM_MUTEX_ITER; i++ )
     {
-#if TEST_MUTEX
         mutex_lock( &lock );
-#else
-        down( &sem_lock );
-#endif
-        mb();
-        dsb();
-        counter++;
-        mb();
-        dsb();
-#if TEST_MUTEX
+        stuff_after_lock();
+        mutex_counter++;
+        stuff_before_unlock();
         mutex_unlock( &lock );
-#else
-        up ( &sem_lock );
-#endif
     }
     up( &thread_wait );
 
     return 0;
 }
 
-static int __init test_mutex_init( void )
+static int test_semaphore_thread( void *param )
 {
     int     i;
 
-    counter = 0;
+    for ( i = 0; i < NUM_SEMA_ITER; i++ )
+    {
+        down( &sem_lock );
+        stuff_after_lock();
+        sema_counter++;
+        stuff_before_unlock();
+        up ( &sem_lock );
+    }
+    up( &thread_wait );
 
-#if TEST_MUTEX
-    printk( "Testing mutex...\n" );
-#else
-    printk( "Testing semaphore...\n" );
-#endif
+    return 0;
+}
 
-    printk( "Launching threads ...\n");
+static int test_atomic_thread( void *param )
+{
+    int     i;
+
+    for ( i = 0; i < NUM_ATOMIC_ITER; i++ )
+    {
+        atomic_inc( &atomic_counter );
+    }
+    up( &thread_wait );
+
+    return 0;
+}
+
+static void launch_test_threads( const char *label, int (*test_fn)(void *param) )
+{
+    int i;
+
+    printk( KERN_INFO "    Launching threads ");
     for ( i = 0; i < NUM_THREADS; i++ )
     {
-        printk( "." );
-        kthread_run( test_mutex_thread, NULL, "test-mtx-%d", i );
+        if (( i % 10 ) == 0 )
+            printk( "." );
+        kthread_run( test_fn, NULL, "test-%s-%d", label, i );
     }
     printk( "\n" );
 
-    printk( "Waiting for threads to finish...\n");
+    printk( KERN_INFO "    Waiting for threads to finish ");
     for ( i = 0; i < NUM_THREADS; i++ )
     {
-        printk( "." );
+        if (( i % 10 ) == 0 )
+            printk( "." );
         down( &thread_wait );
     }
     printk( "\n" );
+}
 
-    printk( "counter = %d\n", counter );
+static int __init test_mutex_init( void )
+{
+    int counter;
+
+    printk( KERN_INFO "Testing mutex...\n" );
+    mutex_counter = 0;
+    launch_test_threads( "mtx", test_mutex_thread );
+    counter = mutex_counter;
+    printk( KERN_INFO "  counter = %d %s\n", counter, counter == (NUM_THREADS * NUM_MUTEX_ITER) ? "Pass" : "FAIL" );
+
+    printk( KERN_INFO "Testing semaphore...\n" );
+    sema_counter = 0;
+    launch_test_threads( "sem", test_semaphore_thread );
+    counter = sema_counter;
+    printk( KERN_INFO "  counter = %d %s\n", counter, counter == (NUM_THREADS * NUM_SEMA_ITER) ? "Pass" : "FAIL" );
+
+    printk( KERN_INFO "Testing atomic...\n" );
+    atomic_set( &atomic_counter, 0 );
+    launch_test_threads( "atm", test_atomic_thread );
+    counter = atomic_read( &atomic_counter );
+    printk( KERN_INFO " counter = %d %s\n", counter, counter == (NUM_THREADS * NUM_ATOMIC_ITER) ? "Pass" : "FAIL" );
 
     return 0;
 }
