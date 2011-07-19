@@ -35,6 +35,10 @@
 
 #if defined( AVR )
 
+#if CFG_LOG_USE_USB_DEBUG
+#include    "avr/usb_debug_only.h"
+#endif
+
 #undef  Log
 #undef  LogError
 #undef  LogAssertFailed
@@ -142,6 +146,20 @@ void LogInit( FILE *logFs )
 
 } // LogInit
 
+#elif CFG_LOG_USE_USB_DEBUG
+
+static int LogToUsbDebugFunc( void *outParm, int ch )
+{
+    (void)outParm;
+
+    usb_debug_putchar( ch );
+    if ( ch == '\n' )
+    {
+        usb_debug_flush_output();
+    }
+    return 1;
+}
+
 #else
 
 static int LogToUartFunc( void *outParm, int ch )
@@ -198,6 +216,8 @@ void vLog
     {
         vfprintf_P( gLogFs, fmt, args );
     }
+#elif CFG_LOG_USE_USB_DEBUG
+    vStrXPrintf_P( LogToUsbDebugFunc, NULL, fmt, args );
 #   else
     vStrXPrintf_P( LogToUartFunc, NULL, fmt, args );
 #   endif

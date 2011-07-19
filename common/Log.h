@@ -36,8 +36,14 @@
 #if !defined( CONFIG_H )
 #   include "Config.h"
 #endif
+#if !defined( CFG_LOG_USE_STDIO ) && !defined( CFG_LOG_USE_USB_DEBUG )
+#   define  CFG_LOG_USE_STDIO       1
+#endif
 #if !defined( CFG_LOG_USE_STDIO )
-#   define  CFG_LOG_USE_STDIO   1
+#   define  CFG_LOG_USE_STDIO       0
+#endif
+#if !defined( CFG_LOG_USE_USB_DEBUG )
+#   define  CFG_LOG_USE_USB_DEBUG   0
 #endif
 
 #if defined( AVR )
@@ -64,7 +70,7 @@
 #   endif
 #endif
 
-#if !CFG_LOG_USE_STDIO
+#if ( !CFG_LOG_USE_STDIO && !CFG_LOG_USE_USB_DEBUG )
 
 #   if !defined( CFG_LOG_PUT_CHAR_FUNC )
 #       define  CFG_LOG_PUT_CHAR_FUNC   UART0_PutChar

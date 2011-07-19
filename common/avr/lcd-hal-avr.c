@@ -58,12 +58,20 @@
 #include "lcd-hal.h"
 #include "Delay.h"
 
-#if !defined( CFG_LCD_DATA_PORT )
-#   define  CFG_LCD_DATA_PORT   PORTC
+#if !defined( CFG_LCD_SCATTERED_DATA )
+#define CFG_LCD_SCATTERED_DATA  0
 #endif
-#if !defined( CFG_LCD_DATA_SHIFT )
-#   define  CFG_LCD_DATA_SHIFT  0
+
+#if ( CFG_LCD_SCATTERED_DATA == 0 )
+#   if !defined( CFG_LCD_DATA_PORT )
+#       define  CFG_LCD_DATA_PORT   PORTC
+#   endif
+#   if !defined( CFG_LCD_DATA_SHIFT )
+#       define  CFG_LCD_DATA_SHIFT  0
+#   endif
+#   define LCD_DATA_MASK   ( 0x0F << CFG_LCD_DATA_SHIFT )
 #endif
+
 #if !defined( CFG_LCD_E_PORT )
 #   define  CFG_LCD_E_PORT      PORTC
 #endif
@@ -77,7 +85,6 @@
 #   define  CFG_LCD_RS_PIN      4
 #endif
 
-#define LCD_DATA_MASK   ( 0x0F << CFG_LCD_DATA_SHIFT )
 #define LCD_E_MASK      ( 1    << CFG_LCD_E_PIN )
 #define LCD_RS_MASK     ( 1    << CFG_LCD_RS_PIN )
 #define LCD_RW_MASK     ( 1    << CFG_LCD_RW_PIN )
@@ -134,8 +141,32 @@ static inline void LCD_HAL_RW_Low( void )
 
 static inline void LCD_HAL_Data( uint8_t data )
 {
+#if CFG_LCD_SCATTERED_DATA
+
+    if ( data & 1 )
+        CFG_LCD_DATA_DB4_PORT |=  ( 1 << CFG_LCD_DATA_DB4_PIN );
+    else
+        CFG_LCD_DATA_DB4_PORT &= ~( 1 << CFG_LCD_DATA_DB4_PIN );
+
+    if ( data & 2 )
+        CFG_LCD_DATA_DB5_PORT |=  ( 1 << CFG_LCD_DATA_DB5_PIN );
+    else
+        CFG_LCD_DATA_DB5_PORT &= ~( 1 << CFG_LCD_DATA_DB5_PIN );
+
+    if ( data & 4 )
+        CFG_LCD_DATA_DB6_PORT |=  ( 1 << CFG_LCD_DATA_DB6_PIN );
+    else
+        CFG_LCD_DATA_DB6_PORT &= ~( 1 << CFG_LCD_DATA_DB6_PIN );
+
+    if ( data & 8 )
+        CFG_LCD_DATA_DB7_PORT |=  ( 1 << CFG_LCD_DATA_DB7_PIN );
+    else
+        CFG_LCD_DATA_DB7_PORT &= ~( 1 << CFG_LCD_DATA_DB7_PIN );
+
+#else
     CFG_LCD_DATA_PORT &= ~LCD_DATA_MASK;
     CFG_LCD_DATA_PORT |= (( data & 0x0F ) << CFG_LCD_DATA_SHIFT );
+#endif
 }
 
 //***************************************************************************
@@ -164,7 +195,14 @@ void LCD_HAL_Init( void )
 {
     // Configure the pins as outputs
 
+#if CFG_LCD_SCATTERED_DATA
+    DDR( CFG_LCD_DATA_DB4_PORT )    |= ( 1 << CFG_LCD_DATA_DB4_PIN );
+    DDR( CFG_LCD_DATA_DB5_PORT )    |= ( 1 << CFG_LCD_DATA_DB5_PIN );
+    DDR( CFG_LCD_DATA_DB6_PORT )    |= ( 1 << CFG_LCD_DATA_DB6_PIN );
+    DDR( CFG_LCD_DATA_DB7_PORT )    |= ( 1 << CFG_LCD_DATA_DB7_PIN );
+#else
     DDR( CFG_LCD_DATA_PORT ) |= LCD_DATA_MASK;
+#endif
     DDR( CFG_LCD_RS_PORT )   |= LCD_RS_MASK;
     DDR( CFG_LCD_E_PORT )    |= LCD_E_MASK;
 #if defined( CFG_LCD_RW_PORT )
