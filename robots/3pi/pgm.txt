@@ -1,0 +1,7 @@
+This one works
+
+avrdude -P usb -c avrispmkII -p atmega328p -U flash:w:bin/avr-m328p-20MHz/flasher.hex:a
+
+This one didn't
+
+

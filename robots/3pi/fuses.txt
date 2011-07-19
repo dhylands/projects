@@ -1,0 +1,34 @@
+#
+# The 3pi uses an ATMega328p
+#
+# The fuses that are shipped with the 3pi are:
+#
+#       Extended: 04 
+#       High:     D0
+#       Low:      F7
+#
+# Rememebr 0 = programmed = enabled
+#
+# Extended fuse byte for 328, lower 3 bits is BODLEVEL
+#	xxxxx100 is suitable for 5v devices
+#
+# High Byte
+#	7 - RSTDISBL	1	Reset Disable
+#	6 - DWEN	1	Debug Wire Enable
+#	5 - SPIEN	0	Enable Serial Programming
+#	4 - WDTON	1	Wathchdog Timer Always On
+#	3 - EESAVE	0	Enable EEPROM through Chip Erase
+#	2 - BOOTSZ1	01      11 = 512 bytes, 10 = 1024 bytes, 01 = 2048 bytes, 00 = 4096 bytes
+#	1 - BOOTSZ0
+#	0 - BOOOTRST	1 for standalone, 0 for bootloader
+#
+# Low Byte
+#	7 - CKDIV8	1 Divide Clock by 8
+#	6 - CKOUT	1 Clock Output
+#	5 - SUT1	1
+#	4 - SUT0	1
+#	3 - CKSEL3	0
+#	2 - CKSEL2	1
+#	1 - CKSEL1	1
+#	0 - CKSEL0	0
+
