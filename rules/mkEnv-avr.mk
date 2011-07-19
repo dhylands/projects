@@ -60,6 +60,8 @@ MK_avrdude_PROG    	?= avrispmkII
 MK_avrdude_CMD		= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U flash:w:$<:a
 MK_avrdude_CMD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U efuse:w:0x$(word 1,$(MK_AVR_FUSES)):m -U hfuse:w:0x$(word 2,$(MK_AVR_FUSES)):m -U lfuse:w:0x$(word 3,$(MK_AVR_FUSES)):m
 MK_avrdude_RD_FUSE	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -v
+MK_avrdude_RD_PGM	= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U flash:r:flash.hex:i
+MK_avrdude_RD_EEPROM= $(Q)$(MK_avrdude) -P $(MK_avrdude_PORT) -c $(MK_avrdude_PROG) -p $(MK_AVR_MCU_LONG) -U eeprom:r:eeprom.hex:i
 
 MK_BootHost 		= boothost
 MK_BootHost_BAUD	?= 38400

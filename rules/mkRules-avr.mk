@@ -13,9 +13,9 @@ include $(MK_RULES_DIR)/mkRules-gcc.mk
 
 ifneq ($(MK_HEX_TARGET),)
 
-download d : mkdir_bin mkdir_obj d_target
+download d : mkdir_bin mkdir_obj pgm
 
-d_target: $(call MK_HEX_NAME, $(MK_HEX_TARGET))
+pgm: $(call MK_HEX_NAME, $(MK_HEX_TARGET))
 	$(ECHO) "Downloading $< ..."
 	$(MK_$(MK_AVR_PROGRAMMER)_CMD)
 
@@ -38,6 +38,20 @@ ifeq ($(MK_$(MK_AVR_PROGRAMMER)_RD_FUSE),)
 	$(error Programmer $(MK_AVR_PROGRAMMER) doesn't support reading fuses)
 endif
 	$(MK_$(MK_AVR_PROGRAMMER)_RD_FUSE)
+
+read-flash:
+	$(ECHO) "Reading flash ..."
+ifeq ($(MK_$(MK_AVR_PROGRAMMER)_RD_PGM),)
+	$(error Programmer $(MK_AVR_PROGRAMMER) doesn't support reading program)
+endif
+	$(MK_$(MK_AVR_PROGRAMMER)_RD_PGM)
+
+read-eeprom:
+	$(ECHO) "Reading eeprom ..."
+ifeq ($(MK_$(MK_AVR_PROGRAMMER)_RD_EEPROM),)
+	$(error Programmer $(MK_AVR_PROGRAMMER) doesn't support reading eeprom)
+endif
+	$(MK_$(MK_AVR_PROGRAMMER)_RD_EEPROM)
 
 .PHONY: download d d_target fuses
 
