@@ -190,8 +190,8 @@ static  struct class       *gGpioEventClass = NULL;
 static  struct  cdev        gGpioEventCDev;
 static  dev_t               gGpioEventDevNum = 0;
 
-static  spinlock_t          gFileListLock  = SPIN_LOCK_UNLOCKED;
-static  spinlock_t          gPinListLock  = SPIN_LOCK_UNLOCKED;
+static  DEFINE_SPINLOCK( gFileListLock );
+static  DEFINE_SPINLOCK( gPinListLock );
 
 static  LIST_HEAD( gFileList );
 static  LIST_HEAD( gPinList );
