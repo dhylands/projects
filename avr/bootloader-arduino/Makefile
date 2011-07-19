@@ -1,6 +1,6 @@
 ###########################################################################
 #
-# STK500 compatible serial bootloader
+# Arduino bootloader
 #
 ###########################################################################
 
@@ -44,7 +44,7 @@ MK_BIN_DIR			= ./bin/$(TARGET)
 endif
 
 MK_HEX_TARGET       = Boot-$(MK_AVR_MCU)-$(MK_AVR_FREQ)
-MK_SRC_FILES        = start.c boot.c
+MK_SRC_FILES        = ATmegaBOOT_168.c
 
 # Determnine the starting address for the bootloader. Note that this is 
 # a byte address, whereas the datasheet uses a word address.
@@ -64,8 +64,7 @@ MK_AVR_FUSES_m168   = FA DF E2	# 1k bootloader
 # 3pi (ATMega328p shipped fuses are 04 D0 F6
 # which is suitable for standalone. For use with this
 # bootloader, we need to set BOOTSZ to 01, and BOOTRST tp 1
-MK_AVR_FUSES_m328p  = 04 D2 F6	# 2k bootloader
-
+MK_AVR_FUSES_m328p  = 04 D3 F6	# 2k bootloader
 
 MK_AVR_FUSES_m128   = FF C2 BF	# 4k bootloader
                       
@@ -87,9 +86,10 @@ $(error Need to set LED_PORT for $(MK_AVR_MCU))
 endif
 
 LED_PORT        = PORT$(word 1, $(LED_$(MK_AVR_MCU)))
+LED_PIN         = PIN$(word 1, $(LED_$(MK_AVR_MCU)))
 LED_DDR         = DDR$(word 1, $(LED_$(MK_AVR_MCU)))
-LED             = P$(word 1, $(LED_$(MK_AVR_MCU)))$(word 2, $(LED_$(MK_AVR_MCU)))
-LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED=$(LED)
+LED             = PIN$(word 1, $(LED_$(MK_AVR_MCU)))$(word 2, $(LED_$(MK_AVR_MCU)))
+LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED_PIN=$(LED_PIN) -DLED=$(LED)
 
 else
 
@@ -98,9 +98,10 @@ LED_OPT			=
 else
 
 LED_PORT		= PORT$(word 1, $($(TARGET)_LED))
+LED_PIN         = PIN$(word 1, $(LED_$(MK_AVR_MCU)))
 LED_DDR			= DDR$(word 1, $($(TARGET)_LED))
-LED				= P$(word 1, $($(TARGET)_LED))$(word 2, $($(TARGET)_LED))
-LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED=$(LED)
+LED				= PIN$(word 1, $($(TARGET)_LED))$(word 2, $($(TARGET)_LED))
+LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED_PIN=$(LED_PIN) -DLED=$(LED)
 
 endif
 endif
@@ -128,7 +129,7 @@ endif
 SW_DDR          = DDR$(word 1, $(SW_$(MK_AVR_MCU)))
 SW_PORT         = PORT$(word 1, $(SW_$(MK_AVR_MCU)))
 SW_PIN          = PIN$(word 1, $(SW_$(MK_AVR_MCU)))
-SW              = P$(word 1, $(SW_$(MK_AVR_MCU)))$(word 2, $(SW_$(MK_AVR_MCU)))
+SW              = PIN$(word 1, $(SW_$(MK_AVR_MCU)))$(word 2, $(SW_$(MK_AVR_MCU)))
 SW_OPT			= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
 
 else
@@ -154,12 +155,11 @@ endif
 
 BOOT_START = $(BOOT_START_$(MK_AVR_MCU))
 
-DEFS = $(LED_OPT) $(SW_OPT) -DBAUD_RATE=38400
+DEFS = $(LED_OPT) $(SW_OPT) -DBAUD_RATE=57600 -DNUM_LED_FLASHES=1 -DMAX_TIME_COUNT=F_CPU>>4 -DWATCHDOG_MODS
 
 CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions
 
 LDFLAGS += -Wl,--section-start=.text=$(BOOT_START),-e,boot,--defsym,zero_addr=0 -nostdlib
 
 include ../../rules/mkRules.mk
-
 

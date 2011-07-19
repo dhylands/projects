@@ -48,8 +48,6 @@ how/if it works for you.
 
 #include "boot.h"
 
-#define F_CPU   CFG_CPU_CLOCK
-
 /* SW_MAJOR and MINOR needs to be updated from time to time to avoid warning message from AVR Studio */
 #define HW_VER	 0x02
 #define SW_MAJOR 0x01
@@ -72,6 +70,13 @@ how/if it works for you.
 #define SIG2	0x95
 #define SIG3	0x02
 #define PAGE_SIZE	0x40U	//64 words
+#elif defined __AVR_ATmega328P__
+#define SIG2	0x95
+#define SIG3	0x0F
+#define PAGE_SIZE	0x40U	//64 words
+#define EEWE    EEPE
+#define EEMWE   EEMPE
+#define SPMCR   SPMCSR
 #elif defined __AVR_ATmega16__
 #define SIG2	0x94
 #define SIG3	0x03
