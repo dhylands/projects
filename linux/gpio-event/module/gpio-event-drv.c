@@ -704,11 +704,11 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
             // A clean signal is being presented, so we can just look for
             // a particular edge
 
-            if (( monitor->edgeType | GPIO_EventRisingEdge ) != 0 )
+            if (( monitor->edgeType & GPIO_EventRisingEdge ) != 0 )
             {
                 irqFlags |= IRQF_TRIGGER_RISING;
             }
-            if (( monitor->edgeType | GPIO_EventFallingEdge ) != 0 )
+            if (( monitor->edgeType & GPIO_EventFallingEdge ) != 0 )
             {
                 irqFlags |= IRQF_TRIGGER_FALLING;
             }
