@@ -6,17 +6,34 @@
 # environment using the 'sp' alias.
 #
 
-AddPath()
+function AddPath()
 {
-    if [ -d "$1" ]
+    local   sv_ifs=${IFS}
+    local   dir
+    local   add_dir="$1"
+
+    IFS=:
+
+    if [ -d "${add_dir}" ]
     then
+        for dir in ${PATH}
+        do
+            if [ "${dir}" == "${add_dir}" ]
+            then
+                # Path is already there - nothing to do
+                IFS=${sv_ifs}
+                return
+            fi
+        done
+
         if [ -z "${PATH}" ]
         then
-            PATH="$1"
+            PATH="${add_dir}"
         else
-            PATH=${PATH}:"$1"
+            PATH=${PATH}:"${add_dir}"
         fi
     fi
+    IFS=${sv_ifs}
 }
 
 PATH=''
@@ -31,13 +48,25 @@ AddPath '/usr/bin'
 AddPath '/usr/sbin'
 AddPath '/usr/X11R6/bin'
 AddPath '.'
-AddPath '/c/WinAVR/bin'
-AddPath '/c/Program Files/CodeSourcery/Sourcery G++/bin'
-AddPath '/c/WINDOWS'
-AddPath '/c/WINDOWS/system32'
 
-#needed for netsh
-AddPath '/c/WINDOWS/system32/Wbem'
+case "$(uname)" in
+
+    Linux)
+        AddPath "/opt/slickedit/bin"
+        AddPath "/opt/CodeSourcery/Sourcery_G++_Lite/bin"
+        AddPath "${HOME}/.wine/drive_c/WinAVR-20100110/bin"
+        ;;
+
+    CYGWIN*)
+        AddPath '/c/WinAVR/bin'
+        AddPath '/c/Program Files/CodeSourcery/Sourcery G++/bin'
+        AddPath '/c/WINDOWS'
+        AddPath '/c/WINDOWS/system32'
+
+        #needed for netsh
+        AddPath '/c/WINDOWS/system32/Wbem'
+        ;;
+esac
 
 export PATH
 
