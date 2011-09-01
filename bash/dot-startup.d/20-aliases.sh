@@ -10,15 +10,15 @@
 
 shopt -s extglob
 
-alias a='alias'
+aliaslias a='alias'
 
-a  dir='ls'
-a  h='history|tail -24'
-a  home='cd ~'
+alias  dir='ls'
+alias  h='history|tail -24'
+alias  home='cd ~'
 
-a  findname='find . ! \( \( -iname "backup" -o -iname "obj" -o -iname "lib" \) -prune \)'
-a  findsrc='findname \( -iname "*.[ch]" -o -iname "*.[ch]xx" -o -iname "*.[ch]pp" -o -iname "*.cc" -o -iname "*.s" -o -iname "*.asm" \)'
-a  find_nocyg='find . -xdev ! \( -iname cygwin -prune \)'
+alias  findname='find . ! \( \( -iname "backup" -o -iname "obj" -o -iname "lib" \) -prune \)'
+alias  findsrc='findname \( -iname "*.[ch]" -o -iname "*.[ch]xx" -o -iname "*.[ch]pp" -o -iname "*.cc" -o -iname "*.s" -o -iname "*.asm" \)'
+alias  find_nocyg='find . -xdev ! \( -iname cygwin -prune \)'
 
 function fgrs
 {
@@ -50,35 +50,35 @@ function egrsi
    findsrc -exec grep -E -H -i -- "$@" '{}' ';'
 }
 
-a  bls=/bin/ls
+alias  bls=/bin/ls
 
 if [ -z "${VSLICKPATH}" ]
 then
-   a  ls='ls --color=auto -F'
+   alias  ls='ls --color=auto -F'
 else
-   a  ls='ls --color=auto -F -C --width=105'
+   alias  ls='ls --color=auto -F -C --width=105'
 fi
 
-a  ll='ls -alG'
-a  llr='ll -R'
-a  m='less -r'
-a  md='mkdir'
-a  l='less -r'
-a  rd='rmdir'
-a  ren='cmd /c ren'
-a  rehash='hash -r'
-a  which='type'
-a  whereis='type'
-a  open='cygstart'
+alias  ll='ls -alG'
+alias  llr='ll -R'
+alias  m='less -r'
+alias  md='mkdir'
+alias  l='less -r'
+alias  rd='rmdir'
+alias  ren='cmd /c ren'
+alias  rehash='hash -r'
+alias  which='type'
+alias  whereis='type'
+alias  open='cygstart'
 
-a  sa='. ~/.startup.d/20-aliases.sh'
-a  sb='. ~/.bashrc'
-a  se='. ~/.startup.d/01-env.sh'
-a  sp='. ~/.startup.d/02-path.sh'
-a  setpath='sp'
+alias  sa='. ~/.startup.d/20-aliases.sh'
+alias  sb='. ~/.bashrc'
+alias  se='. ~/.startup.d/01-env.sh'
+alias  sp='. ~/.startup.d/02-path.sh'
+alias  setpath='sp'
 
-a  va='vi ~/.startup.d/20-aliases.sh'
-a  vb='vi ~/.bashrc'
-a  ve='vi ~/.startup.d/01-env.sh'
-a  vp='vi ~/.startup.d/02-path.sh'
+alias  va='vi ~/.startup.d/20-aliases.sh'
+alias  vb='vi ~/.bashrc'
+alias  ve='vi ~/.startup.d/01-env.sh'
+alias  vp='vi ~/.startup.d/02-path.sh'
 

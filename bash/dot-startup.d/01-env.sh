@@ -12,8 +12,8 @@ export TERM=ansi
 
 export ENV_INCLUDED=1
 
-export ENSCRIPT_LIBRARY='c:\Home\Utils\enscript'
-export PRT_OUTDEV='\\dave\LaserJet-2200'
+#export ENSCRIPT_LIBRARY='c:\Home\Utils\enscript'
+#export PRT_OUTDEV='\\dave\LaserJet-2200'
 
 if [ -z "${VSLICKPATH}" ]
 then

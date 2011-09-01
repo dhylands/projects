@@ -46,12 +46,13 @@ AddPath '/bin'
 AddPath '/sbin'
 AddPath '/usr/bin'
 AddPath '/usr/sbin'
-AddPath '/usr/X11R6/bin'
-AddPath '.'
+
+uname=$(uname)
 
 case "$(uname)" in
 
     Linux)
+    	AddPath '/usr/X11R6/bin'
         AddPath "/opt/slickedit/bin"
         AddPath "/opt/CodeSourcery/Sourcery_G++_Lite/bin"
         AddPath "${HOME}/.wine/drive_c/WinAVR-20100110/bin"
