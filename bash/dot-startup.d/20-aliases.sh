@@ -10,8 +10,6 @@
 
 shopt -s extglob
 
-aliaslias a='alias'
-
 alias  dir='ls'
 alias  h='history|tail -24'
 alias  home='cd ~'
