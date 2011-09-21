@@ -4,14 +4,26 @@
 # my laptop is connected to my network at home, and if it is, then
 # it fires up the backup.
 #
-# Note: 
+# To install the script, add the following line to /etc/cron.d/rsnapshot
+#
+#   00 2  	* * *		root	/home/dhylands/projects/bash/backup.sh daily
+#
+# cron should pick up the change automatically
+
+scriptname=$(basename $0)
+scriptdir=$(dirname $0)
 
 LOG=/var/log/backup.log
-BACKUP_DIR=/backup-dave/dave-ubuntu
 
 HOSTNAME=$(hostname)
 
-echo "$(date): HOSTNAME = ${HOSTNAME}" >> ${LOG}
+echo "$(date): ==============================================" >> ${LOG}
+echo "$(date): Starting backup of HOSTNAME = ${HOSTNAME}" >> ${LOG}
+
+BACKUP_MOUNT=/backup-dave
+BACKUP_DIR=${BACKUP_MOUNT}/${HOSTNAME}
+
+# Check to see if we're at home or not.
 
 CHECK_WIRELESS=0
 
@@ -37,27 +49,32 @@ esac
 
 if [ ${CHECK_WIRELESS} = 1 ];
 then
-    # Check to see if we're on my wireless LAN
-    #
-    # For reference, the output of iwconfig looks like this when associated:
-    #
-    # eth1      IEEE 802.11b/g  ESSID:"Seeker-WLAN"  Nickname:"Broadcom 4306"
-    #           Mode:Managed  Frequency=2.437 GHz  Access Point: 00:00:00:00:00:00   
-    #           Bit Rate=24 Mb/s   Tx-Power=15 dBm   
-    #           RTS thr:off   Fragment thr:off
-    #           Link Quality=60/100  Signal level=-62 dBm  Noise level=-72 dBm
-    #           Rx invalid nwid:0  Rx invalid crypt:30678  Rx invalid frag:0
-    #           Tx excessive retries:0  Invalid misc:0   Missed beacon:0
-    
-    
-    SSID=$(/sbin/iwconfig eth1 | grep ESSID | sed -e 's/^.*ESSID://' -e 's/ .*//' -e 's/"//g')
-    
-    echo "====================================================" >> ${LOG}
-    if [ "${SSID}" != "Blue-Heron" ]
+    if ! ${scriptdir}/check-wireless.sh >> ${LOG}
     then
-        echo "$(date): Not on home network" >> ${LOG}
-        echo "  SSID = ${SSID}" >> ${LOG}
-        exit 0
+        exit 1
+    fi
+fi
+
+#
+# Check to see that /backup-dave is mounted, and if not
+# then mount it
+#
+
+if mount | grep ${BACKUP_MOUNT}
+then
+    echo "$(date): ${BACKUP_MOUNT} appears to be mounted." >> ${LOG}
+else
+    echo "$(date): ${BACKUP_MOUNT} doesn't appear to be mounted - trying to mount" >> ${LOG}
+
+    # Volume doesn't appear to be mounted. Mount it now
+    # so we don't backup locally
+
+    if mount ${BACKUP_MOUNT}
+    then
+        echo "$(date): ${BACKUP_MOUNT} mounted successfully" >> ${LOG}
+    else
+        echo "$(date): Unable to mount ${BACKUP_MOUNT} - aborting backup" >> ${LOG}
+        exit 1
     fi
 fi
 
