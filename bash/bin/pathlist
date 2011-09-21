@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# This script prints out your PATH, one subdirectory per line.
+#
+
+IFS=:
+
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+NO_COLOR="\033[0m"
+
+
+for dir in ${PATH}
+do
+   if [ -d ${dir} ]
+   then
+      echo -e "${GREEN}${dir}${NO_COLOR}"
+   else
+      echo -e "${RED}${dir}${NO_COLOR} - doesn't exist"
+   fi
+done
+
