@@ -3,8 +3,8 @@
 *     Copyright (c) 2002 by Dave Hylands
 *           All Rights Reserved
 *
-*	Permission is granted to any individual or institution to use, copy, 
-*  modify, or redistribute this file so long as it is not sold for profit, 
+*	Permission is granted to any individual or institution to use, copy,
+*  modify, or redistribute this file so long as it is not sold for profit,
 *  and that this copyright notice is retained.
 *
 ***************************************************************************
@@ -14,7 +14,7 @@
 *
 *  Usage:   2dos file ...
 *
-*  Currently it does not accept wildcards (I use bash which does the 
+*  Currently it does not accept wildcards (I use bash which does the
 *  wildcard expansion for me).
 *
 ***************************************************************************/
@@ -31,11 +31,13 @@ int main( int argc, char **argv )
 	FILE	*src_fs;
 	int		ch;
 	int		foundCr;
+	int		foundSpace;
 	int     lfCount;
 	int     crCount;
 	int     crLfCount;
 	int     crcrLfCount;
 	int     otherCount;
+	int		trailingWSCount;
 
 	if ( argc < 2 )
 	{
@@ -43,8 +45,8 @@ int main( int argc, char **argv )
 		exit( 1 );
 	}
 
-	printf( "    LF     CR   CRLF CRCRLF  Other FileName\n" );
-	printf( "------ ------ ------ ------ ------ ---------------------------\n" );
+	printf( "    LF     CR   CRLF CRCRLF  Other  Trail FileName\n" );
+	printf( "------ ------ ------ ------ ------ ------ ---------------------------\n" );
 
 	for ( i = 1; i < argc; i++ )
 	{
@@ -55,14 +57,32 @@ int main( int argc, char **argv )
 		}
 
 		foundCr = 0;
+		foundSpace = 1;
 		lfCount = 0;
 		crCount = 0;
 		crLfCount = 0;
 		crcrLfCount = 0;
 		otherCount = 0;
+		trailingWSCount = 0;
 
 		while (( ch = fgetc( src_fs )) != EOF )
 		{
+			if ( ch == ' ' )
+			{
+				foundSpace = 1;
+			}
+			else
+			{
+				if (( ch == 0x0D  ) || ( ch == 0x0A ))
+				{
+					if ( foundSpace )
+					{
+						trailingWSCount++;
+					}
+				}
+				foundSpace = 0;
+			}
+
 			if ( ch == 0x0D )
 			{
 				foundCr++;
@@ -92,7 +112,7 @@ int main( int argc, char **argv )
 
 		fclose(src_fs);
 
-		printf( "%6d %6d %6d %6d %6d %s\n", lfCount, crCount, crLfCount, crcrLfCount, otherCount, argv[ i ] );
+		printf( "%6d %6d %6d %6d %6d %6d %s\n", lfCount, crCount, crLfCount, crcrLfCount, otherCount, trailingWSCount, argv[ i ] );
 	}
 
 	exit( 0 );
