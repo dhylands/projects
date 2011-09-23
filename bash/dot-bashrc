@@ -1,6 +1,0 @@
-if [ "${RC_VERBOSE}" = "Y" ]; then echo "Executing ~/.bashrc"; fi
-
-. ~/.startup
-
-if [ "${RC_VERBOSE}" = "Y" ]; then echo "Leaving ~/.bashrc"; fi
-

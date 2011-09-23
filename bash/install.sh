@@ -89,3 +89,9 @@ do
         fi
     fi
 done
+
+if ! fgrep .startup ~/.bashrc
+then
+	echo "" >> ~/.bashrc
+	echo ". ~/.startup" >> ~/.bashrc
+fi
