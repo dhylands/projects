@@ -13,11 +13,12 @@
 scriptname=$(basename $0)
 scriptdir=$(dirname $0)
 
-LOG=/var/log/backup.log
+LOG=/var/log/backup-last-run.log
+REAL_LOG=/var/log/backup.log
 
 HOSTNAME=$(hostname)
 
-echo "$(date): ==============================================" >> ${LOG}
+echo "$(date): ==============================================" > ${LOG}
 echo "$(date): Starting backup of HOSTNAME = ${HOSTNAME}" >> ${LOG}
 
 BACKUP_MOUNT=/backup-dave
@@ -60,7 +61,7 @@ fi
 # then mount it
 #
 
-if mount | grep ${BACKUP_MOUNT}
+if mount | grep ${BACKUP_MOUNT} > /dev/null
 then
     echo "$(date): ${BACKUP_MOUNT} appears to be mounted." >> ${LOG}
 else
@@ -69,7 +70,7 @@ else
     # Volume doesn't appear to be mounted. Mount it now
     # so we don't backup locally
 
-    if mount ${BACKUP_MOUNT}
+    if mount ${BACKUP_MOUNT} > /dev/null
     then
         echo "$(date): ${BACKUP_MOUNT} mounted successfully" >> ${LOG}
     else
@@ -126,4 +127,6 @@ then
     echo "$(date): Finished monthly rsnapshot" >> ${LOG}
 fi
 
+cat ${LOG}
+cat ${LOG} >> ${REAL_LOG}
 
