@@ -210,11 +210,19 @@ int main( int argc, char **argv )
         }
     }
 
-    if (( gPortFd = open( devName, O_RDWR | O_EXCL )) < 0 )
+    // Open the serial port initially using O_NONBLOCK so that we won't block waiting for
+    // carrier detect.
+
+    if (( gPortFd = open( devName, O_RDWR | O_EXCL | O_NONBLOCK )) < 0 )
     {
         fprintf( stderr, "Unable to open serial port '%s': %s\n", devName, strerror( errno ));
         exit( 2 );
     }
+
+    // Now that the serial port is open, we can turn off the non-blocking behaviour (for us we want
+    // the reads to have blocking semantics).
+
+    fcntl( gPortFd, F_SETFL, fcntl( gPortFd, F_GETFL ) & ~O_NONBLOCK );
 
     if ( tcgetattr( gPortFd, &attr ) < 0 )
     {
