@@ -17,6 +17,7 @@ CPPFLAGS	= -I. -I$(LPC17XX_DIR) -I$(FREE_RTOS_SRC)/include -I$(FREE_RTOS_SRC)/po
 CFLAGS		= -mthumb         \
 		  -mcpu=cortex-m3 \
 		  -O1             \
+		  -g		  \
 		  -DPACK_STRUCT_END=__attribute\(\(packed\)\) \
 		  -DALIGN_STRUCT_END=__attribute\(\(aligned\(4\)\)\) \
 		  -MD
