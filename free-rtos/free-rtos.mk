@@ -34,6 +34,20 @@ export Q
 FREE_RTOS	= /home/dhylands/software/FreeRTOSV7.1.0
 FREE_RTOS_SRC	= $(FREE_RTOS)/Source
 
+#
+# Do some sanity checks on the FREE_RTOS directory structure
+#
+
+ifeq (,$(wildcard $(FREE_RTOS)))
+$(error FREE_RTOS '$(FREE_RTOS)' doesn't exist)
+endif
+ifeq (,$(wildcard $(FREE_RTOS_SRC)))
+$(error FREE_RTOS_SRC '$(FREE_RTOS_SRC)' doesn't exist)
+endif
+ifeq (,$(wildcard $(FREE_RTOS_SRC)/include/FreeRTOS.h))
+$(error Unable to find '$(FREE_RTOS_SRC)/include/FreeRTOS.h')
+endif
+
 CC 	= $(CROSS_COMPILE)gcc
 LD 	= $(CROSS_COMPILE)ld
 OBJCOPY	= $(CROSS_COMPILE)objcopy
