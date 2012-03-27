@@ -5,13 +5,13 @@
 
 #set -x
 
-if [ "$(echo ${DIR}*)" = "${DIR}"'*' ]
-then
-    # We've been asked to install an empty directory - nothing to do
+script=$0
+scriptdir=$(dirname ${script})
 
-    echo "${DIR} is an empty directory"
-    exit 0;
-fi
+verbose=false
+dry_run=false
+
+DIR=${scriptdir}/
 
 osName=
 case "$(uname)" in
@@ -24,71 +24,96 @@ case "$(uname)" in
         ;;
 esac
 
-for srcFile in ${DIR}*
-do
-    if [ "${srcFile}" = "install.sh" ]
-    then
-        # That's this file - skip it
+function InstallDir
+{
+    local srcDir=$1
+    local dstDir=$2
+    local srcFile
+    local dstFile
+    local srcBase
 
-        continue
-    fi
+    $verbose && echo "InstallDir '${srcDir}' '${dstDir}' ..."
 
-    # Change files which look like dot-foo to be .foo
-    
-    if [ "${srcFile:0:4}" = "dot-" ]
-    then
-        dstFile=~/.${srcFile:4}
-    else
-        dstFile=~/${srcFile}
-    fi
+    for srcFile in ${srcDir}/*
+    do  
+        $verbose && echo "Processing '${srcFile}' ..."
 
-    # Install the file
-
-    if [ -d ${srcFile} ]
-    then
-        #
-        # We're installing a subdirectory - recurse
-        #
+        srcBase=$(basename ${srcFile})
         
-        mkdir -p ${dstFile}
-
-        DIR="${srcFile}/" $0
-    else
-        #
-        # We're installing an individual file - check for os specific variants
-        #
-
-        installThisFile=0
-        case "${srcFile}" in
-
-            *-cygwin.sh)
-                if [ "${osName}" = "cygwin" ]
-                then
-                    installThisFile=1
-                fi
-                ;;
-
-            *-linux.sh)
-                if [ "${osName}" = "linux" ]
-                then
-                    installThisFile=1
-                fi
-                ;;
-
-            *)
-                installThisFile=1
-                ;;
-        esac
-
-        if [ "${installThisFile}" = "1" ]
+        if [ "${srcBase}" = "install.sh" ]
         then
-            echo "Installing ${srcFile} to ${dstFile} ..."
-            cp ${srcFile} ${dstFile}
-        else
-            echo "Skipping   ${srcFile} ..."
+            # That's this file - skip it
+            
+            ${verbose} && echo "-- Skipping install.sh"
+            continue
         fi
-    fi
-done
+
+        # Change files which look like dot-foo to be .foo
+        
+        if [ "${srcBase:0:4}" = "dot-" ]
+        then
+            dstFile=${dstDir}/.${srcBase:4}
+            ${verbose} && echo "  Renaming '${srcFile}' to '${dstFile}'"
+        else
+            dstFile=${dstDir}/${srcBase}
+        fi
+
+        # Install the file
+
+        if [ -d ${srcFile} ]
+        then
+            #
+            # We're installing a subdirectory - recurse
+            #
+            
+            mkdir -p ${dstFile}
+            InstallDir ${srcFile} ${dstFile}
+        else
+            #
+            # We're installing an individual file - check for os specific variants
+            #
+
+            installThisFile=0
+            case "${srcFile}" in
+
+                *-cygwin.sh)
+                    if [ "${osName}" = "cygwin" ]
+                    then
+                        installThisFile=1
+                        dstFile=${dstFile%-cygwin.sh}.sh
+                    fi
+                    ;;
+
+                *-linux.sh)
+                    if [ "${osName}" = "linux" ]
+                    then
+                        installThisFile=1
+                        dstFile=${dstFile%-linux.sh}.sh
+                    fi
+                    ;;
+
+                *)
+                    installThisFile=1
+                    ;;
+            esac
+
+            if [ "${installThisFile}" = "1" ]
+            then
+                echo "Installing '${srcFile}' to '${dstFile}' ..."
+                ! ${dry_run} && cp -p ${srcFile} ${dstFile}
+            else
+                echo "Skipping   '${srcFile}' ..."
+            fi
+        fi
+    done
+
+}
+
+InstallDir ${scriptdir} ~
+
+#
+# Now add a call to ~/.startup into .bashrc
+#
 
 if ! fgrep .startup ~/.bashrc
 then

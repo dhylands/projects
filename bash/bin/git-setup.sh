@@ -5,7 +5,7 @@
 set -x
 
 git config --global user.name "Dave Hylands"
-git config --global user.email "dhylands@broadcom.com"
+git config --global user.email "dhylands@mozilla.com"
 git config --global color.diff auto
 git config --global color.status auto
 git config --global color.branch auto

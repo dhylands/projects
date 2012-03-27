@@ -17,7 +17,13 @@ function start_agent {
      echo succeeded
      chmod 600 "${SSH_ENV}"
      . "${SSH_ENV}" > /dev/null
-     /usr/bin/ssh-add;
+     pubkey=~/.ssh/id-dsa-$(hostname)
+     if [ -e ${pubkey} ]
+     then
+        /usr/bin/ssh-add ${pubkey}
+     else
+        /usr/bin/ssh-add 
+     fi
 }
 
 # Source SSH settings, if applicable
