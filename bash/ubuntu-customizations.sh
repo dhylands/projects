@@ -2,7 +2,7 @@
 
 echo "Moving min/max/close over to the right..."
 
-gconftool-2 --set "/apps/metacity/general/button_layout" --type string "menu:minimize,maximize,close"
+#gconftool-2 --set "/apps/metacity/general/button_layout" --type string "menu:minimize,maximize,close"
 
 # The following is especially useful if you use VNC
 echo "Make the background be a plain color (no image)..."

@@ -1,0 +1,9 @@
+Install Indicator Multiload - the equivalent to system monitor from 10.10
+
+sudo add-apt-repository ppa:indicator-multiload/stable-daily
+sudo apt-get update
+sudo apt-get install indicator-multiload
+
+The following allows clicking on URLs in thunderbird and having Firefox come to the foreground
+sudo apt-get install compizconfig-settings-manager
+Compiz Settings Manager > General Options -> Focus & Raise Behaviour, and set the Focus Prevention Level to Off.
