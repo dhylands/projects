@@ -7,3 +7,9 @@ sudo apt-get install indicator-multiload
 The following allows clicking on URLs in thunderbird and having Firefox come to the foreground
 sudo apt-get install compizconfig-settings-manager
 Compiz Settings Manager > General Options -> Focus & Raise Behaviour, and set the Focus Prevention Level to Off.
+
+Install Gnome 3 Desktop
+
+sudo add-apt-repository ppa:gnome3-team/gnome3
+sudo apt-get update
+sudo apt-get install gnome-shell
