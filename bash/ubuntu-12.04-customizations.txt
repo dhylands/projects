@@ -13,3 +13,27 @@ Install Gnome 3 Desktop
 sudo add-apt-repository ppa:gnome3-team/gnome3
 sudo apt-get update
 sudo apt-get install gnome-shell
+
+Install System Monitor
+
+sudo apt-get install libgtop2-dev
+Logout
+Login and then install
+https://extensions.gnome.org/extension/120/system-monitor/
+
+Remove Accessibility menu
+https://extensions.gnome.org/extension/112/remove-accesibility/
+
+Install Gnome Tweak Tool
+sudo apt-get install gnome-tweak-tool
+
+Add Advanced Settings to the menu
+https://extensions.gnome.org/extension/130/advanced-settings-in-usermenu/
+
+Change Shell->Arrangements of buttons on the titlebar to All
+
+Install Alternate-Tab
+https://extensions.gnome.org/extension/15/alternatetab/
+
+Install Alternative Status Menu
+https://extensions.gnome.org/extension/5/alternative-status-menu/
