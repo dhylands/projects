@@ -4,10 +4,13 @@
 #
 ###########################################################################
 
-ifeq ($(MK_OS),)		  
+ifeq ($(MK_OS),)
 MK_OS			= host
-MK_HOST_OS      = mingw
+MK_HOST_OS      = linux
 endif
+
+debug           = 1
+MK_ADD_SYMBOLS  = 1
 
 MK_ELF_TARGET 	= hello-world
 
