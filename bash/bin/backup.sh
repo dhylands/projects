@@ -33,7 +33,7 @@ case ${HOSTNAME} in
     # These machines are always attached to the network, so don't
     # need the wireless check
 
-    dave-ubuntu|dave-moz)
+    dave-ubuntu|dave|dave-moz)
         CHECK_WIRELESS=0
         ;;
 
