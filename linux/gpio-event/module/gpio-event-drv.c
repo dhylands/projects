@@ -41,7 +41,7 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
-#include <mach/gpio.h>
+#include <linux/gpio.h>
 
 #include "gpio-event-drv.h"
 
