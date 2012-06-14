@@ -367,7 +367,8 @@ void BioloidCommandLine::ProcessDeviceGetCommand( BLD_DevType_t  *devType, Biolo
 
             if ( reg->flags & BLD_REG_FLAG_16BIT )
             {
-                val = *(uint16_t *)&gReadBuf[ reg->address ];
+                val =  (uint16_t)gReadBuf[ reg->address ]
+                    | ((uint16_t)gReadBuf[ reg->address ] << 8 );
             }
             else
             {
