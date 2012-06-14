@@ -12,18 +12,18 @@
 SSH_ENV="$HOME/.ssh/environment"
 
 function start_agent {
+     privkey=~/.ssh/id-rsa-$(hostname)
+     if [ ! -e "${privkey}" ]
+     then
+        echo "Unable to find SSH private key: '${privkey}'"
+	return
+     fi
      echo "Initialising new SSH agent..."
      /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
      echo succeeded
      chmod 600 "${SSH_ENV}"
      . "${SSH_ENV}" > /dev/null
-     pubkey=~/.ssh/id-rsa-$(hostname)
-     if [ -e ${pubkey} ]
-     then
-        /usr/bin/ssh-add ${pubkey}
-     else
-        /usr/bin/ssh-add 
-     fi
+     /usr/bin/ssh-add ${privkey}
 }
 
 # Source SSH settings, if applicable
