@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+<head>
+<link rel="icon" href="/mozilla-central/static/hgicon.png" type="image/png" />
+<meta name="robots" content="index, nofollow"/>
+<link rel="stylesheet" href="/mozilla-central/static/style-gitweb.css" type="text/css" />
+
+<style type="text/css">
+div.feed {
+  float: right;
+}
+a img {
+  border-width: 0px;
+}
+div.log_link {
+  width: 80px;
+  background-color: white;
+}
+
+div.log_body {
+  padding-left: 96px;
+}
+</style>
+
+<title>mozilla-central: js/src/editline/README@b2fd9044b65c</title>
+<link rel="alternate" type="application/atom+xml"
+   href="/mozilla-central/atom-log" title="Atom feed for mozilla-central"/>
+</head>
+<body>
+
+<div class="page_header">
+<a href="http://developer.mozilla.org/en/docs/Mercurial" title="Mercurial" style="float: right;">Mercurial</a><a href="/mozilla-central/summary">mozilla-central</a> - file revision - js/src/editline/README@b2fd9044b65c
+</div>
+
+<div class="page_nav">
+<a href="/mozilla-central/summary">summary</a> |
+<a href="/mozilla-central/shortlog">shortlog</a> |
+<a href="/mozilla-central/log">changelog</a> |
+<a href="/mozilla-central/graph">graph</a> |
+<a href="/mozilla-central/tags">tags</a> |
+<a href="/mozilla-central/file/b2fd9044b65c/js/src/editline/">files</a> |
+<a href="/mozilla-central/rev/b2fd9044b65c">changeset</a> |
+file |
+<a href="/mozilla-central/log/b2fd9044b65c/js/src/editline/README">revisions</a> |
+<a href="/mozilla-central/annotate/b2fd9044b65c/js/src/editline/README">annotate</a> |
+<a href="/mozilla-central/diff/b2fd9044b65c/js/src/editline/README">diff</a> |
+<a href="/mozilla-central/raw-file/b2fd9044b65c/js/src/editline/README">raw</a><br/>
+</div>
+
+<div class="title">js/src/editline/README</div>
+
+<div class="title_text">
+<table cellspacing="0">
+<tr>
+ <td>author</td>
+ <td>&#68;&#63;&#111;&#32;&#71;&#111;&#116;&#116;&#119;&#97;&#108;&#100;&#32;&#60;&#100;&#97;&#111;&#64;&#109;&#111;&#122;&#105;&#108;&#108;&#97;&#46;&#99;&#111;&#109;&#62;</td></tr>
+<tr>
+ <td></td>
+ <td>Sun Jan 10 13:28:49 2010 +0100 (at Sun Jan 10 13:28:49 2010 +0100)</td></tr>
+
+<tr>
+ <td>changeset 36979</td>
+ <td style="font-family:monospace"><a class="list" href="/mozilla-central/rev/b2fd9044b65c">b2fd9044b65c</a></td></tr>
+
+
+<tr>
+ <td>permissions</td>
+ <td style="font-family:monospace">-rw-r--r--</td></tr>
+</table>
+</div>
+
+<div class="page_path">
+merge
+</div>
+
+<div class="page_body">
+<div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l1" id="l1">     1</a> The files in this directory provide simple line-editing and history
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l2" id="l2">     2</a> support for the standalone javascript engine, through the 'editline'
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l3" id="l3">     3</a> library.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l4" id="l4">     4</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l5" id="l5">     5</a> editline has only been enabled for those platforms on which it is
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l6" id="l6">     6</a> known to build; to try it on a different platform, define JS_EDITLINE
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l7" id="l7">     7</a> before building.  Line editing (and js.c) is not a supported feature
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l8" id="l8">     8</a> of the javascript library, so your mileage my vary.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l9" id="l9">     9</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l10" id="l10">    10</a> The editline API is a compatible subset of the FSF readline API; if
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l11" id="l11">    11</a> you have readline installed and would like to link to that instead,
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l12" id="l12">    12</a> define JS_READLINE.  Note that the readline library is distributed
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l13" id="l13">    13</a> under the GPL, so any resulting binaries are not legally
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l14" id="l14">    14</a> distributable.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l15" id="l15">    15</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l16" id="l16">    16</a> The editline files used here have been modified to work with the js
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l17" id="l17">    17</a> build system and to quiet some compiler warnings, and also to remove
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l18" id="l18">    18</a> filename-completion support.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l19" id="l19">    19</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l20" id="l20">    20</a> If anyone knows of a more recent version of these files, or a site on
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l21" id="l21">    21</a> which they are being maintained, please let me know!
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l22" id="l22">    22</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l23" id="l23">    23</a> Mike McCabe, mccabe@netscape.com
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l24" id="l24">    24</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l25" id="l25">    25</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l26" id="l26">    26</a> The original README file distributed with the editline library follows.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l27" id="l27">    27</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l28" id="l28">    28</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l29" id="l29">    29</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l30" id="l30">    30</a> This is a line-editing library.  It can be linked into almost any
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l31" id="l31">    31</a> program to provide command-line editing and recall.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l32" id="l32">    32</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l33" id="l33">    33</a> It is call-compatible with the FSF readline library, but it is a
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l34" id="l34">    34</a> fraction of the size (and offers fewer features).  It does not use
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l35" id="l35">    35</a> standard I/O.  It is distributed under a &quot;C News-like&quot; copyright.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l36" id="l36">    36</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l37" id="l37">    37</a> Configuration is done in the Makefile.  Type &quot;make testit&quot; to get
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l38" id="l38">    38</a> a small slow shell for testing.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l39" id="l39">    39</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l40" id="l40">    40</a> An earlier version was distributed with Byron's rc.  Principal
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l41" id="l41">    41</a> changes over that version include:
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l42" id="l42">    42</a> 	Faster.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l43" id="l43">    43</a> 	Is eight-bit clean (thanks to brendan@cs.widener.edu)
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l44" id="l44">    44</a> 	Written in K&amp;R C, but ANSI compliant (gcc all warnings)
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l45" id="l45">    45</a> 	Propagates EOF properly; rc trip test now passes
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l46" id="l46">    46</a> 	Doesn't need or use or provide memmove.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l47" id="l47">    47</a> 	More robust
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l48" id="l48">    48</a> 	Calling sequence changed to be compatible with readline.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l49" id="l49">    49</a> 	Test program, new manpage, better configuration
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l50" id="l50">    50</a> 	More system-independant; includes Unix and OS-9 support.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l51" id="l51">    51</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l52" id="l52">    52</a> This contains some changes since the posting to comp.sources.misc:
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l53" id="l53">    53</a> 	Bugfix for completion on absolute pathnames.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l54" id="l54">    54</a> 	Better handling of M-n versus showing raw 8bit chars.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l55" id="l55">    55</a> 	Better signal handling.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l56" id="l56">    56</a> 	Now supports termios/termio/sgttyb ioctl's.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l57" id="l57">    57</a> 	Add M-m command to toggle how 8bit data is displayed.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l58" id="l58">    58</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l59" id="l59">    59</a> There is one known bug:
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l60" id="l60">    60</a> 	History-searching redraws the line wrong if the text
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l61" id="l61">    61</a> 	retrieved is shorter then the prompt.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l62" id="l62">    62</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l63" id="l63">    63</a> Enjoy,
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l64" id="l64">    64</a> 	Rich $alz
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l65" id="l65">    65</a> 	&lt;rsalz@osf.org&gt;
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l66" id="l66">    66</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l67" id="l67">    67</a>  Copyright 1992,1993 Simmule Turner and Rich Salz.  All rights reserved.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l68" id="l68">    68</a> 
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l69" id="l69">    69</a>  This software is not subject to any license of the American Telephone
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l70" id="l70">    70</a>  and Telegraph Company or of the Regents of the University of California.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l71" id="l71">    71</a> 
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l72" id="l72">    72</a>  Permission is granted to anyone to use this software for any purpose on
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l73" id="l73">    73</a>  any computer system, and to alter it and redistribute it freely, subject
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l74" id="l74">    74</a>  to the following restrictions:
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l75" id="l75">    75</a>  1. The authors are not responsible for the consequences of use of this
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l76" id="l76">    76</a>     software, no matter how awful, even if they arise from flaws in it.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l77" id="l77">    77</a>  2. The origin of this software must not be misrepresented, either by
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l78" id="l78">    78</a>     explicit claim or by omission.  Since few users ever read sources,
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l79" id="l79">    79</a>     credits must appear in the documentation.
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l80" id="l80">    80</a>  3. Altered versions must be plainly marked as such, and must not be
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l81" id="l81">    81</a>     misrepresented as being the original software.  Since few users
+</pre></div><div style="font-family:monospace" class="parity1"><pre><a class="linenr" href="#l82" id="l82">    82</a>     ever read sources, credits must appear in the documentation.
+</pre></div><div style="font-family:monospace" class="parity0"><pre><a class="linenr" href="#l83" id="l83">    83</a>  4. This notice may not be removed or altered.
+</pre></div>
+</div>
+
+<div class="page_footer">
+<div class="page_footer_text">mozilla-central</div>
+<div class="feed">
+<a href="/mozilla-central/atom-log"><img src="http://www.mozilla.org/images/livemarks16.png" alt="Feed" title="Feed of repository changes"/></a>
+</div>
+<br />
+
+</div>
+</body>
+</html>
+
