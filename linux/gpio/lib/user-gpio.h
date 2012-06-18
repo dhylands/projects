@@ -29,6 +29,10 @@
 
 /* ---- Function Prototypes ---------------------------------------------- */
 
+#if defined( __cplusplus )
+extern "C" {
+#endif
+
 int  gpio_init( void );
 void gpio_term( void );
 
@@ -42,6 +46,10 @@ int  gpio_direction_input( unsigned gpio );
 int  gpio_direction_output( unsigned gpio, int initialValue );
 int  gpio_get_value( unsigned gpio );
 void gpio_set_value( unsigned gpio, int value );
+
+#if defined( __cplusplus )
+}
+#endif
 
 #endif  /* USER_GPIO_H */
 
