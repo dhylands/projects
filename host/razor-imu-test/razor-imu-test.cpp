@@ -128,7 +128,7 @@ static void EulerCallback( RAZOR_IMU_t *instance, int16_t roll, int16_t pitch, i
 
 int main( int argc, char **argv )
 {
-    char                shortOptsStr[ sizeof( gOption ) / sizeof( gOption[ 0 ] ) + 1 ];
+    char                shortOptsStr[ (sizeof( gOption ) / sizeof( gOption[ 0 ] )) * 2 + 1 ];
     char               *shortOpts = shortOptsStr;
     struct option      *scanOpt;
     int                 opt;
