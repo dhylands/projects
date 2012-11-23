@@ -37,7 +37,7 @@ case ${HOSTNAME} in
         CHECK_WIRELESS=0
         ;;
 
-    dave-laptop)
+    dave-laptop|dave-za)
         CHECK_WIRELESS=1
         ;;
 
