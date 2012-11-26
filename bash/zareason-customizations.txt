@@ -1,0 +1,24 @@
+mkdir /etc/X11/xorg.conf.d/
+cp /usr/share/X11/xorg.conf.d/50-synaptics.conf /etc/X11/xorg.conf.d/
+
+Edit /etc/X11/xorg.conf.d/50-synaptics.conf and add the following:
+
+        Option "RTCornerButton" "0"
+        Option "RBCornerButton" "0"
+        Option "LTCornerButton" "0"
+        Option "LBCornerButton" "0"
+        Option "ClickFinger1" "0"
+        Option "ClickFinger2" "0"
+        Option "ClickFinger3" "0"
+
+to the following section:
+
+Section "InputClass"
+        Identifier "touchpad catchall"
+        Driver "synaptics"
+        MatchIsTouchpad "on"
+
+and reboot. You can use synclient to set the above options without having to reboot.
+
+This seems to disable all of the extraneous tapping I was seeing.
+
