@@ -694,9 +694,6 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
 
         snprintf( pinData->devName, sizeof( pinData->devName ), "gpio %d event", monitor->gpio );
 
-        // Note:
-        //     Calling request_irq will automatically set the pin to be an input.
-
         irqFlags = 0;
 
         if ( monitor->debounceMilliSec == 0 )
@@ -723,6 +720,7 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
             irqFlags |= IRQF_TRIGGER_FALLING;
         }
 
+        gpio_direction_input( monitor->gpio );
         if (( rc = request_irq( gpio_to_irq( monitor->gpio ), gpio_event_irq, irqFlags, pinData->devName, pinData )) != 0 )
         {
             DEBUG( Error, "Unable to register irq for GPIO %d\n", monitor->gpio );
