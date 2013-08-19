@@ -683,9 +683,17 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
             spin_lock_irqsave( &gPinListLock, flags );
         }
 
+        // request the pin you wish to monitor
+        if(( rc = gpio_request( monitor->gpio, pinData->devName )) != 0)
+        {
+            DEBUG( Error, "Unable to request GPIO %d, %d\n", monitor->gpio, rc );
+            goto out;
+        }
+
         if (( pinData = kcalloc( 1, sizeof( *pinData ), GFP_KERNEL )) == NULL )
         {
             DEBUG( Error, "GPIO %d: Out of memory\n", monitor->gpio );
+            gpio_free( monitor->gpio );
             rc = -ENOMEM;
             goto out;
         }
@@ -724,6 +732,7 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
         if (( rc = request_irq( gpio_to_irq( monitor->gpio ), gpio_event_irq, irqFlags, pinData->devName, pinData )) != 0 )
         {
             DEBUG( Error, "Unable to register irq for GPIO %d\n", monitor->gpio );
+            gpio_free( monitor->gpio );
             kfree( pinData );
             goto out;
         }
@@ -764,6 +773,7 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
         del_timer_sync( &pinData->debounceTimer );
         list_del( &pinData->list );
 
+        gpio_free( monitor->gpio );
         kfree( pinData );
     }
 
