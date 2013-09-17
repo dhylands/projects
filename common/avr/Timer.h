@@ -44,6 +44,11 @@
 #define TIMER1_CLOCK_SEL_T1_FALLING (( 1 << CS12 ) | ( 1 << CS11 ) | ( 0 << CS10 ))
 #define TIMER1_CLOCK_SEL_T1_RISING  (( 1 << CS12 ) | ( 1 << CS11 ) | ( 1 << CS10 ))
 
+// To add a new MCU, find its official name with the following command line:
+// touch empty.c; avr-gcc -E -mmcu=atmega32u4 -Wp,-dD empty.c
+// That command produces a lot of output, but one line looks like this:
+// #define __AVR_ATmega32U4__ 1
+
 #if defined (__AVR_ATmega8__) \
  || defined (__AVR_ATmega16__) \
  || defined (__AVR_ATmega32__) \
@@ -52,7 +57,8 @@
  || defined (__AVR_ATmega164P__) \
  || defined (__AVR_ATmega168__) \
  || defined (__AVR_ATmega328P__) \
- || defined (__AVR_ATmega644__)
+ || defined (__AVR_ATmega644__) \
+ || defined (__AVR_ATmega32U4__)
 
 #define TIMER0_CLOCK_SEL_NONE       (( 0 << CS02 ) | ( 0 << CS01 ) | ( 0 << CS00 ))
 #define TIMER0_CLOCK_SEL_DIV_1      (( 0 << CS02 ) | ( 0 << CS01 ) | ( 1 << CS00 ))
