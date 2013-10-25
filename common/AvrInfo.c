@@ -52,6 +52,8 @@ static const AvrInfo_t gAvrInfo[] =
     AVR_ENTRY( ATMEGA_168 ),
     AVR_ENTRY( ATMEGA_169 ),
     AVR_ENTRY( ATMEGA_32 ),
+    AVR_ENTRY( ATMEGA_328 ),
+    AVR_ENTRY( ATMEGA_328P ),
     AVR_ENTRY( ATMEGA_64 ),
     AVR_ENTRY( ATMEGA_644 ),
     AVR_ENTRY( ATMEGA_128 ),

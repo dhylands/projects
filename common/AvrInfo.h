@@ -42,10 +42,10 @@ typedef struct
 
 } AvrInfo_t;
 
-// Every AVR is assigned a 3 byte signature sequence. The first byte is a 
+// Every AVR is assigned a 3 byte signature sequence. The first byte is a
 // vendor ID and is the value 0x1E for Atmel. We use the remaining two bytes.
 
-#define AVR_ATMEGA_48_STRING        "ATMega48"                                    
+#define AVR_ATMEGA_48_STRING        "ATMega48"
 #define AVR_ATMEGA_48_SIGNATURE     0x9205
 #define AVR_ATMEGA_48_FLASH_SIZE    (  4 * 1024 )
 #define AVR_ATMEGA_48_BOOT_SIZE     (  4 * 1024 )
@@ -53,15 +53,15 @@ typedef struct
 #define AVR_ATMEGA_48_PAGE_SHIFT    6
 #define AVR_ATMEGA_48_PAGE_SIZE     64
 
-#define AVR_ATMEGA_8_STRING         "ATMega8"                                    
+#define AVR_ATMEGA_8_STRING         "ATMega8"
 #define AVR_ATMEGA_8_SIGNATURE      0x9307
 #define AVR_ATMEGA_8_FLASH_SIZE     (  8 * 1024 )
 #define AVR_ATMEGA_8_BOOT_SIZE      (  2 * 1024 )
 #define AVR_ATMEGA_8_EEPROM_SIZE    512
-#define AVR_ATMEGA_8_PAGE_SHIFT     6 
+#define AVR_ATMEGA_8_PAGE_SHIFT     6
 #define AVR_ATMEGA_8_PAGE_SIZE      64
 
-#define AVR_ATMEGA_88_STRING        "ATMega88"                                    
+#define AVR_ATMEGA_88_STRING        "ATMega88"
 #define AVR_ATMEGA_88_SIGNATURE     0x930A
 #define AVR_ATMEGA_88_FLASH_SIZE    (  8 * 1024 )
 #define AVR_ATMEGA_88_BOOT_SIZE     (  2 * 1024 )
@@ -69,7 +69,7 @@ typedef struct
 #define AVR_ATMEGA_88_PAGE_SHIFT    6
 #define AVR_ATMEGA_88_PAGE_SIZE     64
 
-#define AVR_ATMEGA_16_STRING        "ATMega16"                                    
+#define AVR_ATMEGA_16_STRING        "ATMega16"
 #define AVR_ATMEGA_16_SIGNATURE     0x9403
 #define AVR_ATMEGA_16_FLASH_SIZE    ( 16 * 1024 )
 #define AVR_ATMEGA_16_BOOT_SIZE     (  2 * 1024 )
@@ -77,7 +77,7 @@ typedef struct
 #define AVR_ATMEGA_16_PAGE_SHIFT    7
 #define AVR_ATMEGA_16_PAGE_SIZE     128
 
-#define AVR_ATMEGA_168_STRING       "ATMega168"                                    
+#define AVR_ATMEGA_168_STRING       "ATMega168"
 #define AVR_ATMEGA_168_SIGNATURE    0x9406
 #define AVR_ATMEGA_168_FLASH_SIZE   ( 16 * 1024 )
 #define AVR_ATMEGA_168_BOOT_SIZE    (  2 * 1024 )
@@ -85,15 +85,7 @@ typedef struct
 #define AVR_ATMEGA_168_PAGE_SHIFT   7
 #define AVR_ATMEGA_168_PAGE_SIZE    128
 
-#define AVR_ATMEGA_169_STRING       "ATMega169"                                    
-#define AVR_ATMEGA_169_SIGNATURE    0x9405
-#define AVR_ATMEGA_169_FLASH_SIZE   ( 16 * 1024 )
-#define AVR_ATMEGA_169_BOOT_SIZE    (  2 * 1024 )
-#define AVR_ATMEGA_169_EEPROM_SIZE  512
-#define AVR_ATMEGA_169_PAGE_SHIFT   7
-#define AVR_ATMEGA_169_PAGE_SIZE    128
-
-#define AVR_ATMEGA_32_STRING        "ATMega32"                                    
+#define AVR_ATMEGA_32_STRING        "ATMega32"
 #define AVR_ATMEGA_32_SIGNATURE     0x9502
 #define AVR_ATMEGA_32_FLASH_SIZE    ( 32 * 1024 )
 #define AVR_ATMEGA_32_BOOT_SIZE     (  4 * 1024 )
@@ -101,7 +93,31 @@ typedef struct
 #define AVR_ATMEGA_32_PAGE_SHIFT    7
 #define AVR_ATMEGA_32_PAGE_SIZE     128
 
-#define AVR_ATMEGA_64_STRING        "ATMega64"                                    
+#define AVR_ATMEGA_169_STRING       "ATMega169"
+#define AVR_ATMEGA_169_SIGNATURE    0x9405
+#define AVR_ATMEGA_169_FLASH_SIZE   ( 16 * 1024 )
+#define AVR_ATMEGA_169_BOOT_SIZE    (  2 * 1024 )
+#define AVR_ATMEGA_169_EEPROM_SIZE  512
+#define AVR_ATMEGA_169_PAGE_SHIFT   7
+#define AVR_ATMEGA_169_PAGE_SIZE    128
+
+#define AVR_ATMEGA_328P_STRING      "ATMega328P"
+#define AVR_ATMEGA_328P_SIGNATURE   0x950F
+#define AVR_ATMEGA_328P_FLASH_SIZE  ( 32 * 1024 )
+#define AVR_ATMEGA_328P_BOOT_SIZE   (  4 * 1024 )
+#define AVR_ATMEGA_328P_EEPROM_SIZE (  1 * 1024 )
+#define AVR_ATMEGA_328P_PAGE_SHIFT  7
+#define AVR_ATMEGA_328P_PAGE_SIZE   128
+
+#define AVR_ATMEGA_328_STRING       "ATMega328"
+#define AVR_ATMEGA_328_SIGNATURE    0x9514
+#define AVR_ATMEGA_328_FLASH_SIZE   ( 32 * 1024 )
+#define AVR_ATMEGA_328_BOOT_SIZE    (  4 * 1024 )
+#define AVR_ATMEGA_328_EEPROM_SIZE  (  1 * 1024 )
+#define AVR_ATMEGA_328_PAGE_SHIFT   7
+#define AVR_ATMEGA_328_PAGE_SIZE    128
+
+#define AVR_ATMEGA_64_STRING        "ATMega64"
 #define AVR_ATMEGA_64_SIGNATURE     0x9602
 #define AVR_ATMEGA_64_FLASH_SIZE    ( 64 * 1024 )
 #define AVR_ATMEGA_64_BOOT_SIZE     (  8 * 1024 )
@@ -117,7 +133,7 @@ typedef struct
 #define AVR_ATMEGA_644_PAGE_SHIFT   8
 #define AVR_ATMEGA_644_PAGE_SIZE    256
 
-#define AVR_ATMEGA_128_STRING       "ATMega128"                                    
+#define AVR_ATMEGA_128_STRING       "ATMega128"
 #define AVR_ATMEGA_128_SIGNATURE    0x9702
 #define AVR_ATMEGA_128_FLASH_SIZE   ( 128 * 1024 )
 #define AVR_ATMEGA_128_BOOT_SIZE    (   8 * 1024 )
@@ -155,6 +171,12 @@ typedef struct
 
 #elif defined( __AVR_ATmega32__ )
 #   define  AVR_PART_NUM    ATMEGA_32
+
+#elif defined( __AVR_ATmega328__ )
+#   define  AVR_PART_NUM    ATMEGA_328
+
+#elif defined( __AVR_ATmega328P__ )
+#   define  AVR_PART_NUM    ATMEGA_328P
 
 #elif defined( __AVR_ATmega64__ )
 #   define  AVR_PART_NUM    ATMEGA_64
