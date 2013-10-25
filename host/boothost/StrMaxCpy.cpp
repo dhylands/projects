@@ -57,7 +57,8 @@ char *StrMaxCpy( char *dst, const char *src, size_t maxLen )
 		 * There's no room in the buffer?
 		 */
 
-		return "";
+		static char emptyStr[] = {'\0'};
+		return emptyStr;
 	}
 
 	if ( maxLen == 1 )

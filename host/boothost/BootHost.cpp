@@ -140,15 +140,11 @@ void   *ReadSerialThread( void *param );
 void   *ReadStdinThread( void *param );
 void    Usage();
 
-void LogUnrecognizedChar( char ch, const char *label );
-
 #if USE_I2C
 void PacketTextChar( unsigned char ch, void *userData );
 void PacketSendChar( unsigned char ch, void *userData );
 void PacketReceived( PKT_Packet *packet, void *userData );
 #endif
-
-void SendByte( unsigned char ch );
 
 // ---- Functions -----------------------------------------------------------
 
@@ -784,6 +780,8 @@ void *ReadStdinThread( void *param )
             gSerialPort.Write( &ch, 1 );
         }
     }
+
+    return NULL;
 
 } // ReadStdinThread
 
