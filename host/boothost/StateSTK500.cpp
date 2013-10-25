@@ -32,6 +32,7 @@
 #include "stk500-command.h"
 #include "StateSTK500.h"
 #include "Log.h"
+#include "AvrInfo.h"
 
 // ---- Public Variables ----------------------------------------------------
 // ---- Private Constants and Types -----------------------------------------
@@ -86,32 +87,6 @@ static  uint8_t         gSwMajor;
 static  uint8_t         gSwMinor;
 
 static  uint8_t         gSignature[ 3 ];
-
-static  DeviceMap       gDeviceMap[] =
-{
-    //                                      Flash     Boot  Page  Page  
-    //  Signature Bytes       Name           Size     Size  Size  Shift
-    //  -----------------    ----------  -----------  ----  ----  -----
-
-    {{ 0x1e, 0x92, 0x05 }, { "ATMega48",    4 * 1024, 4096,   64,   6 }},
-
-    {{ 0x1e, 0x93, 0x07 }, { "ATMega8",     8 * 1024, 2048,   64,   6 }},
-    {{ 0x1e, 0x93, 0x0A }, { "ATMega88",    8 * 1024, 2048,   64,   6 }},
-
-    {{ 0x1e, 0x94, 0x03 }, { "ATMega16",   16 * 1024, 2048,  128,   7 }},
-    {{ 0x1e, 0x94, 0x06 }, { "ATMega168",  16 * 1024, 2048,  128,   7 }},
-    {{ 0x1e, 0x94, 0x05 }, { "ATMega169",  16 * 1024, 2048,  128,   7 }},
-
-    {{ 0x1e, 0x95, 0x02 }, { "ATMega32",   32 * 1024, 4096,  128,   7 }},
-
-    {{ 0x1e, 0x96, 0x02 }, { "ATMega64",   64 * 1024, 8192,  256,   8 }},
-    {{ 0x1e, 0x96, 0x09 }, { "ATMega644",  64 * 1024, 8192,  256,   8 }},
-
-    {{ 0x1e, 0x97, 0x02 }, { "ATMega128", 128 * 1024, 8192,  256,   8 }},
-
-};
-
-int gNumDeviceMapEntries = sizeof( gDeviceMap ) / sizeof( gDeviceMap[ 0 ]);
 
 // ---- Private Function Prototypes -----------------------------------------
 
@@ -506,16 +481,28 @@ void ProcessPacket( uint8_t *packetData, size_t packetSize )
 
             // Lookup the signature
 
-            for ( int i = 0; i < gNumDeviceMapEntries; i++ ) 
+            const AvrInfo_t *avrInfo = NULL;
+            if ( gSignature[ 0 ] == 0x1e )
             {
-                if (( gSignature[ 0 ] == gDeviceMap[ i ].signature[ 0 ] )
-                &&  ( gSignature[ 1 ] == gDeviceMap[ i ].signature[ 1 ] )
-                &&  ( gSignature[ 2 ] == gDeviceMap[ i ].signature[ 2 ] ))
-                {
-                    gDeviceInfo = gDeviceMap[ i ].deviceInfo;
-                    break;
-                }
+                uint16_t signature = (uint16_t)gSignature[ 1 ] << 8
+                                   | (uint16_t)gSignature[ 2 ];
+                avrInfo = FindAvrInfoBySignature(signature);
             }
+            if ( avrInfo == NULL )
+            {
+                LogError("Unrecognized device signature: %02x %02x %02x\n",
+                         gSignature[ 0 ],
+                         gSignature[ 1 ],
+                         gSignature[ 2 ]);
+                LogError( "Switching to logging mode\n" );
+                gState = LOGGING;
+                break;
+            }
+            gDeviceInfo.name = avrInfo->m_string;
+            gDeviceInfo.flashSize = avrInfo->m_flashSize;
+            gDeviceInfo.bootSize = avrInfo->m_bootSize;
+            gDeviceInfo.pageSize = avrInfo->m_pageSize;
+            gDeviceInfo.pageShift = avrInfo->m_pageShift;
 
             Log( "Found: %s\n", gDeviceInfo.name );
 
