@@ -176,6 +176,7 @@ void app_start( void );
 	#define SWInput()	(1)
 #endif
 
+#if 0
 void boot_1(void)
 {
 	asm volatile(
@@ -191,6 +192,7 @@ void boot_0(void)
 	"\trjmp	boot\n"
 	);
 }
+#endif
 
 void boot(char) __attribute__ ((noreturn));
 void boot(char bCalled)
@@ -213,6 +215,7 @@ void boot(char bCalled)
 	}
 	length;
 
+#if 0
 	// Set up bare minimum for C to operate...
 
 	asm volatile(
@@ -221,12 +224,29 @@ void boot(char bCalled)
 	);
     SPL = (RAMEND-1)&0xFF;
     SPH = (RAMEND-1)>>8;
+#endif
 
 	// Now, ready to go.
 
 	InitUART();
     InitSW();      // Enable BootLoader input pullup
     InitLed();
+
+//    putch('a');
+#if 0
+    putch('b');
+    putch('C');
+    putch('a');
+    putch('l');
+    putch('l');
+    putch('e');
+    putch('d');
+    putch('=');
+    putch('0' + bCalled);
+    putch(' ');
+    putch('0' + sizeof(bCalled));
+    putch('\n');
+#endif
 
 #if PRINT_BANNER
     {
@@ -675,6 +695,5 @@ void DelayMS(uint16_t ms)
             : "r26", "r27"
             );
 }
-
 
 /* end of file ATmegaBOOT.c */
