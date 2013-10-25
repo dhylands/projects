@@ -80,9 +80,9 @@ int main( void )
         ms_spin( 100 );
         LED_PORT &= ~LED_MASK;
         ms_spin( 100 );
-        //LED_PORT |=  LED_MASK;
+        LED_PORT |=  LED_MASK;
         ms_spin( 100 );
-        //LED_PORT &= ~LED_MASK;
+        LED_PORT &= ~LED_MASK;
         ms_spin( 700 );
     }
 }
