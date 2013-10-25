@@ -128,7 +128,7 @@ int main( int argc, char **argv )
     int         opt;
     char        devName[ 40 ];
     const char *baudStr = NULL;
-    const char *portStr = "ttyS2";
+    const char *portStr = "ttyUSB0";
     speed_t     baudRate;
     sigset_t    termSig;
     pthread_t   readSerialThreadId;
@@ -187,7 +187,7 @@ int main( int argc, char **argv )
     baudRate = B0;
     if ( baudStr == NULL )
     {
-        baudRate = B9600;
+        baudRate = B38400;
     }
     else
     {
@@ -365,7 +365,6 @@ void *ReadSerialThread( void *param )
             {
                 fprintf( stderr, "Serial Read: 0x%02x '%c'\n", ch, ch );
             }
-
         }
 
         putc( ch, stdout );
