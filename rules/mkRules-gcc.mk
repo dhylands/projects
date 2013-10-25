@@ -95,7 +95,7 @@ $(MK_OBJ_DIR)/%.o : %.S $(MK_OBJ_DIR)/%.d
 
 %.cod : %.c FORCE
 	$(ECHO) "Listing $< ..."
-	$(Q)$(COMPILE.c) -gstabs -Wa,-ahldms=$@ $< -o $(MK_OBJDIR)/$(@:.cod=.o)
+	$(Q)$(COMPILE.c) -gstabs -Wa,-ahldms=$@ $< -o $(MK_OBJ_DIR)/$(@:.cod=.o)
 
 %.cod : %.cpp FORCE
 	$(ECHO) "Preprocessing $< ..."
