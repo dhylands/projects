@@ -56,7 +56,6 @@ CFLAGS += \
 
 CXXFLAGS += \
 	-Wall \
-	-Wimplicit \
 	-Wpointer-arith \
 	-Wswitch \
 	-Wredundant-decls \
