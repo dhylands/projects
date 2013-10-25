@@ -64,6 +64,14 @@ volatile msTick_t   gMsTickCount = 0;
 #   define  CFG_TIMER_MICRO_TICK    1
 #endif
 
+#if CFG_CPU_CLOCK < 16384000
+#define PRESCALER       64
+#define PRESCALER_TCCR0 TIMER0_CLOCK_SEL_DIV_64
+#else
+#define PRESCALER       256
+#define PRESCALER_TCCR0 TIMER0_CLOCK_SEL_DIV_256
+#endif
+
 // ---- Private Constants and Types -----------------------------------------
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
@@ -104,7 +112,7 @@ ISR( TIMER0_OVF_vect )/* signal handler for tcnt0 overflow interrupt */
     // For 
     // 256 - 250 = 6
 
-#define OVERFLOW_COUNT  ( CFG_CPU_CLOCK / 1000 / 64 )
+#define OVERFLOW_COUNT  ( CFG_CPU_CLOCK / 1000 / PRESCALER )
 
     TCNT0 = (uint8_t) -OVERFLOW_COUNT;
 
@@ -122,9 +130,9 @@ ISR( TIMER0_OVF_vect )/* signal handler for tcnt0 overflow interrupt */
 void InitTimer( void )
 {
 #if defined( TCCR0B )
-    TCCR0B = TIMER0_CLOCK_SEL_DIV_64; // Divide by 64
+    TCCR0B = PRESCALER_TCCR0;
 #else
-    TCCR0  = TIMER0_CLOCK_SEL_DIV_64; // Divide by 64
+    TCCR0  = PRESCALER_TCCR0;
 #endif
     TCNT0 = 0;
 
