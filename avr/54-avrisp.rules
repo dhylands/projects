@@ -1,0 +1,2 @@
+# I used this for ubuntu 12.04
+SUBSYSTEM=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2104", MODE="0666"
