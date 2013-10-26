@@ -63,8 +63,8 @@ uint8_t LCD_NumLines( void );
 
 int  LCD_PutCharStdio( char ch, FILE *fs );
 
-void LCD_PutStr_P( const prog_char *s );
-void LCD_Printf_P( const prog_char *fmt, ... );
+void LCD_PutStr_P( const char *s );
+void LCD_Printf_P( const char *fmt, ... );
 
 #define LCD_PutStr( str )           LCD_PutStr_P( PSTR( str ))
 #define LCD_Printf( fmt, args... )  LCD_Printf_P( PSTR( fmt ), ## args )

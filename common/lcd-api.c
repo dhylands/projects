@@ -295,7 +295,7 @@ void LCD_PutChar( char ch )
 *   and advances the cursor by the length of the string.
 */
 
-void LCD_PutStr_P( const prog_char *s )
+void LCD_PutStr_P( const char *s )
 {
     char    ch;
 
