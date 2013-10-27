@@ -35,6 +35,8 @@ robostix_SW	= B 1
 3pi_FREQ        = 20MHz
 3pi_LED		= D 7	# Green LED
 3pi_SW		= B 4	# (PB1)
+3pi_LCD_CONFIG  = "Config.h"
+CPPFLAGS 	+= -I ../../robots/3pi
 
 MK_AVR_MCU	= $($(TARGET)_MCU)
 MK_AVR_FREQ	= $($(TARGET)_FREQ)
@@ -89,12 +91,12 @@ endif
 LED_PORT        = PORT$(word 1, $(LED_$(MK_AVR_MCU)))
 LED_DDR         = DDR$(word 1, $(LED_$(MK_AVR_MCU)))
 LED             = P$(word 1, $(LED_$(MK_AVR_MCU)))$(word 2, $(LED_$(MK_AVR_MCU)))
-LED_OPT			= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED=$(LED)
+LED_OPT		= -DLED_DDR=$(LED_DDR) -DLED_PORT=$(LED_PORT) -DLED=$(LED)
 
 else
 
 ifeq ($($(TARGET)_LED),)
-LED_OPT			=
+LED_OPT		=
 else
 
 LED_PORT	= PORT$(word 1, $($(TARGET)_LED))
@@ -146,6 +148,17 @@ SW_OPT		= -DSW_DDR=$(SW_DDR) -DSW_PORT=$(SW_PORT) -DSW=$(SW) -DSW_PIN=$(SW_PIN)
 endif
 endif
 
+ifeq ($(TARGET),)
+LCD_OPT		=
+else
+ifeq ($($(TARGET)_LCD_CONFIG),)
+LCD_OPT		=
+else
+LCD_OPT		= -DUSE_LCD=1 -DLCD_CONFIG='$($(TARGET)_LCD_CONFIG)'
+MK_SRC_FILES	+= lcd-api.c lcd-hal-avr.c Delay.c
+endif
+endif
+
 # Check to make sure that something has been assigned for various paramters
            
 ifeq ($(BOOT_START_$(MK_AVR_MCU)),)
@@ -154,7 +167,7 @@ endif
 
 BOOT_START = $(BOOT_START_$(MK_AVR_MCU))
 
-DEFS = $(LED_OPT) $(SW_OPT) -DBAUD_RATE=38400
+DEFS = $(LED_OPT) $(SW_OPT) $(LCD_OPT) -DBAUD_RATE=38400
 
 CPPFLAGS += $(DEFS)
 CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions

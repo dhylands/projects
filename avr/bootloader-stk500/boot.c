@@ -135,6 +135,19 @@ how/if it works for you.
 
 #define PRINT_BANNER    0
 
+#if USE_LCD
+#include LCD_CONFIG
+#include "lcd.h"
+#else
+#define CFG_LCD_NUM_LINES   0
+#define CFG_LCD_NUM_COLUMNS 0
+#define LCD_Init(l,c)
+#define LCD_Clear()
+#define LCD_MoveTo(x,y)
+#define LCD_PutStr(s)
+#define LCD_PutChar(c)
+#endif
+
 #if PRINT_BANNER
 static const char gBanner[] PROGMEM = "***** STK500 BootLoader *****\n\n";
 static const char *s;
@@ -176,22 +189,8 @@ void app_start( void );
 	#define SWInput()	(1)
 #endif
 
-#if 0
-void boot_1(void)
-{
-	asm volatile(
-	"\tldi	R24, 1\n"
-	"\trjmp	boot\n"
-	);
-}
-
-void boot_0(void)
-{
-	asm volatile(
-	"\tldi	R24, 0\n"
-	"\trjmp	boot\n"
-	);
-}
+#if USE_LCD
+uint8_t gSpinIdx = 0;
 #endif
 
 void boot(char) __attribute__ ((noreturn));
@@ -199,6 +198,10 @@ void boot(char bCalled)
 {
     uint8_t ch, ch2, bEEPROM, i, bAppStart;
     uint16_t w;
+#if USE_LCD
+    uint8_t iter = 0;
+    uint8_t seconds = 0;
+#endif
 
     union address_union
     {
@@ -215,39 +218,15 @@ void boot(char bCalled)
 	}
 	length;
 
-#if 0
-	// Set up bare minimum for C to operate...
-
-	asm volatile(
-	"\tcli\n"
-	"\tclr	__zero_reg__\n"
-	);
-    SPL = (RAMEND-1)&0xFF;
-    SPH = (RAMEND-1)>>8;
-#endif
-
 	// Now, ready to go.
 
+    LCD_Init(CFG_LCD_NUM_LINES, CFG_LCD_NUM_COLUMNS);
 	InitUART();
     InitSW();      // Enable BootLoader input pullup
     InitLed();
 
-//    putch('a');
-#if 0
-    putch('b');
-    putch('C');
-    putch('a');
-    putch('l');
-    putch('l');
-    putch('e');
-    putch('d');
-    putch('=');
-    putch('0' + bCalled);
-    putch(' ');
-    putch('0' + sizeof(bCalled));
-    putch('\n');
-#endif
-
+    LCD_Clear();
+    LCD_PutStr("BootLoad");
 #if PRINT_BANNER
     {
         s = gBanner;
@@ -262,6 +241,8 @@ void boot(char bCalled)
 
 	if (bCalled)
 	{
+        LCD_MoveTo(0,1);
+        LCD_PutStr("App");
 		putch(0x14);
 		putch(0x10);
 	}
@@ -271,18 +252,39 @@ void boot(char bCalled)
 
 	    if (bAppStart)
         {
+            // App Program found in low memory
             i = 30;	// 3 seconds
-            //putch( 'A' );
         }
 	    else
         {
+            // No app in low memory, or forced into bootloader mode via SW
             i = 6;	// 1/2 second
-            //putch( 'R' );
+
+            LCD_MoveTo(0,1);
+            if (pgm_read_byte_near(0x00) == 0xFF)
+            {
+                LCD_PutStr("No Pgm");
+            }
+            else
+            {
+                LCD_PutStr("SW");
+            }
         }
 
         while(( bAppStart == 0 ) || i--)
         {
-
+#if USE_LCD
+            if (bAppStart)
+            {
+                if (++iter >= 10)
+                {
+                    iter = 0;
+                    seconds++;
+                    LCD_MoveTo(0,1);
+                    LCD_PutChar('0' + seconds);
+                }
+            }
+#endif
             putch('\0'); // Wakes up BootHost
 
             DelayMS(100);
@@ -300,15 +302,18 @@ void boot(char bCalled)
         }
 		if (bAppStart)
         {
+            LCD_MoveTo(0,1);
+            LCD_PutStr("Start");
             app_start();
         }
 	}
 
 	LedOff();
+    LCD_MoveTo(0,1);
+    LCD_PutStr("        ");
 
     for (;;)
     {
-
         ch = getch();			/* get character from UART */
         if(ch=='0')				/* Hello is anyone home ? */
         {
@@ -365,6 +370,8 @@ void boot(char bCalled)
         	LedOff();
         	nothing_response();
         	DelayMS(2);	// Wait for previous response to clear.
+            LCD_MoveTo(0,1);
+            LCD_PutStr("Start");
         	start();	// Re-enter the bootloader
 		}
 #if 0	// Pointless since avrdude doesn't use these commands to access eeprom
