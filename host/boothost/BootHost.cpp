@@ -355,6 +355,12 @@ int main( int argc, char **argv )
         LogError( "Unable to update terminal settings\n" );
         return 1;
     }
+
+    if ( tcflush( fileno(stdin), TCIFLUSH ) < 0 )
+    {
+        LogError( "Unable to flush terminal\n" );
+        return 1;
+    }
 #endif
 
     const char *bootLoaderType = "*** Unknown ***";
