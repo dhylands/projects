@@ -93,11 +93,75 @@
 
 /* ---- Private Constants and Types --------------------------------------- */
 
-#define DDR( port ) (*(&(port) - 1))
+#define DDR( port )  (*(&(port) - 1))
+
+#if CFG_LCD_MUX_DATA
+typedef struct PinConfig_s
+{
+#if CFG_LCD_SCATTERED_DATA
+    uint8_t port[4];
+    uint8_t ddr[4];
+#else
+    uint8_t port;
+    uint8_t ddr;
+#endif
+} PinConfig_t;
+#endif  // CFG_LCD_MUX_DATA
 
 /* ---- Private Variables ------------------------------------------------- */
 
 /* ---- Private Function Prototypes --------------------------------------- */
+
+#if CFG_LCD_MUX_DATA
+static void LCD_SavePinConfig(PinConfig_t *pinConfig)
+{
+#if CFG_LCD_SCATTERED_DATA
+    pinConfig->port[0] = CFG_LCD_DATA_DB4_PORT;
+    pinConfig->port[1] = CFG_LCD_DATA_DB5_PORT;
+    pinConfig->port[2] = CFG_LCD_DATA_DB6_PORT;
+    pinConfig->port[3] = CFG_LCD_DATA_DB7_PORT;
+    pinConfig->ddr[0] = DDR( CFG_LCD_DATA_DB4_PORT );
+    pinConfig->ddr[1] = DDR( CFG_LCD_DATA_DB5_PORT );
+    pinConfig->ddr[2] = DDR( CFG_LCD_DATA_DB6_PORT );
+    pinConfig->ddr[3] = DDR( CFG_LCD_DATA_DB7_PORT );
+
+    DDR( CFG_LCD_DATA_DB4_PORT ) |= ( 1 << CFG_LCD_DATA_DB4_PIN );
+    DDR( CFG_LCD_DATA_DB5_PORT ) |= ( 1 << CFG_LCD_DATA_DB5_PIN );
+    DDR( CFG_LCD_DATA_DB6_PORT ) |= ( 1 << CFG_LCD_DATA_DB6_PIN );
+    DDR( CFG_LCD_DATA_DB7_PORT ) |= ( 1 << CFG_LCD_DATA_DB7_PIN );
+#else
+    pinConfig->port = CFG_LCD_DATA_PORT;
+    pinConfig->ddr  = DDR( CFG_LCD_DATA_PORT );
+
+    DDR( CFG_LCD_DATA_PORT ) |= LCD_DATA_MASK;
+#endif
+}
+
+static void LCD_RestorePinConfig(PinConfig_t *pinConfig)
+{
+#if CFG_LCD_SCATTERED_DATA
+    CFG_LCD_DATA_DB7_PORT = (CFG_LCD_DATA_DB7_PORT & ~(1 << CFG_LCD_DATA_DB7_PIN)) | (pinConfig->port[3] & (1 << CFG_LCD_DATA_DB7_PIN));
+    CFG_LCD_DATA_DB6_PORT = (CFG_LCD_DATA_DB6_PORT & ~(1 << CFG_LCD_DATA_DB6_PIN)) | (pinConfig->port[2] & (1 << CFG_LCD_DATA_DB6_PIN));
+    CFG_LCD_DATA_DB5_PORT = (CFG_LCD_DATA_DB5_PORT & ~(1 << CFG_LCD_DATA_DB5_PIN)) | (pinConfig->port[1] & (1 << CFG_LCD_DATA_DB5_PIN));
+    CFG_LCD_DATA_DB4_PORT = (CFG_LCD_DATA_DB4_PORT & ~(1 << CFG_LCD_DATA_DB4_PIN)) | (pinConfig->port[0] & (1 << CFG_LCD_DATA_DB4_PIN));
+
+    DDR(CFG_LCD_DATA_DB7_PORT) = (DDR(CFG_LCD_DATA_DB7_PORT) & ~(1 << CFG_LCD_DATA_DB7_PIN)) | (pinConfig->ddr[3] & (1 << CFG_LCD_DATA_DB7_PIN));
+    DDR(CFG_LCD_DATA_DB6_PORT) = (DDR(CFG_LCD_DATA_DB6_PORT) & ~(1 << CFG_LCD_DATA_DB6_PIN)) | (pinConfig->ddr[2] & (1 << CFG_LCD_DATA_DB6_PIN));
+    DDR(CFG_LCD_DATA_DB5_PORT) = (DDR(CFG_LCD_DATA_DB5_PORT) & ~(1 << CFG_LCD_DATA_DB5_PIN)) | (pinConfig->ddr[1] & (1 << CFG_LCD_DATA_DB5_PIN));
+    DDR(CFG_LCD_DATA_DB4_PORT) = (DDR(CFG_LCD_DATA_DB4_PORT) & ~(1 << CFG_LCD_DATA_DB4_PIN)) | (pinConfig->ddr[0] & (1 << CFG_LCD_DATA_DB4_PIN));
+#else
+    CFG_LCD_DATA_PORT = (CFG_LCD_DATA_PORT & ~LCD_DATA_MASK) | (pinConfig->port & LCD_DATA_MASK);
+    DDR(CFG_LCD_DATA_PORT) = (DDR(CFG_LCD_DATA_PORT) & ~LCD_DATA_MASK) | (pinConfig->ddr & LCD_DATA_MASK);
+#endif
+}
+#define LCD_DECL_PIN_CONFIG     PinConfig_t pinConfig
+#define LCD_SAVE_PIN_CONFIG     LCD_SavePinConfig(&pinConfig)
+#define LCD_RESTORE_PIN_CONFIG  LCD_RestorePinConfig(&pinConfig)
+#else
+#define LCD_DECL_PIN_CONFIG
+#define LCD_SAVE_PIN_CONFIG
+#define LCD_RESTORE_PIN_CONFIG
+#endif  // CFG_LCD_MUX_DATA
 
 static inline void LCD_HAL_E_High( void )
 {
@@ -195,6 +259,10 @@ void LCD_HAL_Init( void )
 {
     // Configure the pins as outputs
 
+#if CFG_LCD_MUX_DATA
+    LCD_DECL_PIN_CONFIG;
+    LCD_SAVE_PIN_CONFIG;
+#else
 #if CFG_LCD_SCATTERED_DATA
     DDR( CFG_LCD_DATA_DB4_PORT )    |= ( 1 << CFG_LCD_DATA_DB4_PIN );
     DDR( CFG_LCD_DATA_DB5_PORT )    |= ( 1 << CFG_LCD_DATA_DB5_PIN );
@@ -203,6 +271,7 @@ void LCD_HAL_Init( void )
 #else
     DDR( CFG_LCD_DATA_PORT ) |= LCD_DATA_MASK;
 #endif
+#endif  //  CFG_LCD_MUX_DATA
     DDR( CFG_LCD_RS_PORT )   |= LCD_RS_MASK;
     DDR( CFG_LCD_E_PORT )    |= LCD_E_MASK;
 #if defined( CFG_LCD_RW_PORT )
@@ -231,6 +300,8 @@ void LCD_HAL_Init( void )
     LCD_HAL_E_Pulse();
     LCD_HAL_Delay( 1 );
 
+    LCD_RESTORE_PIN_CONFIG;
+
     // Now that the LCD is in 4 bit mode, we can call LCD_HAL_Write
 
     if ( LCD_NumLines() == 1 )
@@ -254,6 +325,9 @@ void LCD_HAL_Init( void )
 
 void LCD_HAL_Write( uint8_t rs, uint8_t cmd )
 {
+    LCD_DECL_PIN_CONFIG;
+    LCD_SAVE_PIN_CONFIG;
+
     if ( rs )
     {
         LCD_HAL_RS_High();
@@ -272,6 +346,8 @@ void LCD_HAL_Write( uint8_t rs, uint8_t cmd )
 
     LCD_HAL_Data( cmd & 0x0F );
     LCD_HAL_E_Pulse();
+
+    LCD_RESTORE_PIN_CONFIG;
 
 } // LCD_HAL_Write
 
