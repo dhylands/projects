@@ -30,7 +30,11 @@
 #define LED_PORT                PORTD
 #define LED_MASK                ( 1 << 7 )   
 
+#define CFG_LCD_NUM_LINES       2
+#define CFG_LCD_NUM_COLUMNS     8
+
 #define CFG_LCD_SCATTERED_DATA  1
+#define CFG_LCD_MUX_DATA        1
 
 #define CFG_LCD_DATA_DB4_PORT   PORTB
 #define CFG_LCD_DATA_DB4_PIN    1
