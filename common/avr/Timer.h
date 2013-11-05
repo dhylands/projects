@@ -25,6 +25,7 @@
 
 #include "Config.h"
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
 /* ---- Include Files ---------------------------------------------------- */
 
@@ -182,11 +183,18 @@ typedef uint32_t    msTick_t;   // Counts once per millisecond
 
 extern volatile msTick_t    gMsTickCount;
 
+static inline msTick_t getMsTickCount( void ) {
+	cli();
+	msTick_t value = gMsTickCount;
+	sei();
+	return value;
+}
+
 #endif
 
 /* ---- Function Prototypes ---------------------------------------------- */
 
 void InitTimer( void );
 void WaitForTimer0Rollover( void );
-                  
+
 #endif  // TIMER_H
