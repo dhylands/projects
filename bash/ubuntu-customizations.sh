@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Remove brltty which conflicts with many FTDI usb-to-serial adapters
+
+echo "Removing brltty (conflicts with FTDI adapters)"
+sudo apt-get remove brltty
+
+# Remove modemmanager which conflicts with ATMega32u4 and/or LUFA
+
+echo "Removing modemmanager (conflicts with ATMega32u4/LUFA)"
+
+sudo apt-get remove modemmanager
+
 echo "Moving min/max/close over to the right..."
 
 #gconftool-2 --set "/apps/metacity/general/button_layout" --type string "menu:minimize,maximize,close"
