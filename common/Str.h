@@ -70,11 +70,11 @@ char *StrMaxCat( char *dst, const char *src, size_t maxLen );
 
 #include <avr/pgmspace-fix.h>
 
-int StrPrintf_P( char *outStr, int maxLen, const prog_char *fmt, ... );
-int vStrPrintf_P( char *outStr, int maxLen, const prog_char *fmt, va_list args );
+int StrPrintf_P( char *outStr, int maxLen, const char *fmt, ... );
+int vStrPrintf_P( char *outStr, int maxLen, const char *fmt, va_list args );
 
-int StrXPrintf_P( StrXPrintfFunc func, void *userParm, const prog_char *fmt, ... );
-int vStrXPrintf_P( StrXPrintfFunc func, void *userParm, const prog_char *fmt, va_list args );
+int StrXPrintf_P( StrXPrintfFunc func, void *userParm, const char *fmt, ... );
+int vStrXPrintf_P( StrXPrintfFunc func, void *userParm, const char *fmt, va_list args );
 
 #define StrPrintf(  outStr, maxLen, fmt, args... )      StrPrintf_P(  outStr, maxLen, PSTR( fmt ), ## args )
 #define vStrPrintf( outStr, maxLen, fmt, args )         vStrPrintf_P( outStr, maxLen, PSTR( fmt ), args )

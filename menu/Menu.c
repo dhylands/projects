@@ -411,7 +411,7 @@ static void MENU_EventEditMenu( MENU_Event_t event, MENU_MemItem_t *item )
 
 static void MENU_EventEditProc( MENU_Event_t event, MENU_MemItem_t *item )
 {
-    const prog_char *str;
+    const char *str;
 
     MENU_LOG(  "MENU_EventEditProc: %s\n", gMenuEventStr[ event ]);
 

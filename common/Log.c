@@ -50,8 +50,6 @@
 #define vLog            vLog_P
 #define LogBuf          LogBuf_P
 
-//#define char            prog_char
-
 #else
 
 #define PSTR(str)   str

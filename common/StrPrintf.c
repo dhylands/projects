@@ -55,7 +55,6 @@
 
 #else
 
-#define prog_char               char
 #define pgm_read_byte( addr )  *addr
 
 #endif
@@ -187,7 +186,7 @@ int StrPrintf( char *outStr, int maxLen, const char *fmt, ... )
 *
 */
 
-int StrXPrintf( StrXPrintfFunc outFunc, void *outParm, const prog_char *fmt, ... )
+int StrXPrintf( StrXPrintfFunc outFunc, void *outParm, const char *fmt, ... )
 {
    int      rc;
    va_list  args;
@@ -210,7 +209,7 @@ int StrXPrintf( StrXPrintfFunc outFunc, void *outParm, const prog_char *fmt, ...
 *  @param   args     (in)  Arguments in a format compatible with va_arg().
 */
 
-int vStrPrintf( char *outStr, int maxLen, const prog_char *fmt, va_list args )
+int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 {
    StrPrintfParms    strParm;
 
@@ -314,7 +313,7 @@ int vStrXPrintf
 (
    StrXPrintfFunc   outFunc,
    void            *outParm, 
-   const prog_char *fmt, 
+   const char      *fmt, 
    va_list          args
 )
 {

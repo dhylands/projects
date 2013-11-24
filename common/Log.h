@@ -122,12 +122,12 @@ extern  int gDeferredNewline;
 
 typedef struct
 {
-    const prog_char    *fmt;
-    uint8_t             param1;
-    uint8_t             param2;
+    const char *fmt;
+    uint8_t     param1;
+    uint8_t     param2;
 #if CFG_LOG_EXTRA_PARAMS
-    uint8_t             param3;
-    uint8_t             param4;
+    uint8_t     param3;
+    uint8_t     param4;
 #endif
 
 } LOG_Entry_t;
@@ -140,7 +140,7 @@ typedef struct
 #   define LOG_EXTRA_PARAMS
 #endif
 
-void LogBuf_P( const prog_char *fmt, uint8_t arg1, uint8_t arg2 LOG_EXTRA_PARAMS_DECL );
+void LogBuf_P( const char *fmt, uint8_t arg1, uint8_t arg2 LOG_EXTRA_PARAMS_DECL );
 
 #define LogBuf0( fmt )              LogBuf_P( LOG_PSTR( fmt ), 0, 0       LOG_EXTRA_PARAMS )
 #define LogBuf1( fmt, arg1 )        LogBuf_P( LOG_PSTR( fmt ), arg1, 0    LOG_EXTRA_PARAMS )

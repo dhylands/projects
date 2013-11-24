@@ -100,7 +100,7 @@ static void CalibrateCore( MENU_Event_t event, uint8_t *cal )
 *   Called to save the white calibration
 */
 
-static const prog_char *CalibrateSaveWhite( MENU_Event_t event )
+static const char *CalibrateSaveWhite( MENU_Event_t event )
 {
     CalibrateCore( event, gMemParam.cal_white );
 
@@ -113,14 +113,14 @@ static const prog_char *CalibrateSaveWhite( MENU_Event_t event )
 
 } // CalibrateSaveWhite
 
-static const prog_char *Follow( MENU_Event_t event );
+static const char *Follow( MENU_Event_t event );
 
 /***************************************************************************/
 /**
 *   Called to save the black calibration
 */
 
-static const prog_char *CalibrateSaveBlack( MENU_Event_t event )
+static const char *CalibrateSaveBlack( MENU_Event_t event )
 {
     CalibrateCore( event, gMemParam.cal_black );
 
@@ -553,7 +553,7 @@ int main( void )
 *   Test mode to follow a line.
 */
 
-static const prog_char *Follow( MENU_Event_t event )
+static const char *Follow( MENU_Event_t event )
 {
     MENU_Exit();
 

@@ -57,9 +57,9 @@ void LogInit( StrXPrintfFunc logPrintFunc );
 
 void Log( const char *fmt, ... );
 
-void Log_P( const prog_char *fmt, ... );
-void LogError_P( const prog_char *fmt, ... );
-void vLog_P( const prog_char *fmt, va_list args );
+void Log_P( const char *fmt, ... );
+void LogError_P( const char *fmt, ... );
+void vLog_P( const char *fmt, va_list args );
 
 #define Log( fmt, args... )         Log_P( PSTR( fmt ), ## args )
 #define LogError( fmt, args... )    LogError_P( PSTR( fmt ), ## args )

@@ -56,7 +56,7 @@ void LCD_MoveTo( unsigned x, unsigned y );
 void LCD_PutChar( char ch );
 void LCD_PutStr( const char *s );
 
-void LCD_Printf_P( const prog_char *fmt, ... );
+void LCD_Printf_P( const char *fmt, ... );
 
 #define LCD_Printf( fmt, args... )  LCD_Printf_P( PSTR( fmt ), ## args )
 

@@ -281,7 +281,7 @@ static int lcdPrintfFunc( void *outParm, int ch )
 
 } // lcdPrintfFunc
 
-void LCD_Printf( const prog_char *fmt, ... )
+void LCD_Printf( const char *fmt, ... )
 {
     va_list args;
 

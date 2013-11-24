@@ -46,8 +46,6 @@
 #define vLog        vLog_P
 #define vStrXPrintf vStrXPrintf_P
 
-#define char        prog_char
-
 #else
 
 int gVerbose = 0;

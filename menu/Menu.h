@@ -34,7 +34,6 @@
 #if defined( AVR )
 #   include <avr/pgmspace.h>
 #else
-typedef char    prog_char;
 #define PSTR(str )  str
 #define PROGMEM
 #endif
@@ -62,7 +61,7 @@ typedef enum
 
 } MENU_Event_t;
 
-typedef const prog_char *(*MENU_Proc_t)( MENU_Event_t event );
+typedef const char *(*MENU_Proc_t)( MENU_Event_t event );
 
 struct MENU_Item_s;
 typedef struct MENU_Item_s          MENU_MemItem_t;
@@ -105,9 +104,9 @@ typedef union
 
 struct MENU_Item_s
 {
-    const prog_char    *name;
-    MENU_Type           type;
-    MENU_Value_t        val;
+    const char     *name;
+    MENU_Type       type;
+    MENU_Value_t    val;
 
 };
 

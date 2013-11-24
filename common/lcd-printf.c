@@ -64,7 +64,7 @@ static int lcdPrintfFunc( void *outParm, int ch )
 *   LCD_Printf_P( PSTR( "i = %d\n" ), i );
 */
 
-void LCD_Printf_P( const prog_char *fmt, ... )
+void LCD_Printf_P( const char *fmt, ... )
 {
     va_list args;
 
