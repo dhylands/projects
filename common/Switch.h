@@ -34,14 +34,14 @@
 
 // This file expects the following options to be defined in Config.h
 //
-//  CFG_NUM_SWITCHES            - Determines the total number of switches that 
+//  CFG_NUM_SWITCHES            - Determines the total number of switches that
 //                                will be checked.
-//                      
-//  CFG_SWITCH_BOUNCE_ON_COUNT  - Determines the number of times that the 
+//
+//  CFG_SWITCH_BOUNCE_ON_COUNT  - Determines the number of times that the
 //                                the swith needs to be seen on before it's
 //                                considered to be really on.
 //
-//  CFG_SWITCH_BOUNCE_OFF_COUNT - Determines the number of times that the 
+//  CFG_SWITCH_BOUNCE_OFF_COUNT - Determines the number of times that the
 //                                the swith needs to be seen off before it's
 //                                considered to be really off.
 //
@@ -158,5 +158,5 @@ void CheckSwitches( void );
 // following prototype.
 
 void SwitchEvent( SwitchNum_t switchNum, SwitchEvent_t event );
-                                                 
+
 #endif  // SWITCH_H

@@ -32,7 +32,7 @@ MK_SRC_FILES = \
 
 #LDFLAGS += -L $(PTHREADS_DIR)
 									  
-LDLIBS += -lpthread
+LDLIBS += -lpthread -lrt
 
 include ../../rules/mkRules.mk
 

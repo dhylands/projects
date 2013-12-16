@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <sys/unistd.h>
 #include <string.h>
+#include <time.h>
 
 #include "stk500-command.h"
 #include "StateSTK500.h"
@@ -81,6 +82,7 @@ static  size_t          gPacketSizeExpected = 0;
 static  size_t          gPacketSize = 0;
 static  uint8_t         gPacketData[ PACKET_SIZE ];
 static  bool            gLogError = true;
+static  struct timespec gSyncTime;
 
 static  uint8_t         gHwVer;
 static  uint8_t         gSwMajor;
@@ -298,6 +300,7 @@ StatePtrProxy StateProcessChar( char ch )
 
                 SendData( buf, sizeof( buf ));
 
+                clock_gettime(CLOCK_MONOTONIC, &gSyncTime);
                 gState = SYNCING_RSP;
                 gPacketState = WaitingForINSYNC;
                 gPacketSizeExpected = 0;
@@ -346,11 +349,32 @@ StatePtrProxy StateProcessChar( char ch )
                 // extra 0x00's while we're waiting for the InSync response
                 // so we jut ignore them.
 
+                struct timespec now;
+                clock_gettime(CLOCK_MONOTONIC, &now);
+                struct timespec elapsed;
+                elapsed.tv_sec = now.tv_sec - gSyncTime.tv_sec;
+                if (now.tv_nsec >= gSyncTime.tv_nsec)
+                {
+                    elapsed.tv_nsec = now.tv_nsec - gSyncTime.tv_nsec;
+                }
+                else
+                {
+                    elapsed.tv_nsec = gSyncTime.tv_nsec - now.tv_nsec;
+                    elapsed.tv_sec++;
+                }
+                if (elapsed.tv_sec > 0 || elapsed.tv_nsec > 500000000)
+                {
+                    // A half second has gone by with no response, resend
+                    // the handshale
+
+                    gPacketState = PacketLogging;
+                    return StateProcessChar(ch);
+                }
                 break; 
             }
             if ( ch != 0x00 )
             {
-    #if 0
+    #if 1
                 // Log Character but don't switch states
     
                 StateLog( ch );

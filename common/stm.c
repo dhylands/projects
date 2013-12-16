@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   stm.c 
+*   @file   stm.c
 *
 *   @brief  This file contains the functions which implements the
 *           State Machine Engine.
@@ -91,7 +91,7 @@ static	STM_Input	GetInput( STM_StateMachine *sm );
 
 //***************************************************************************
 /**
-*	Adds `input` onto the end of input queue for state 
+*	Adds `input` onto the end of input queue for state
 *	machine `sm`. The input will eventually be processed via
 *	STM_Execute or STM_Execute1.
 */
@@ -182,7 +182,7 @@ int STM_Execute( STM_StateMachine *sm, STM_StateMachine **currSm )
 *	The return code indicates whether an input was processed or not.
 *	
 *   @returns	TRUE if an input was processed, FALSE otherwise.
-*   
+*
 */
 
 int STM_Execute1( STM_StateMachine *sm, STM_StateMachine **currSm )
@@ -205,7 +205,7 @@ int STM_Execute1( STM_StateMachine *sm, STM_StateMachine **currSm )
 		return FALSE;
 	}
 
-	/* 
+	/*
 	 * Set the global state machine variable, so that actions which use it
 	 * can access this state machine. Save the old value off so that action
 	 * routines can execute other state machines.

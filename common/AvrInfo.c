@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   AvrInfo.c 
+*   @file   AvrInfo.c
 *
 *   @brief  Contains fucntions for mapping AVR Part numbers to information
 *           structures.
@@ -73,7 +73,7 @@ const AvrInfo_t *FindAvrInfoBySignature( uint16_t signature )
 {
     int i;
 
-    for ( i = 0; i < gNumAvrInfoEntries; i++ ) 
+    for ( i = 0; i < gNumAvrInfoEntries; i++ )
     {
         if ( gAvrInfo[ i ].m_signature == signature )
         {

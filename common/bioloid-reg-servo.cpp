@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   bioloid-reg-servo.c 
+*   @file   bioloid-reg-servo.c
 *
 *   @brief  Provides the description of the registers used by the
 *           Dynamixel AX-12 servo.

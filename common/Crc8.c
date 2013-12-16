@@ -14,11 +14,11 @@
 ****************************************************************************/
 /**
 *
-*   @file   Crc8.c 
+*   @file   Crc8.c
 *
 *   @brief  This file contains the definition of the CRC-8 algorithim
 *           used by SMBus
-*           
+*
 *
 *****************************************************************************/
 
@@ -49,7 +49,7 @@
 
 #if 0   // Traditional implementation
 
-#define POLYNOMIAL    (0x1070U << 3) 
+#define POLYNOMIAL    (0x1070U << 3)
 
 unsigned char Crc8( unsigned char inCrc, unsigned char inData )
 {
@@ -58,8 +58,8 @@ unsigned char Crc8( unsigned char inCrc, unsigned char inData )
 
     data = inCrc ^ inData;
     data <<= 8;
-  
-	for ( i = 0; i < 8; i++ ) 
+
+	for ( i = 0; i < 8; i++ )
     {
 		if (( data & 0x8000 ) != 0 )
         {
@@ -88,8 +88,8 @@ unsigned char Crc8( unsigned char inCrc, unsigned char inData )
     unsigned char   data;
 
     data = inCrc ^ inData;
-  
-	for ( i = 0; i < 8; i++ ) 
+
+	for ( i = 0; i < 8; i++ )
     {
         if (( data & 0x80 ) != 0 )
         {

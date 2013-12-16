@@ -40,7 +40,7 @@
 
 /***************************************************************************/
 /**
-*  Concatenates source to the destination, but makes sure that the 
+*  Concatenates source to the destination, but makes sure that the
 *  destination string (including terminating null), doesn't exceed maxLen.
 *
 *  @param   dst      (mod) String to concatnate onto.
@@ -65,8 +65,8 @@ char *StrMaxCat( char *dst, const char *src, size_t maxLen )
 
 /***************************************************************************/
 /**
-*   Copies the source to the destination, but makes sure that the 
-*   destination string (including terminating null), doesn't exceed 
+*   Copies the source to the destination, but makes sure that the
+*   destination string (including terminating null), doesn't exceed
 *   maxLen.
 *
 *   @param  dst     (out) Place to store the string copy.
@@ -114,7 +114,7 @@ char *StrMaxCpy( char *dst, const char *src, size_t maxLen )
 		 * Write in the terminating null character since strncpy doesn't in
 		 * this particular case.
 		 *
-		 * We don't do this arbitrarily so that the caller can use a sentinel 
+		 * We don't do this arbitrarily so that the caller can use a sentinel
 		 * in the very end of the buffer to detect buffer overflows.
 		 */
 

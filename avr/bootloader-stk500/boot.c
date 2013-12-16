@@ -149,11 +149,18 @@ how/if it works for you.
 #endif
 
 #if PRINT_BANNER
+#undef LCD_PutChar
+#undef LCD_PutStr
+
+#define LCD_PutChar(c)  putch(c)
+#define LCD_PutStr(s)   puts_P(PSTR(s))
+
 static const char gBanner[] PROGMEM = "***** STK500 BootLoader *****\n\n";
-static const char *s;
 #endif
 
 void putch(uint8_t);
+void puts_P(const char *s);
+#define puts(s) puts_P(PSTR(s))
 uint8_t getch(void);
 uint8_t checkchar(void);
 void getNch(uint8_t);
@@ -221,22 +228,14 @@ void boot(char bCalled)
 	// Now, ready to go.
 
     LCD_Init(CFG_LCD_NUM_LINES, CFG_LCD_NUM_COLUMNS);
-	InitUART();
+    InitUART();
     InitSW();      // Enable BootLoader input pullup
     InitLed();
 
     LCD_Clear();
     LCD_PutStr("BootLoad");
 #if PRINT_BANNER
-    {
-        s = gBanner;
-
-        while (( ch = pgm_read_byte( s )) != '\0' ) 
-        {
-            putch( ch );
-            s++;
-        }
-    }
+    puts_P(gBanner);
 #endif
 
 	if (bCalled)
@@ -576,6 +575,16 @@ void putch(uint8_t ch)
     while (!(UCSRA & _BV(UDRE)))
     	;
     UDR = ch;
+}
+
+void puts_P(const char *s)
+{
+    char ch;
+    while ((ch = pgm_read_byte(s)) != '\0')
+    {
+        putch(ch);
+        s++;
+    }
 }
 
 uint8_t getch(void)

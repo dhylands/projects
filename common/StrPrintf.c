@@ -12,10 +12,10 @@
 *
 *  @brief   Implementation of a re-entrant printf function.
 *
-*  Implements a reentrant version of the printf function. Also allows a 
+*  Implements a reentrant version of the printf function. Also allows a
 *  function pointer to be provided to perform the actual output.
 *
-*  This version of printf was taken from 
+*  This version of printf was taken from
 *
 *     http://www.efgh.com/software/gprintf.htm
 *
@@ -70,7 +70,7 @@
 /**
  * Controls a variety of output options.
  */
-  
+
 typedef enum
 {
     NO_OPTION       = 0x00, /**< No options specified.						*/
@@ -95,16 +95,16 @@ typedef enum
  * Internal structure which is used to allow vStrXPrintf() to be reentrant.
  */
 
-typedef struct 
+typedef struct
 {
    /** Number of characters output so far.                                 */
    int            numOutputChars;
 
    /** Options determined from parsing format specification.               */
-   FmtOption      options;          
+   FmtOption      options;
 
    /** Minimum number of characters to output.                             */
-   short          minFieldWidth;    
+   short          minFieldWidth;
 
    /** The exact number of characters to output.                           */
    short          editedStringLen;
@@ -170,14 +170,14 @@ int StrPrintf( char *outStr, int maxLen, const char *fmt, ... )
 
 /***************************************************************************/
 /**
-*  Generic printf function which writes formatted data by calling a user 
+*  Generic printf function which writes formatted data by calling a user
 *  supplied function.
 *
 *  @a outFunc will be called to output each character. If @a outFunc returns
-*  a number >= 0, then StrXPrintf will continue to call @a outFunc with 
+*  a number >= 0, then StrXPrintf will continue to call @a outFunc with
 *  additional characters.
 *
-*  If @a outFunc returns a negative number, then StrXPrintf will stop 
+*  If @a outFunc returns a negative number, then StrXPrintf will stop
 *  calling @a outFunc and will return the non-negative return value.
 *
 *  @param   outFunc  (in)  Pointer to function to call to do the actual output.
@@ -226,7 +226,7 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 *  functions.
 *
 *  @a outFunc will be called to output each character. If @a outFunc returns
-*  a number >= 0, then vStrXPrintf will continue to call @a outFunc with 
+*  a number >= 0, then vStrXPrintf will continue to call @a outFunc with
 *  additional characters.
 *
 *  If @a outFunc returns a negative number, then vStrXPrintf will stop calling
@@ -235,13 +235,13 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 *  The format string @a fmt consists of ordinary characters, escape
 *  sequences, and format specifications. The ordinary characters and escape
 *  sequences are output in their order of appearance. Format specifications
-*  start with a percent sign (%) and are read from left to right. When 
-*  the first format specification (if any) is encountered, it converts the 
-*  value of the first argument after @a fmt and outputs it accordingly. 
-*  The second format specification causes the second argument to be 
-*  converted and output, and so on. If there are more arguments than there 
-*  are format specifications, the extra arguments are ignored. The 
-*  results are undefined if there are not enough arguments for all the 
+*  start with a percent sign (%) and are read from left to right. When
+*  the first format specification (if any) is encountered, it converts the
+*  value of the first argument after @a fmt and outputs it accordingly.
+*  The second format specification causes the second argument to be
+*  converted and output, and so on. If there are more arguments than there
+*  are format specifications, the extra arguments are ignored. The
+*  results are undefined if there are not enough arguments for all the
 *  format specifications.
 *
 *  A format specification has optional, and required fields, in the following
@@ -252,11 +252,11 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 *  Each field of the format specification is a single character or a number
 *  specifying a particular format option. The simplest format specification
 *  contains only the percent sign and a @b type character (for example %s).
-*  If a percent sign is followed by a character that has no meaning as a 
-*  format field, the character is sent to the output function. For example, 
+*  If a percent sign is followed by a character that has no meaning as a
+*  format field, the character is sent to the output function. For example,
 *  to print a percent-sign character, use %%.
 *
-*  The optional fields, which appear before the type character, control 
+*  The optional fields, which appear before the type character, control
 *  other aspects of the formatting, as follows:
 *
 *  @b flags may be one of the following:
@@ -266,28 +266,28 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 *
 *  @b width may be one of the following:
 *  - a number specifying the minimum width of the field
-*  - * (asterick) means that an integer taken from the argument list will 
+*  - * (asterick) means that an integer taken from the argument list will
 *    be used to provide the width. The @a width argument must precede the
 *    value being formatted in the argument list.
 *
 *  @b precision may be one of the following:
-*  - a number 
-*  - * (asterick) means that an integer taken from the argument list will 
-*    be used to provide the precision. The @a precision argument must 
+*  - a number
+*  - * (asterick) means that an integer taken from the argument list will
+*    be used to provide the precision. The @a precision argument must
 *    precede the value being formatted in the argument list.
 *
 *  The interpretation of @a precision depends on the type of field being
 *  formatted:
 *  - For b, d, o, u, x, X, the precision specifies the minimum number of
 *    digits that will be printed. If the number of digits in the argument
-*    is less than @a precision, the output value is padded on the left with 
-*    zeros. The value is not truncated when the number of digits exceeds 
+*    is less than @a precision, the output value is padded on the left with
+*    zeros. The value is not truncated when the number of digits exceeds
 *    @a prcision.
 *  - For s, the precision specifies the maximum number of characters to be
 *    printed.
 *
 *  The optional type modifier l (lowercase ell), may be used to specify
-*  that the argument is a long argument. This makes a difference on 
+*  that the argument is a long argument. This makes a difference on
 *  architectures where the sizeof an int is different from the sizeof a long.
 *
 *  @b type causes the output to be formatted as follows:
@@ -312,8 +312,8 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 int vStrXPrintf
 (
    StrXPrintfFunc   outFunc,
-   void            *outParm, 
-   const char      *fmt, 
+   void            *outParm,
+   const char      *fmt,
    va_list          args
 )
 {
@@ -338,7 +338,7 @@ int vStrXPrintf
          p.minFieldWidth = 0;
          p.leadingZeros  = 0;
          p.options       = NO_OPTION;
-         
+
          SetOption( &p, RIGHT_JUSTIFY );
 
          /*
@@ -417,18 +417,18 @@ int vStrXPrintf
          {
             base = 10;
          }
-         else 
+         else
          if ( controlChar == 'x' )
          {
             base = 16;
          }
-         else 
+         else
          if ( controlChar == 'X' )
          {
             base = 16;
             SetOption( &p, CAPITAL_HEX );
          }
-         else 
+         else
          if ( controlChar == 'u' )
          {
             base = 10;
@@ -438,12 +438,12 @@ int vStrXPrintf
          {
             base = 8;
          }
-         else 
+         else
          if ( controlChar == 'b' )
          {
             base = 2;
          }
-         else 
+         else
          if ( controlChar == 'c' )
          {
             base = -1;
@@ -524,7 +524,7 @@ int vStrXPrintf
                   x = - (long) x;
                }
 
-               do 
+               do
                {
                   int c;
                   c = x % base + '0';
@@ -604,7 +604,7 @@ static void OutputChar( Parameters *p, int c )
 /***************************************************************************/
 /**
 *  Outputs a formatted field. This routine assumes that the field has been
-*  converted to a string, and this routine takes care of the width 
+*  converted to a string, and this routine takes care of the width
 *  options, leading zeros, and any leading minus sign.
 *
 *  @param   p     (mod) State information.
@@ -688,7 +688,7 @@ static void OutputField( Parameters *p, char *s )
 
 /***************************************************************************/
 /**
-*  Helper function, used by vStrPrintf() (and indirectly by StrPrintf()) 
+*  Helper function, used by vStrPrintf() (and indirectly by StrPrintf())
 *  for outputting characters into a user supplied buffer.
 *
 *  @param   outParm  (mod) Pointer to StrPrintfParms structure.

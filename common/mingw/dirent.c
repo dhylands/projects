@@ -47,9 +47,9 @@
 
 //***************************************************************************
 /**
-*   The opendir() function opens a directory stream corresponding to 
-*   the directory name, and returns a pointer to the directory stream. 
-*   The stream is positioned at the first entry in the directory. 
+*   The opendir() function opens a directory stream corresponding to
+*   the directory name, and returns a pointer to the directory stream.
+*   The stream is positioned at the first entry in the directory.
 *
 *   On error, NULL is returned and errno is set appropriately.
 */
@@ -112,10 +112,10 @@ DIR *opendir( const char *dirName )
 
 //***************************************************************************
 /**
-*   The readdir() function returns a pointer to a dirent structure 
-*   representing the next directory entry in the directory stream 
-*   pointed to by dir. It returns NULL on reaching the end-of-file 
-*   or if an error occurred. 
+*   The readdir() function returns a pointer to a dirent structure
+*   representing the next directory entry in the directory stream
+*   pointed to by dir. It returns NULL on reaching the end-of-file
+*   or if an error occurred.
 */
 
 struct dirent *readdir( DIR *dir )
@@ -170,8 +170,8 @@ struct dirent *readdir( DIR *dir )
 
 //***************************************************************************
 /**
-*   The closedir() function closes the directory stream associated with dir. 
-*   The directory stream descriptor dir is not available after this call. 
+*   The closedir() function closes the directory stream associated with dir.
+*   The directory stream descriptor dir is not available after this call.
 */
 
 int closedir( DIR *dir )

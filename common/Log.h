@@ -52,7 +52,7 @@
 
 /* It turns out that newer versions of gcc have troubles with the
  * default PSTR macro when compiled using C++. This change
- * provides the equivalent behaviour, but gets rid of the 
+ * provides the equivalent behaviour, but gets rid of the
  * warning: only initialized variables can be placed into program memory area
  */
 
@@ -60,7 +60,7 @@
 #define LOG_PSTR(s)      PSTR(s)
 
 //#define LOG_PROGMEM __attribute__(( section(".progmem.data") ))
-//#define LOG_PSTR(s) (__extension__({static char __c[] LOG_PROGMEM = (s); &__c[0];}))    
+//#define LOG_PSTR(s) (__extension__({static char __c[] LOG_PROGMEM = (s); &__c[0];}))
 
 #endif
 

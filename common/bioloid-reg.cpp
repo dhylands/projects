@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   bioloid-reg.c 
+*   @file   bioloid-reg.c
 *
 *   @brief  Provides formatting routines for formatting various registers
 *           found on bioloid devices.

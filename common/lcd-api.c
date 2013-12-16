@@ -93,7 +93,7 @@ static inline void LCD_WriteCommand( uint8_t cmd )
 /**
 *   LCD_BlinkCursor
 *
-*   Controls whether the cursor is blinking or not. This function also has 
+*   Controls whether the cursor is blinking or not. This function also has
 *   the side effect of causing the cursor to be "shown".
 */
 

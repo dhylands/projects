@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file    PacketProtocol.c 
+*   @file    PacketProtocol.c
 *
 *   @brief   This file contains the implementation of the packet protocol.
 *
@@ -85,7 +85,7 @@ static  PKT_Globals gGlobals;
 
 /****************************************************************************/
 /**
-*   This function should be called for each character that is received on 
+*   This function should be called for each character that is received on
 *   the serial port. It will run it through it's internal state machine
 *   and call PKT_TextChar or PKT_PacketReceived as appropriate.
 *
@@ -250,7 +250,7 @@ void PKT_SendPacket
 
     crc = Crc8( 0, pkt->len );
 
-    for ( i = 0; i < pkt->len; i++ ) 
+    for ( i = 0; i < pkt->len; i++ )
     {
         crc = Crc8( crc, pkt->data[ i ]);
     }
@@ -258,7 +258,7 @@ void PKT_SendPacket
 #if PKT_LOG_ENABLED
 
     PKT_LOG(( "Sending %02x %02x ", PKT_ETX, pkt->len ));
-    for ( i = 0; i < pkt->len; i++ ) 
+    for ( i = 0; i < pkt->len; i++ )
     {
         PKT_LOG(( "%02x ", pkt->data[ i ], userData ));
     }
@@ -269,7 +269,7 @@ void PKT_SendPacket
     PKT_SendChar( PKT_ETX, userData );
     PKT_SendChar( pkt->len, userData );
 
-    for ( i = 0; i < pkt->len; i++ ) 
+    for ( i = 0; i < pkt->len; i++ )
     {
         PKT_SendChar( pkt->data[ i ], userData );
     }

@@ -16,7 +16,7 @@
 *
 *   @file   BioloidCommandLine.cpp
 *
-*   @brief  This file implements the BioloidCommandLine class, which 
+*   @brief  This file implements the BioloidCommandLine class, which
 *           parses command lines and sends the commands to devices on the
 *   bioloid bus.
 *
@@ -163,13 +163,13 @@ void BioloidCommandLine::DumpRegInfo( BLD_DevType_t *devType )
 
         if (( reg->flags & BLD_REG_FLAG_WR ) == 0 )
         {
-            Log( "0x%02x ro %d          %s\n", 
+            Log( "0x%02x ro %d          %s\n",
                  reg->address, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, reg->name );
         }
         else
         {
-            Log( "0x%02x rw %d %3d %4d %s\n", 
-                 reg->address, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, 
+            Log( "0x%02x rw %d %3d %4d %s\n",
+                 reg->address, reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1,
                  reg->minVal, reg->maxVal, reg->name );
         }
     }
@@ -313,7 +313,7 @@ static bool DevFound( BioloidBus *bus, BioloidDevice *dev )
 void BioloidCommandLine::ProcessDeviceGetCommand( BLD_DevType_t  *devType, Bioloid::ID_t id, StrTokenizer &line, bool raw )
 {
     BLD_Reg_t  *reg;
-    char        str[ 40 ]; 
+    char        str[ 40 ];
     unsigned    val;
     int         strWidth;
     int         i;
@@ -390,11 +390,11 @@ void BioloidCommandLine::ProcessDeviceGetCommand( BLD_DevType_t  *devType, Biolo
                 reg->fmtFunc( reg, val, str, sizeof( str ));
             }
 
-            Log( "0x%02x %s %d %-*s %s\n", 
-                reg->address, 
+            Log( "0x%02x %s %d %-*s %s\n",
+                reg->address,
                 reg->flags & BLD_REG_FLAG_WR ? "rw" : "ro",
-                reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1, 
-                strWidth, str, 
+                reg->flags & BLD_REG_FLAG_16BIT ? 2 : 1,
+                strWidth, str,
                 reg->name );
 
             reg++;
@@ -583,7 +583,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
         {
             devType = m_devType[devTypeIdx];
 
-            Log( "%-10s Model: %5u %2d registers\n", 
+            Log( "%-10s Model: %5u %2d registers\n",
                  devType->devTypeStr, devType->model, devType->numRegs );
         }
         return true;

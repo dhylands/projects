@@ -49,7 +49,7 @@
 *
 *   @code
 *   #define myQ_SIZE    64
-*   
+*
 *   volatile struct
 *   {
 *       uint8_t     m_getIdx;
@@ -92,9 +92,9 @@
 
 /* ---- Constants and Types ---------------------------------------------- */
 
-/** 
+/**
 *   Initializes the circular buffer for use.
-*/ 
+*/
 
 #define CBUF_Init( cbuf )       cbuf.m_getIdx = cbuf.m_putIdx = 0
 
@@ -208,7 +208,7 @@ public:
     bool IsFull() const     { return Len() == Size; }
     bool Error() const      { return Len() > Size; }
 
-    void Push( EntryType val )   
+    void Push( EntryType val )
     {
         m_entry[ m_putIdx++ & ( Size - 1 )] = val;
     }

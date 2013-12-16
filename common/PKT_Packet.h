@@ -56,7 +56,7 @@ extern "C"
  *  The CRC is calculated using CRC-8 (same as with the PEC in SMBus).
  *
  *  This protocol has two "modes", text mode and packet mode. When in text
- *  mode, any characters which are received are passed on directly, which 
+ *  mode, any characters which are received are passed on directly, which
  *  allows the underlying microprocessor to employ simple logging.
  */
 

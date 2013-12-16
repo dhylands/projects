@@ -87,7 +87,7 @@ struct option gLongOption[] =
     { "help",               0, NULL, 'h' },
     { "megaload",           0, NULL, 'm' }, // Use MegaLoad protocol
     { "port",               1, NULL, 'p' },
-    { "rts-reset",          0, NULL, 'r' }, // Use RTS as reset for device
+    { "reset",              0, NULL, 'r' }, // Use DTR/RTS as reset for device
     { "stk500",             0, NULL, 's' }, // Use STK500 protocol
     { "verbose",            0, NULL, 'v' },
     { 0 },
@@ -322,7 +322,7 @@ int main( int argc, char **argv )
     }
     if ( gUseRtsToReset )
     {
-        gSerialPort.StrobeRTS( 10 );
+        gSerialPort.StrobeDTRRTS();
     }
 
     // Put stdin in raw mode

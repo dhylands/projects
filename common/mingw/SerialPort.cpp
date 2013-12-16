@@ -325,7 +325,7 @@ size_t SerialPort::Write( const void *buf, size_t bytesToWrite )
         LogError( "SerialPort::Write failed: %s\n", GetErrorStr( err, errStr, sizeof( errStr )));
 
         return 0;
-        
+
     }
 
     return bytesWritten;
@@ -337,11 +337,9 @@ size_t SerialPort::Write( const void *buf, size_t bytesToWrite )
 *   Resets the target
 */
 
-void SerialPort::StrobeRTS( int strobeWidthInMsec )
+void SerialPort::StrobeDTRRTS()
 {
-    (void)strobeWidthInMsec;
-
-    LogError( "SerialPort::StrobeRTS not implemented yet\n" );
+    LogError( "SerialPort::StrobeDTRRTS not implemented yet\n" );
 
 } // StrobeRTS
 

@@ -40,7 +40,7 @@ void DumpMem( const char *prefix, unsigned address, const void *data, unsigned n
 #if defined( __cplusplus )
 }
 #endif
-                 
+
 /** @} */
 
 #endif // DUMPMEM_H

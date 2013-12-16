@@ -20,7 +20,7 @@
 *           was posted by Craig Limber:
 *           http://members.shaw.ca/climber/avrbuttons.html
 *
-*   This particular implementation is for the SRS Workshop Bot expansion 
+*   This particular implementation is for the SRS Workshop Bot expansion
 *   board.
 *
 ****************************************************************************/
@@ -35,7 +35,7 @@
 
 uint8_t gSwitchRaw[ NUM_SWITCH_BYTES ];
 uint8_t gSwitchEnabled[ NUM_SWITCH_BYTES ];
-                                                         
+
 /* ---- Private Constants and Types --------------------------------------- */
 
 /* ---- Private Variables ------------------------------------------------- */
@@ -107,7 +107,7 @@ void CheckSwitches( void )
 {
     uint8_t     sw;
 
-    for ( sw = 0; sw < CFG_NUM_SWITCHES; sw++ ) 
+    for ( sw = 0; sw < CFG_NUM_SWITCHES; sw++ )
     {
         if ( IsSwitchEnabled( sw ))
         {
@@ -122,7 +122,7 @@ void CheckSwitches( void )
                     }
                     break;
                 }
-    
+
                 case SWITCH_STATE_BOUNCING_ON:
                 {
                     if ( SwitchBounceCount(  sw ) >= CFG_SWITCH_BOUNCE_ON_COUNT )
@@ -143,7 +143,7 @@ void CheckSwitches( void )
                     }
                     break;
                 }
-    
+
                 case SWITCH_STATE_ON:
                 {
                     if ( !IsRawSwitchPressed( sw ))
@@ -153,7 +153,7 @@ void CheckSwitches( void )
                     }
                     break;
                 }
-    
+
                 case SWITCH_STATE_BOUNCING_OFF:
                 {
                     if ( SwitchBounceCount( sw ) >= CFG_SWITCH_BOUNCE_OFF_COUNT )

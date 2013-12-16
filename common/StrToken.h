@@ -63,7 +63,7 @@ public:
     void Init( const char *str, char *outToken, size_t maxLen, const char *delim = " \r\n\t" );
 
     //------------------------------------------------------------------------
-    
+
     char *NextToken( const char *delim = NULL );
 
     //------------------------------------------------------------------------

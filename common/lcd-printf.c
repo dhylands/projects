@@ -54,7 +54,7 @@ static int lcdPrintfFunc( void *outParm, int ch )
 *   LCD_Printf_P
 *
 *   Writes the formatted sting to the LCD at the current cursor position.
-*   The _P version indicates that the format string comes from program 
+*   The _P version indicates that the format string comes from program
 *   memory.
 *
 *   Use this function one of the following two ways:

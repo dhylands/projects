@@ -68,7 +68,7 @@ public:
     // Runs a single character through the state machine. Once a packet
     // has been parsed successfully, the PacketReceived virtual method
     // is called.
-    // 
+    //
     // ProcessChar returns Bioloid::ERROR_NOT_DONE if the packet is incomplete.
     // If the packet was parsed successfully, then Bioloid::ERROR_NONE is
     // returned. If an error is detected that Bioloid::ERROR_CHECKSUM is

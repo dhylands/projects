@@ -16,7 +16,7 @@
 *
 *   @file   StrToken.cpp
 *
-*   @brief  Implements the string tokenizer 
+*   @brief  Implements the string tokenizer
 *
 ****************************************************************************/
 
@@ -47,7 +47,7 @@
 StrTokenizer::StrTokenizer()
     : m_str( NULL ),
       m_delim( NULL ),
-      m_outToken( NULL ), 
+      m_outToken( NULL ),
       m_maxLen( 0 )
 {
 }
@@ -65,9 +65,9 @@ StrTokenizer::StrTokenizer
     size_t maxLen,      ///< Maximum lenght of @a outToken.
     const char *delim   ///< Delimiters to use if none are provided
 )
-    : m_str( str ), 
-      m_delim( delim ), 
-      m_outToken( outToken ), 
+    : m_str( str ),
+      m_delim( delim ),
+      m_outToken( outToken ),
       m_maxLen( maxLen )
 {
 }
@@ -124,7 +124,7 @@ char *StrTokenizer::NextToken
     }
 
     // Skip over delimiter characters
-    
+
     while (( *m_str != '\0' ) && ( strchr( delim, *m_str ) != NULL ))
     {
         m_str++;
@@ -137,12 +137,12 @@ char *StrTokenizer::NextToken
         return NULL;
     }
 
-    // Copy characters until we fill up the token, we run out, or hit a 
+    // Copy characters until we fill up the token, we run out, or hit a
     // delimiter.
 
     size_t i;
 
-    for ( i = 0; i < ( m_maxLen - 1 ); i++ ) 
+    for ( i = 0; i < ( m_maxLen - 1 ); i++ )
     {
         if ( *m_str == '\0' )
         {

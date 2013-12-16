@@ -16,7 +16,7 @@
 *
 *   @file   stm.h
 *
-*   @brief  This file contains the declarations for the State Machine Engine. 
+*   @brief  This file contains the declarations for the State Machine Engine.
 *
 *   The state machine engine takes a state machine, generated from smc,
 *	and executes it.
@@ -90,7 +90,7 @@ struct STM_StateMachine
 	int 		dbgStates;		/* Should we trace state changes?			*/
 #endif
 
-	/* 
+	/*
 	 * The following variables are initialized dynamically.
 	 */
 
@@ -102,7 +102,7 @@ struct STM_StateMachine
 
 // The state data is arranged as an array of bytes. Each state occupies the
 // same number of bytes, namely sm->entryBytes.
-// 
+//
 // The first two bytes are the index of the enter and exit action, and
 // this is followed by (action index, next state index) tuples.
 
@@ -127,9 +127,9 @@ void	STM_AddInput( STM_StateMachine *sm, STM_Input input );
 int 	STM_Execute( STM_StateMachine *sm, STM_StateMachine **currSm );
 int 	STM_Execute1( STM_StateMachine *sm, STM_StateMachine **currSm );
 void	STM_SetUserParm( STM_StateMachine *sm, void *userParm );
-void	STM_SetDebug( STM_StateMachine *sm, 
+void	STM_SetDebug( STM_StateMachine *sm,
                       int dbgInputs,
-					  int dbgActions, 
+					  int dbgActions,
                       int dbgStates );
 char   *STM_CurrStateStr( STM_StateMachine *sm );
 

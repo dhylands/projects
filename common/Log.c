@@ -125,7 +125,7 @@ static LogFunc_t    gLogFunc = DefaultLogFunc;
 
 void SetLogFunc( LogFunc_t logFunc )
 {
-    
+
     gLogFunc = logFunc;
 
 } // SetLogFunc
@@ -334,7 +334,7 @@ void LogAssertFailed
     Log_P( expr );
     Log_P( PSTR( "' failed.\n" ));
 #else
-    LogFunc( LOG_LEVEL_ASSERT, "%s: %d: %s Assertion '%s' failed.\n", 
+    LogFunc( LOG_LEVEL_ASSERT, "%s: %d: %s Assertion '%s' failed.\n",
              fileName, lineNum, function, expr );
 #endif
 

@@ -146,7 +146,7 @@ bool SerialPort::Open( const char *inDevName, const char *param )
     {
         baudRate = atoi( param );
 
-        for ( unsigned i = 0; i < ARRAY_LEN( gBaudTable ); i++ ) 
+        for ( unsigned i = 0; i < ARRAY_LEN( gBaudTable ); i++ )
         {
             if ( gBaudTable[ i ].baudRate == baudRate )
             {
@@ -258,7 +258,7 @@ bool SerialPort::SetTimeout( unsigned timeout )
     }
     else
     {
-        // Note. termios only supports timeouts specified in tenths of 
+        // Note. termios only supports timeouts specified in tenths of
         // a second, so we need convert from milliseconds.
 
         timeout = ( timeout + 99 ) / 100;
@@ -303,26 +303,41 @@ size_t SerialPort::Write( const void *buf, size_t bytesToWrite )
 
 //***************************************************************************
 /**
-*   Resets the target
+*   Resets the target using the DTR and CTS line
 */
 
-void SerialPort::StrobeRTS( int strobeWidthInMsec )
+void SerialPort::StrobeDTRRTS()
 {
-    int bits = TIOCM_RTS;
+    int rc;
+    unsigned int status;
 
-    // On my computer downstairs, settinging the RTS line makes it low.
+    rc = ioctl(m_fd, TIOCMGET, &status);
+    if ( rc < 0 )
+    {
+        perror("ioctl('TIOCMGET')");
+        return;
+    }
+    printf("Clearing DTR/RTS\n");
+    status &= ~(TIOCM_DTR | TIOCM_RTS);
+    rc = ioctl(m_fd, TIOCMSET, &status);
+    if ( rc < 0 )
+    {
+        perror("ioctl('TIOCMSET')");
+        return;
+    }
+    usleep(250 * 1000);
 
-    ioctl( m_fd, TIOCMBIS, &bits );
+    printf("Setting DTR/RTS\n");
+    status |= (TIOCM_DTR | TIOCM_RTS);
+    rc = ioctl(m_fd, TIOCMSET, &status);
+    if ( rc < 0 )
+    {
+        perror("ioctl('TIOCMSET')");
+        return;
+    }
+    usleep(50 * 1000);
 
-    // Sleep for 10 msec to allow the reset to take effect.
-
-    usleep( strobeWidthInMsec * 1000 );
-    
-    // On my computer downstairs, clearing the RTS line makes it high.
-
-    ioctl( m_fd, TIOCMBIC, &bits );
-
-} // StrobeRTS
+} // StrobeDTRRTS
 
 /** @} */
 

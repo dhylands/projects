@@ -190,7 +190,7 @@ static inline void LCD_HAL_RS_High( void )
 {
     CFG_LCD_RS_PORT |= LCD_RS_MASK;
 }
-
+    
 static inline void LCD_HAL_RS_Low( void )
 {
     CFG_LCD_RS_PORT &= ~LCD_RS_MASK;

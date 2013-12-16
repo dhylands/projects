@@ -90,9 +90,9 @@ public:
     size_t Write( const void *buf, size_t bytesToWrite );
 
     //------------------------------------------------------------------------
-    //  Strobes the RTS line.
+    //  Strobes the DTR and RTS lines.
 
-    void StrobeRTS( int strobeWidthInMsec );
+    void StrobeDTRRTS();
 
 private:
 

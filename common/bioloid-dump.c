@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   bioloid-dump.c 
+*   @file   bioloid-dump.c
 *
 *   @brief  Contains constants and strings which are useful for dumping
 *           bioloid packets.
@@ -64,7 +64,7 @@ void BLD_DumpCmdPacket( BLD_Packet_t *pkt )
         case BLD_CMD_WRITE:
         {
             Log( "ID:0x%02x Cmd: Write @ 0x%02x [", pkt->m_id, pkt->m_param[ 0 ] );
-            for ( i = 1; i <= pkt->m_length - 3; i++ ) 
+            for ( i = 1; i <= pkt->m_length - 3; i++ )
             {
                 Log( " 0x%02x", pkt->m_param[ i ] );
             }
@@ -75,7 +75,7 @@ void BLD_DumpCmdPacket( BLD_Packet_t *pkt )
         case BLD_CMD_REG_WRITE:
         {
             Log( "ID:0x%02x Cmd: RegWrite @ 0x%02x [", pkt->m_id, pkt->m_param[ 0 ] );
-            for ( i = 1; i <= pkt->m_length - 3; i++ ) 
+            for ( i = 1; i <= pkt->m_length - 3; i++ )
             {
                 Log( " 0x%02x", pkt->m_param[ i ] );
             }
@@ -104,11 +104,11 @@ void BLD_DumpCmdPacket( BLD_Packet_t *pkt )
 
             Log( "ID:0x%02x Cmd: SyncWrite @ 0x%02x Len:%d\n", pkt->m_id, pkt->m_param[0], actuatorLen );
 
-            for ( j = 0; j < numActuators; j++ ) 
+            for ( j = 0; j < numActuators; j++ )
             {
                 Log( "   ID:0x%02x [", pkt->m_param[ paramIdx++ ] );
 
-                for ( i = 0; i < actuatorLen; i++ ) 
+                for ( i = 0; i < actuatorLen; i++ )
                 {
                     Log( " 0x%02x", pkt->m_param[ paramIdx++ ] );
                 }
@@ -123,7 +123,7 @@ void BLD_DumpCmdPacket( BLD_Packet_t *pkt )
             break;
         }
     }
-    
+
 } // BLD_DumpCmdPacket
 
 //***************************************************************************
@@ -140,7 +140,7 @@ void BLD_DumpRspPacket( BLD_Packet_t *pkt )
     if ( pkt->m_length > 2 )
     {
         Log( " [" );
-        for ( i = 0; i < ( pkt->m_length - 2 ); i++ ) 
+        for ( i = 0; i < ( pkt->m_length - 2 ); i++ )
         {
             Log( " 0x%02x", pkt->m_param[ i ] );
         }

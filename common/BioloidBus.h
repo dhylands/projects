@@ -67,7 +67,7 @@ public:
     void SendAction();
 
     //------------------------------------------------------------------------
-    // Sends a byte. This will automatically accumulate the byte into 
+    // Sends a byte. This will automatically accumulate the byte into
     // the checksum
 
     virtual void SendByte( uint8_t data );
@@ -76,7 +76,7 @@ public:
     // Reads a byte. This function returns true if a character was read, and
     // returns false if no character is received within the designated
     // timeout.
-    // 
+    //
     // The max Return Delay time is 254 x 2 usec = 508 usec (the default
     // is 500 usec). This represents the minimum time between receiving a
     // packet and sending the response.

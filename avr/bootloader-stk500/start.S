@@ -35,7 +35,7 @@ boot_0:
 
     ldi     r24,lo8(0)
     ldi     r25,hi8(0)
-                       
+
     XJMP    boot
 
 // Entry pint if called directly by an application

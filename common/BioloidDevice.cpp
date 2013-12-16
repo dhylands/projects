@@ -16,7 +16,7 @@
 *
 *   @file   BioloidDevice.cpp
 *
-*   @brief  This file implements the BioloidDevice class, which is an 
+*   @brief  This file implements the BioloidDevice class, which is an
 *           abstract base class for devices on the bioloid bus.
 *
 ****************************************************************************/
@@ -202,8 +202,8 @@ void BioloidDevice::SendWrite( uint8_t offset, const void *data, uint8_t numByte
 
 //***************************************************************************
 /**
-*   Sends some data to write into the control table. The write into the 
-*   control table will be deferred until the ACTION command is sent.    
+*   Sends some data to write into the control table. The write into the
+*   control table will be deferred until the ACTION command is sent.
 */
 
 void BioloidDevice::SendDeferredWrite( uint8_t offset, const void *data, uint8_t numBytes )

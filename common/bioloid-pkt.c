@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   bioloid.c 
+*   @file   bioloid.c
 *
 *   @brief  Implements a parser for detecting and parsing packets sent to
 *           the bioloid servos (like the AX-12)
@@ -66,7 +66,7 @@ void BLD_Init( BLD_Instance_t *inst )
 
 //***************************************************************************
 /**
-*   Runs the packet parsing state machine. When a packet is recognized, 
+*   Runs the packet parsing state machine. When a packet is recognized,
 *   the PacketReceived callback will be called.
 */
 
@@ -104,7 +104,7 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
             {
                 // 0xFF is invalid as an ID, so just stay in this state until we receive
                 // a non-0xFF
-                
+
                 nextState = BLD_STATE_2ND_FF_RCVD;
                 break;
             }
@@ -179,13 +179,13 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
 
 #if CFG_BLD_OPTIMIZE_SYNC_WRITE_PARSING
         // Format of the SYNC WRITE packet:
-        // 
+        //
         // ID:          0xFE (Broadcast)
         // Length:        xx (L+1) * N + 4 where L=len for each ID, N = # of ids
         // Instruction: 0x83
         // Param 1:       AA Starting address where the data is written
         // Param 2:       LL Length of data for each ID (L)
-        // 
+        //
         // The following repeats for  each ID:
         // ID:            xx ID of the first actuator
         // data 1..L      xx L bytes of data
@@ -266,7 +266,7 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
             inst->m_syncWriteIdx++;
             if ( inst->m_syncWriteIdx >= inst->m_syncWriteLen )
             {
-                // We've reached the end of the data for this 
+                // We've reached the end of the data for this
                 // ID, move on to the next one
 
                 nextState = BLD_STATE_SYNC_WRITE_LEN_RCVD;
@@ -305,7 +305,7 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
 
 void BLD_SendStatus
 (
-    BLD_Instance_t *inst,       ///< Instance data 
+    BLD_Instance_t *inst,       ///< Instance data
     uint8_t         errCode,    ///< Error bitmask to send
     const void     *param,      ///< Pointer to parameter data to send. May be NULL if paramLen is zero
     uint8_t         paramLen    ///< Number of bytes of parameter data to send

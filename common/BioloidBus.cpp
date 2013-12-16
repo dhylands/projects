@@ -16,7 +16,7 @@
 *
 *   @file   BioloidBus.cpp
 *
-*   @brief  This file implements the BioloidBus class, which is an 
+*   @brief  This file implements the BioloidBus class, which is an
 *           abstract base class for the hardware which actually talks
 *   to the bioloid bus. This hardware usually takes the form of a UART.
 *
@@ -185,7 +185,7 @@ void BioloidBus::SendAction()
 
 //***************************************************************************
 /**
-*   Sends a byte. This will automatically accumulate the byte into 
+*   Sends a byte. This will automatically accumulate the byte into
 *   the checksum)
 *
 *   virtual
@@ -217,7 +217,7 @@ void BioloidBus::SendCheckSum()
 //***************************************************************************
 /**
 *   Sends 'len' bytes, returning the sum of the bytes for easy accumulation
-*   into the checksum) 
+*   into the checksum)
 */
 
 void BioloidBus::SendData( uint8_t len, const void *voidData )
@@ -242,7 +242,7 @@ void BioloidBus::SendData( uint8_t len, const void *voidData )
 
 void BioloidBus::SendCmdHeader
 (
-    Bioloid::ID_t       id, 
+    Bioloid::ID_t       id,
     uint8_t             paramLen,
     Bioloid::Command    cmd
 )

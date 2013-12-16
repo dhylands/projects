@@ -74,7 +74,7 @@ char *GetErrorStr
     strerror_r( errNum, errStr, maxLen );
 
     return errStr;
-                        
+
 } // GetErrorStr
 
 //***************************************************************************

@@ -14,7 +14,7 @@
 ****************************************************************************/
 /**
 *
-*   @file   one-wire.c 
+*   @file   one-wire.c
 *
 *   @brief  Implements an interface to the 1-wire protocol/bus.
 *
@@ -140,7 +140,7 @@ int OW_Reset( void )
     OW_HAL_AtomicEnd( flags );
 
     return detect;  // 1 means no devices detected
-    
+
 } // OW_Reset
 
 //***************************************************************************
@@ -160,7 +160,7 @@ void OW_WriteBit
         if ( bit )
         {
             // Write out a '1' bit
-    
+
             OW_HAL_DriveDQLow();
             OW_HAL_DelayUSecs( OW_WRITE_1_LOW_USECS );
             OW_HAL_ReleaseDQ();
@@ -169,7 +169,7 @@ void OW_WriteBit
         else
         {
             // Write out a '0' bit
-    
+
             OW_HAL_DriveDQLow();
             OW_HAL_DelayUSecs( OW_WRITE_0_LOW_USECS );
             OW_HAL_ReleaseDQ();

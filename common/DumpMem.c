@@ -50,13 +50,13 @@ void DumpMem( const char *prefix, unsigned address, const void *inData, unsigned
 
 #define LINE_WIDTH  16
 
-    for ( byteOffset = 0; byteOffset < numBytes; byteOffset += LINE_WIDTH ) 
+    for ( byteOffset = 0; byteOffset < numBytes; byteOffset += LINE_WIDTH )
     {
         unsigned    i;
 
         Log( "%s: %04x: ", prefix, address + byteOffset );
 
-        for ( i = 0; i < LINE_WIDTH; i++ ) 
+        for ( i = 0; i < LINE_WIDTH; i++ )
         {
             if (( byteOffset + i ) < numBytes )
             {
@@ -67,7 +67,7 @@ void DumpMem( const char *prefix, unsigned address, const void *inData, unsigned
                 Log( "   " );
             }
         }
-        for ( i = 0; i < LINE_WIDTH; i++ ) 
+        for ( i = 0; i < LINE_WIDTH; i++ )
         {
             if (( byteOffset + i ) < numBytes )
             {
