@@ -26,6 +26,18 @@
 #define CFG_UART0_TX_BUFFER_SIZE    128
 #define CFG_UART0_LF_TO_CRLF        1
 
+#define CFG_LED_ORANGE_PORT         PORTB
+#define CFG_LED_ORANGE_BIT          7
+#define CFG_LED_ORANGE_ON           1
+
+#define CFG_LED_GREEN_PORT          PORTB
+#define CFG_LED_GREEN_BIT           6
+#define CFG_LED_GREEN_ON            1
+
+#define CFG_LED_RED_PORT            PORTD
+#define CFG_LED_RED_BIT             5
+#define CFG_LED_RED_ON              1
+
 #endif  // CONFIG_H
 
 
