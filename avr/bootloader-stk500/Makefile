@@ -42,6 +42,7 @@ uno_MCU         = m328p
 uno_FREQ        = 16MHz
 uno_LED         = B 5
 uno_SW          =
+uno_BAUD        = 115200
 
 AuxPower_MCU    = m168
 AuxPower_FREQ   = 8MHz
@@ -177,7 +178,13 @@ endif
 
 BOOT_START = $(BOOT_START_$(MK_AVR_MCU))
 
-DEFS = $(LED_OPT) $(SW_OPT) $(LCD_OPT) -DBAUD_RATE=38400
+ifeq ($($(TARGET)_BAUD),)
+BAUD_RATE=38400
+else
+BAUD_RATE=$($(TARGET)_BAUD)
+endif
+
+DEFS = $(LED_OPT) $(SW_OPT) $(LCD_OPT) -DBAUD_RATE=$(BAUD_RATE)
 
 CPPFLAGS += $(DEFS)
 CFLAGS += $(DEFS) -mshort-calls -Os -fno-inline-functions
