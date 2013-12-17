@@ -109,7 +109,7 @@ ISR( TIMER0_OVF_vect )/* signal handler for tcnt0 overflow interrupt */
     // things up to overflow after 250 will give us 1000 overflows/second
     //
     // For CFG_CPU_CLOCK = 16 MHz, 16,000,000 / 64 / 1000 = 250
-    // For 
+    // For
     // 256 - 250 = 6
 
 #define OVERFLOW_COUNT  ( CFG_CPU_CLOCK / 1000 / PRESCALER )

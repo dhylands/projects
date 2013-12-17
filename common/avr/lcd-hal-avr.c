@@ -25,7 +25,7 @@
 *   The R/W line on the LCD can be tied to ground.
 *
 *   The 4 data lines should be contiguous and wired to D4, D5, D6, and
-*   D7 on the LCD, with the least significant bit on the AVR side 
+*   D7 on the LCD, with the least significant bit on the AVR side
 *   going to D4 on the LCD.
 *
 *   See: http://homepage.hispeed.ch/peterfleury/avr-lcd44780.html
@@ -190,7 +190,7 @@ static inline void LCD_HAL_RS_High( void )
 {
     CFG_LCD_RS_PORT |= LCD_RS_MASK;
 }
-    
+
 static inline void LCD_HAL_RS_Low( void )
 {
     CFG_LCD_RS_PORT &= ~LCD_RS_MASK;
@@ -312,7 +312,7 @@ void LCD_HAL_Init( void )
     {
         LCD_HAL_Write( LCD_RS_CMD, LCD_FUNCTION | LCD_FUNCTION_2LINES );
     }
-    
+
 
 } // LCD_HAL_Init
 

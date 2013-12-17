@@ -1,4 +1,4 @@
-// The addr32 macro returns a byte address of a symbol located anywhere in 
+// The addr32 macro returns a byte address of a symbol located anywhere in
 // the 128K space of the ATMega128.
 
 #define addr32(symbol)        \

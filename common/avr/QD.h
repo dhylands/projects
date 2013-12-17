@@ -18,7 +18,7 @@
 *
 *   @brief   Performs quadrature decoding.
 *
-*   This file uses macros and expects a certain naming convention to be 
+*   This file uses macros and expects a certain naming convention to be
 *   followed.
 *
 *   If you call QD_Update( Left ) then the following #defines should exist:
@@ -93,7 +93,7 @@ extern QD_Increment_t   QD_gIncrement[ 4 ];
 // we need to disable interrupts around the retrieval.
 
 static inline QD_Counter_t QD_CountInternal( volatile QD_Counter_t *qd )
-{   
+{
     if ( sizeof( QD_Counter_t ) == 1 )
     {
         return *qd;
@@ -113,7 +113,7 @@ static inline QD_Counter_t QD_CountInternal( volatile QD_Counter_t *qd )
 }
 
 static inline void QD_SetCountInternal( volatile QD_Counter_t *qd, QD_Counter_t counter )
-{   
+{
     if ( sizeof( QD_Counter_t ) == 1 )
     {
         *qd = counter;

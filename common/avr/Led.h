@@ -18,7 +18,7 @@
 *
 *   @brief  Contains an abstraction for turning LEDs on and off.
 *
-*   This header file takes advantage of the C-preprocessor to 
+*   This header file takes advantage of the C-preprocessor to
 *   perform it's magic.
 *
 *   For a named LED, the following macro definitions need to exist
@@ -31,7 +31,7 @@
 *                         port. For the AVR, this should be a number between
 *                         0 and 7.
 *
-*   CFG_LED_name_ON     - Determines if the LED is on by setting the 
+*   CFG_LED_name_ON     - Determines if the LED is on by setting the
 *                         appropriate pin to a 0 or 1.
 *
 *   One the above defines have been made, each LED should be initialized

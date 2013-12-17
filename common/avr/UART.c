@@ -193,7 +193,7 @@ ISR( USART1_UDRE_vect )
 *   Extracts a character from the receive buffer. This function will block
 *   until a character is available.
 *
-*   This function returns an int (rather than a char) to be compatible 
+*   This function returns an int (rather than a char) to be compatible
 *   with fdevopen()
 */
 

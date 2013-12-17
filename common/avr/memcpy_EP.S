@@ -32,7 +32,7 @@
 #define src_3   r22
 #define src_2   r21
 #define src_lo  r20
-#define len_hi  r19                   
+#define len_hi  r19
 #define len_lo  r18
 
         .text
@@ -40,24 +40,24 @@
         .type   memcpy_EP, @function
 
 memcpy_EP:
-        out     _SFR_IO_ADDR(RAMPZ), src_3  
+        out     _SFR_IO_ADDR(RAMPZ), src_3
         movw    r30, src_lo     ; Z
-        movw    r26, dst_lo     ; X   
+        movw    r26, dst_lo     ; X
         rjmp    .memcpy_EP_start
-        
+
 .memcpy_EP_loop:
         elpm    r0, Z+
 	    st	    X+, r0
-        
+
 .memcpy_EP_start:
 	    subi	len_lo, lo8(1)
 	    sbci	len_hi, hi8(1)
 
 	    brcc	.memcpy_EP_loop
-        
+
 ; return dest (unchanged)
 	    ret
-        
+
 .memcpy_P_end:
 	    .size   memcpy_EP, .memcpy_EP_end - memcpy_EP
-        
+

@@ -38,7 +38,7 @@
 //  00 10 11 01 in the other direction
 //
 // The left column contains the previous state, and the values across indicate
-// the new state. The value in the table is added to the counter when 
+// the new state. The value in the table is added to the counter when
 // transitioning from the previous state to the new state.
 
 #if ( CFG_QD_COUNT_A_ONLY )

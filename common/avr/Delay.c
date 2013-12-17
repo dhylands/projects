@@ -62,7 +62,7 @@ void us_spin(unsigned short us)
 {
    if (!us)
           return;
-   
+
    /* the inner loop takes 4 cycles per iteration */
    __asm__ __volatile__ (
           "1:                     \n"

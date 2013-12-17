@@ -72,7 +72,7 @@ ISR( ADC_vect )
     // We only need the top 8 bits (left adjusted)
 
 #if CFG_ADC_8_BIT
-    gAdcHistory[ gAdcChannel ] = ADCH;    
+    gAdcHistory[ gAdcChannel ] = ADCH;
 #else
     gAdcHistory[ gAdcChannel ] = ADC;
 #endif
@@ -87,7 +87,7 @@ ISR( ADC_vect )
 
     ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 ))) | ( gAdcChannel & 7 )
 #if CFG_ADC_8_BIT
-          | ( 1 << ADLAR ) 
+          | ( 1 << ADLAR )
 #endif
           ;
 
@@ -130,9 +130,9 @@ ADC_Sample_t ADC_Read( uint8_t channel )
 
     // Select the channel in a manner which leaves REFS0 and REFS1 un touched.
 
-    ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 ))) 
+    ADMUX = ( ADMUX & (( 1 << REFS1 ) | ( 1 << REFS0 )))
 #if CFG_ADC_8_BIT
-          | ( 1 << ADLAR ) 
+          | ( 1 << ADLAR )
 #endif
           | channel;
 
@@ -177,9 +177,9 @@ void ADC_Init( uint8_t prescalar )
 
     // Kick things off
 
-    ADCSRA = ( 1 << ADEN ) | ( 1 << ADSC ) 
+    ADCSRA = ( 1 << ADEN ) | ( 1 << ADSC )
 #if ( CFG_ADC_POLL == 0 )
-           | ( 1 << ADIE ) 
+           | ( 1 << ADIE )
 #endif
            | prescalar;
 

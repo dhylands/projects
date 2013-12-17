@@ -48,7 +48,7 @@ extern "C"
 //                                  used for transmission.
 //
 //  CFG_TIMER_UART_TX_BUFFER_SIZE   How many bytes to put in the Tx buffer.
-//                                  Setting this to zero will cause polled 
+//                                  Setting this to zero will cause polled
 //                                  routines to be used.
 //
 //  CFG_TIMER_UART_LF_TO_CRLF       Translate sent LFs to CRLFs. Useful when

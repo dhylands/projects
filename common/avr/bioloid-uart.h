@@ -32,7 +32,7 @@
 //
 // The following configuration options control how this code gets compiled.
 //
-//  CFG_BLD_USE_UARTx               0 or 1  Controls which UART is used 
+//  CFG_BLD_USE_UARTx               0 or 1  Controls which UART is used
 //                                  (currently only one).
 //
 //  CFG_BLD_UARTx_BAUD_RATE         Baud rate to run the UART at.
