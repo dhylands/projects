@@ -56,7 +56,7 @@
 #   define DEBUG( flag, fmt, args... ) do { if ( gDebug ## flag ) printk( "%s: " fmt, __FUNCTION__ , ## args ); } while (0)
 #else
 #   define DEBUG( flag, fmt, args... )
-#endif  
+#endif
 
 /* ---- Private Variables ------------------------------------------------ */
 
@@ -116,8 +116,8 @@ static struct ctl_table gSysCtl[] =
 {
     {
         CTL_NAME(CTL_GPIO_EVENT)
-        .procname       = "gpio-event", 
-        .mode           = 0555, 
+        .procname       = "gpio-event",
+        .mode           = 0555,
         .child          = gSysCtlSample
     },
     { 0 }
@@ -153,9 +153,9 @@ typedef struct
 } GPIO_FileData_t;
 
 /*
- * An instance of GPIO_PinData_t is maintained for each GPIO line which is 
- * monitored, 
- */ 
+ * An instance of GPIO_PinData_t is maintained for each GPIO line which is
+ * monitored,
+ */
 
 typedef enum
 {
@@ -240,7 +240,7 @@ static void *pin_seq_start( struct seq_file *s, loff_t *pos )
     }
     ps->list = gPinList.next;
 
-    for ( i = 0; i < *pos; i++ ) 
+    for ( i = 0; i < *pos; i++ )
     {
         if ( list_is_last( ps->list, &gPinList ))
         {
@@ -285,7 +285,7 @@ static int pin_seq_show( struct seq_file *s, void *v )
     return 0;
 
 } // pin_seq_show
-	
+
 /****************************************************************************
 *
 *  pin_seq_next
@@ -345,7 +345,7 @@ static void pin_seq_stop( struct seq_file *s, void *v )
 *
 ****************************************************************************/
 
-static struct seq_operations pin_seq_ops = 
+static struct seq_operations pin_seq_ops =
 {
 	.start = pin_seq_start,
 	.next  = pin_seq_next,
@@ -376,7 +376,7 @@ static int pins_proc_open( struct inode *inode, struct file *file )
 *
 ****************************************************************************/
 
-static struct file_operations pins_proc_ops = 
+static struct file_operations pins_proc_ops =
 {
 	.owner   = THIS_MODULE,
 	.open    = pins_proc_open,
@@ -384,7 +384,7 @@ static struct file_operations pins_proc_ops =
 	.llseek  = seq_lseek,
 	.release = seq_release
 };
-	
+
 
 
 /****************************************************************************
@@ -429,10 +429,10 @@ static void gpio_event_queue_event( const GPIO_Event_t *gpioEvent )
     unsigned long       flags;
     struct list_head   *file;
 
-    DEBUG( Trace, "gpio %d:%c@%ld.%06ld\n", 
+    DEBUG( Trace, "gpio %d:%c@%ld.%06ld\n",
            gpioEvent->gpio,
            gpioEvent->edgeType == GPIO_EventRisingEdge ? 'R' : 'F',
-           gpioEvent->time.tv_sec, 
+           gpioEvent->time.tv_sec,
            gpioEvent->time.tv_usec );
 
     // Queue up the event on all of the open files
@@ -451,7 +451,7 @@ static void gpio_event_queue_event( const GPIO_Event_t *gpioEvent )
             if ( fileData->numEvents >= GPIO_EVENT_QUEUE_LEN )
             {
                 // Queue is full - Only report first event lost
-    
+
                 if ( gReportLostEvents )
                 {
                     printk( KERN_ERR "GPIO Event: event lost due to queue full\n" );
@@ -514,10 +514,10 @@ static int gpio_event_dequeue_event( GPIO_FileData_t *fileData, GPIO_Event_t *gp
     }
     spin_unlock_irqrestore( &fileData->queueLock, flags );
 
-    DEBUG( Trace, "gpio %d:%c@%ld.%06ld\n", 
+    DEBUG( Trace, "gpio %d:%c@%ld.%06ld\n",
            gpioEvent->gpio,
            gpioEvent->edgeType == GPIO_EventRisingEdge ? 'R' : 'F',
-           gpioEvent->time.tv_sec, 
+           gpioEvent->time.tv_sec,
            gpioEvent->time.tv_usec );
 
     return eventAvailable;
@@ -614,7 +614,7 @@ static irqreturn_t gpio_event_irq( int irq, void *dev_id )
             gpio_event_queue_event( &gpioEvent );
         }
 
-        // Disable interrupts for our gpio to allow debounce to occur. The 
+        // Disable interrupts for our gpio to allow debounce to occur. The
         // timer will re-enable the interrupt.
 
         disable_irq_nosync( irq );
@@ -641,7 +641,7 @@ void gpio_event_timer( unsigned long data )
     GPIO_PinData_t         *pinData = (GPIO_PinData_t *)data;
 
     // This function is called when the debounce timer for a gpio expires.
-    // We record the state of the pin so that we can figure out what the 
+    // We record the state of the pin so that we can figure out what the
     // next edge will be.
 
     pinData->pinState = ( gpio_get_value( pinData->gpio ) != 0 );
@@ -877,7 +877,7 @@ static int gpio_event_open( struct inode *inode, struct file *file )
         list_add_tail( &fileData->list, &gFileList );
     }
     spin_unlock_irqrestore( &gFileListLock, flags );
-    
+
     return 0;
 
 } // gpio_event_open
@@ -954,7 +954,7 @@ static ssize_t gpio_event_read( struct file *file, char *buffer, size_t spaceRem
             gpio_event_dequeue_event( fileData, (GPIO_Event_t *)&fileData->buffer[0] );
 
             fileData->bufBytes = sizeof( GPIO_Event_t );
-            
+
         }
         else
         {
@@ -970,8 +970,8 @@ static ssize_t gpio_event_read( struct file *file, char *buffer, size_t spaceRem
             //       E is R or F (for rising or falling edge)
             //       tttttttt.tttttt is the timestamp with microsecond resolution
 
-            fileData->bufBytes = snprintf( fileData->buffer, sizeof( fileData->buffer ), 
-                                           "%2d %c %ld.%06ld\n", 
+            fileData->bufBytes = snprintf( fileData->buffer, sizeof( fileData->buffer ),
+                                           "%2d %c %ld.%06ld\n",
                                            gpioEvent.gpio,
                                            (( gpioEvent.edgeType == GPIO_EventRisingEdge ) ? 'R' : 'F' ),
                                            gpioEvent.time.tv_sec,
@@ -1111,16 +1111,16 @@ static int __init gpio_event_init( void )
 
     // Register our proc entries.
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
     gProcGpioEvent = create_proc_entry( "gpio-event", S_IFDIR | S_IRUGO | S_IXUGO, NULL );
+#else
+    gProcGpioEvent = proc_mkdir_mode( "gpio-event", S_IFDIR | S_IRUGO | S_IXUGO, NULL );
+#endif
     if ( gProcGpioEvent == NULL )
     {
         return -ENOMEM;
     }
-    gProcPins = create_proc_entry( "pins", 0444, gProcGpioEvent );
-    if ( gProcPins != NULL )
-    {
-        gProcPins->proc_fops = &pins_proc_ops;
-    }
+    gProcPins = proc_create( "pins", 0444, gProcGpioEvent, &pins_proc_ops );
 
 #if ( LINUX_VERSION_CODE <= KERNEL_VERSION( 2, 6, 20 ))
     gSysCtlHeader = register_sysctl_table( gSysCtl, 0 );
@@ -1132,7 +1132,7 @@ static int __init gpio_event_init( void )
     gSysCtlHeader = register_sysctl_table( gSysCtl );
 #endif
 
-    // Register our device. The device becomes "active" as soon as cdev_add 
+    // Register our device. The device becomes "active" as soon as cdev_add
     // is called.
 
     cdev_init( &gGpioEventCDev, &gpio_event_fops );
@@ -1175,7 +1175,7 @@ static void __exit gpio_event_exit( void )
 
     DEBUG( Trace, "called\n" );
 
-    // If there are any pins which are currently being monitored, then we 
+    // If there are any pins which are currently being monitored, then we
     // need to unmonitor them.
 
     memset( &monitor, 0, sizeof( monitor ));
@@ -1201,8 +1201,8 @@ static void __exit gpio_event_exit( void )
         unregister_sysctl_table( gSysCtlHeader );
     }
     remove_proc_entry( "pins", gProcGpioEvent );
-    remove_proc_entry( "gpio-event", NULL );    
-                                        
+    remove_proc_entry( "gpio-event", NULL );
+
     unregister_chrdev_region( gGpioEventDevNum, 1 );
 
 } // gpio_event_exit
