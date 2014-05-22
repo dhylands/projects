@@ -663,7 +663,17 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
     int             rc = 0;
     unsigned long   flags;
     GPIO_PinData_t *pinData;
+    GPIO_PinData_t *allocPinData = NULL;
     unsigned long   irqFlags;
+
+    if ( monitor->onOff )
+    {
+        if (( allocPinData = kcalloc( 1, sizeof( *pinData ), GFP_KERNEL )) == NULL )
+        {
+            DEBUG( Error, "GPIO %d: Out of memory\n", monitor->gpio );
+            return -ENOMEM;
+        }
+    }
 
     spin_lock_irqsave( &gPinListLock, flags );
 
@@ -683,12 +693,7 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
             spin_lock_irqsave( &gPinListLock, flags );
         }
 
-        if (( pinData = kcalloc( 1, sizeof( *pinData ), GFP_KERNEL )) == NULL )
-        {
-            DEBUG( Error, "GPIO %d: Out of memory\n", monitor->gpio );
-            rc = -ENOMEM;
-            goto out;
-        }
+        pinData = allocPinData;
 
         INIT_LIST_HEAD( &pinData->list );
 
@@ -724,7 +729,6 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
         if(( rc = gpio_request( monitor->gpio, pinData->devName )) != 0)
         {
             DEBUG( Error, "Unable to request GPIO %d, %d\n", monitor->gpio, rc );
-            kfree( pinData );
             goto out;
         }
 
@@ -733,7 +737,6 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
         {
             DEBUG( Error, "Unable to register irq for GPIO %d\n", monitor->gpio );
             gpio_free( monitor->gpio );
-            kfree( pinData );
             goto out;
         }
 
@@ -747,6 +750,7 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
         pinData->debounceTimer.function = gpio_event_timer;
 
         list_add_tail( &pinData->list, &gPinList );
+        allocPinData = NULL;
 
         if ( gpio_get_value( pinData->gpio ) == 0 )
         {
@@ -772,14 +776,18 @@ static int gpio_event_monitor( GPIO_EventMonitor_t *monitor )
 
         del_timer_sync( &pinData->debounceTimer );
         list_del( &pinData->list );
+        allocPinData = pinData;
 
         gpio_free( monitor->gpio );
-        kfree( pinData );
     }
 
 out:
 
     spin_unlock_irqrestore( &gPinListLock, flags );
+    if ( allocPinData != NULL )
+    {
+        kfree(allocPinData);
+    }
 
     return rc;
 
