@@ -49,7 +49,8 @@
 #if defined (__AVR_ATmega8__) \
  || defined (__AVR_ATmega48__) \
  || defined (__AVR_ATmega88__) \
- || defined (__AVR_ATmega168__)
+ || defined (__AVR_ATmega168__) \
+ || defined (__AVR_ATmega328P__)
 
 #define BLD_UART0_DDR       DDRD
 #define BLD_UART0_PORT      PORTD

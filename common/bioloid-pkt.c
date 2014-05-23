@@ -74,6 +74,8 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
 {
     BLD_State_t nextState = inst->m_state;
 
+//    BLD_LogPacket(inst, "Rcvd: 0x%02x\n", ch);
+
     switch ( nextState )
     {
         case BLD_STATE_IDLE:    // We're waiting for the beginning of the packet (0xFF)
@@ -109,6 +111,7 @@ void BLD_ProcessChar( BLD_Instance_t *inst, uint8_t ch )
                 break;
             }
             inst->m_pkt.m_id = ch;
+            inst->m_pkt.m_crc = 0;
             AccumCrc( inst, ch );
             nextState = BLD_STATE_ID_RCVD;
             break;
