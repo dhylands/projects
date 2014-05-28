@@ -7,6 +7,7 @@
 #
 
 export SVN_EDITOR=vi
+export EDITOR=vi
 
 export TERM=ansi
 
