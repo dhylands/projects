@@ -19,6 +19,54 @@
 *   @brief  Provides switch debounc logic. The original algorithim for this
 *           was posted by Craig Limber:
 *           http://members.shaw.ca/climber/avrbuttons.html
+* 
+*   To use:
+* 
+*   This code is fairly generic and makes no assumptions about how switches
+*   map to your hardware.
+* 
+*   This code works on the premise that CheckSwitches will be called on
+*   a periodic basis. It doesn't really matter what the period is, as long
+*   as its called regularly. If your main loop runs say 100 times per second
+*   then you can just call CheckSwitches each time the main loop is called.
+* 
+*   If, like on Arduino, the main loop runs as often as possible, then you
+*   should probably keep track of when you last called CheckSwitches and call
+*   it after 5 or 10 msec have elapsed.
+* 
+*   Generally speaking, it takes some number of milliseconds to debounce a
+*   switch. You can configure how many counts are needed. The total time
+*   to debounce will be the count times the period theat CheckSwitches is
+*   called.
+* 
+*   For example: you call CheckSwitches every 10 msec, and it takes 23 msec
+*   to debounce your switches, you should set the count to be 3.
+* 
+*   You should call SetRawSwitch to indicate the raw state of the switch.
+*   This could be everytime through your main loop, or perhaps on a pin
+*   change interrupt.
+* 
+*   You should provide a function with the following prototype:
+* 
+*   void SwitchEvent( SwitchNum_t switchNum, SwitchEvent_t event );
+* 
+*   switchNum will be the number of the switch, and event will be one of
+*   SWITCH_EVENT_RELEASED or SWITCH_EVENT_PRESSED.
+* 
+*   You should provide a header file called Config.h which contains the
+*   following definitions:
+* 
+*   CFG_NUM_SWITCHES    - the total number of switches you wish to control.
+*                         This is an arbitrary number. Your switch numbers
+*                         are expected t be between 0 and (CFG_NUM_SWITCHES - 1)
+* 
+*   CFG_SWITCH_BOUNCE_ON_COUNT  - a number which indicates how many times
+*                                 CheckSwitches needs to be called before
+*                                 the switch state is considered to be on.
+*
+*   CFG_SWITCH_BOUNCE_OFF_COUNT - a number which indicates how many times
+*                                 CheckSwitches needs to be called before
+*                                 the switch state is considered to be off.
 *
 ****************************************************************************/
 
