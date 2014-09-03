@@ -96,8 +96,6 @@ int gQuit = 0;
 
 /* ---- Private Function Prototypes -------------------------------------- */
 
-void *ReadSerialThread( void *param );
-void *ReadStdinThread( void *param );
 char *StrMaxCpy( char *dst, const char *src, size_t maxLen );
 char *StrMaxCat( char *dst, const char *src, size_t maxLen );
 void  Usage( void );
