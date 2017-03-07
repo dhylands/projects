@@ -73,11 +73,11 @@
 
 typedef enum
 {
-    NO_OPTION       = 0x00, /**< No options specified.						*/
-	MINUS_SIGN		= 0x01, /**< Should we print a minus sign?              */
-	RIGHT_JUSTIFY   = 0x02, /**< Should field be right justified?           */
-	ZERO_PAD        = 0x04, /**< Should field be zero padded?               */
-	CAPITAL_HEX     = 0x08  /**< Did we encounter %X?                       */
+    NO_OPTION       = 0x00, /**< No options specified.                      */
+    MINUS_SIGN      = 0x01, /**< Should we print a minus sign?              */
+    RIGHT_JUSTIFY   = 0x02, /**< Should field be right justified?           */
+    ZERO_PAD        = 0x04, /**< Should field be zero padded?               */
+    CAPITAL_HEX     = 0x08  /**< Did we encounter %X?                       */
 
 } FmtOption;
 
@@ -178,7 +178,7 @@ int StrPrintf( char *outStr, int maxLen, const char *fmt, ... )
 *  additional characters.
 *
 *  If @a outFunc returns a negative number, then StrXPrintf will stop
-*  calling @a outFunc and will return the non-negative return value.
+*  calling @a outFunc and will return the negative return value.
 *
 *  @param   outFunc  (in)  Pointer to function to call to do the actual output.
 *  @param   outParm  (in)  Passed to @a outFunc.
@@ -230,7 +230,7 @@ int vStrPrintf( char *outStr, int maxLen, const char *fmt, va_list args )
 *  additional characters.
 *
 *  If @a outFunc returns a negative number, then vStrXPrintf will stop calling
-*  @a outFunc and will return the non-negative return value.
+*  @a outFunc and will return the negative return value.
 *
 *  The format string @a fmt consists of ordinary characters, escape
 *  sequences, and format specifications. The ordinary characters and escape
