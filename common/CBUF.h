@@ -111,13 +111,19 @@
 *   member.
 */
 
-#define CBUF_Push( cbuf, elem ) (cbuf.m_entry)[ cbuf.m_putIdx++ & (( cbuf##_SIZE ) - 1 )] = (elem)
+#define CBUF_Push( cbuf, elem ) do { \
+    (cbuf.m_entry)[ cbuf.m_putIdx & (( cbuf##_SIZE ) - 1 )] = (elem); \
+    cbuf.m_putIdx++; \
+} while(0)
 
 /**
 *   Retrieves an element from the beginning of the circular buffer
 */
 
-#define CBUF_Pop( cbuf )        (cbuf.m_entry)[ cbuf.m_getIdx++ & (( cbuf##_SIZE ) - 1 )]
+#define CBUF_Pop( cbuf ) ({ \
+    typeof(cbuf.m_entry[0]) _elem = (cbuf.m_entry)[ cbuf.m_getIdx & (( cbuf##_SIZE ) - 1 )]; \
+    cbuf.m_getIdx++; \
+    _elem; })
 
 /**
 *   Returns a pointer to the last spot that was pushed.
@@ -210,12 +216,15 @@ public:
 
     void Push( EntryType val )
     {
-        m_entry[ m_putIdx++ & ( Size - 1 )] = val;
+        m_entry[ m_putIdx & ( Size - 1 )] = val;
+        m_putIdx++;
     }
 
     EntryType Pop()
     {
-        return m_entry[ m_getIdx++ & ( Size - 1 )];
+        EnbtryType item = m_entry[ m_getIdx & ( Size - 1 )];
+        m_getIdx++;
+        return item;
     }
 
 private:
