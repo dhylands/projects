@@ -121,7 +121,7 @@
 */
 
 #define CBUF_Pop( cbuf ) ({ \
-    typeof(cbuf.m_entry[0]) _elem = (cbuf.m_entry)[ cbuf.m_getIdx & (( cbuf##_SIZE ) - 1 )]; \
+    __typeof__(cbuf.m_entry[0]) _elem = (cbuf.m_entry)[ cbuf.m_getIdx & (( cbuf##_SIZE ) - 1 )]; \
     cbuf.m_getIdx++; \
     _elem; })
 
