@@ -222,7 +222,7 @@ public:
 
     EntryType Pop()
     {
-        EnbtryType item = m_entry[ m_getIdx & ( Size - 1 )];
+        EntryType item = m_entry[ m_getIdx & ( Size - 1 )];
         m_getIdx++;
         return item;
     }
