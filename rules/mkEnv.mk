@@ -63,7 +63,7 @@ space := $(empty) $(empty)
 #	MK_HOST_OS describes the OS that the make system is running on.
 #
 
-MK_SUPPORTED_HOST_OS = cygwin linux mingw
+MK_SUPPORTED_HOST_OS = cygwin linux darwin
 
 ifeq ($(MK_HOST_OS),)
 MK_HOST_UNAME = $(shell uname -s)
@@ -74,6 +74,10 @@ endif
 
 ifeq ($(MK_HOST_UNAME),Linux)
 export MK_HOST_OS = linux
+endif
+
+ifeq ($(MK_HOST_UNAME),Darwin)
+export MK_HOST_OS = darwin
 endif
 
 ifeq ($(findstring MINGW32_NT,$(MK_HOST_UNAME)),MINGW32_NT)
@@ -102,7 +106,7 @@ endif
 # 	mkRules_$(MK_OS).mk
 #
 
-MK_SUPPORTED_OS = avr cortex-m3 cygwin gumstix linux lpc mingw none win32
+MK_SUPPORTED_OS = avr cortex-m3 cygwin gumstix linux lpc mingw none win32 darwin
 
 ifeq ($(filter $(MK_OS),$(MK_SUPPORTED_OS)),)
 $(warning Unsupported value for MK_OS: '$(MK_OS)')
@@ -197,6 +201,7 @@ MK_RULES_DIR = $(MK_ROOT)/rules
 #
 
 MK_UTILS_DIR = $(shell echo ~)/bin
+INSTALL_STRIP = --strip
 
 #--------------------------------------------------------------------------
 #
