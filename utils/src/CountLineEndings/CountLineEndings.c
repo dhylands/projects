@@ -37,6 +37,7 @@ int main( int argc, char **argv )
     int     crLfCount;
     int     crcrLfCount;
     int     otherCount;
+    int     tabCount;
     int     trailingWSCount;
 
     if ( argc < 2 )
@@ -45,8 +46,8 @@ int main( int argc, char **argv )
         exit( 1 );
     }
 
-    printf( "    LF     CR   CRLF CRCRLF  Other  Trail FileName\n" );
-    printf( "------ ------ ------ ------ ------ ------ ---------------------------\n" );
+    printf( "  Tabs     LF     CR   CRLF CRCRLF  Other  Trail FileName\n" );
+    printf( "------ ------ ------ ------ ------ ------ ------ ---------------------------\n" );
 
     for ( i = 1; i < argc; i++ )
     {
@@ -58,6 +59,7 @@ int main( int argc, char **argv )
 
         foundCr = 0;
         foundSpace = 1;
+        tabCount = 0;
         lfCount = 0;
         crCount = 0;
         crLfCount = 0;
@@ -67,6 +69,11 @@ int main( int argc, char **argv )
 
         while (( ch = fgetc( src_fs )) != EOF )
         {
+            if ( ch == '\t' )
+            {
+                tabCount++;
+            }
+            else
             if ( ch == ' ' )
             {
                 foundSpace = 1;
@@ -112,7 +119,7 @@ int main( int argc, char **argv )
 
         fclose(src_fs);
 
-        printf( "%6d %6d %6d %6d %6d %6d %s\n", lfCount, crCount, crLfCount, crcrLfCount, otherCount, trailingWSCount, argv[ i ] );
+        printf( "%6d %6d %6d %6d %6d %6d %6d %s\n", tabCount, lfCount, crCount, crLfCount, crcrLfCount, otherCount, trailingWSCount, argv[ i ] );
     }
 
     exit( 0 );
