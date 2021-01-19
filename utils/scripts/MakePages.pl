@@ -159,7 +159,7 @@ while ( <SRC> )
    # Replace special substitutions
 
    s/\@INDEX([^D])/$gIndexLink$1/g;             # URL of index file
-#   s/\@FILEDIR\//$gFileRemoteDirPath/g;    # Directory that files live in
+   s/\@FILEDIR\//$gFileRemoteDirPath/g;    # Directory that files live in
 
    if ( /^(\w*):\s*(.*)/ )
    {
@@ -1225,7 +1225,7 @@ sub PrintEndHTML
     my ( $file ) = @_;
 
     print $file <<EndOfData
-  <p align=center>Copyright 2007 by Dave Hylands</p>
+  <p align=center>Copyright 2010 by Dave Hylands</p>
 </BODY>
 </HTML>
 EndOfData
@@ -1411,10 +1411,21 @@ sub ProcessKeywordChangeAddItem
    my $linkDir = "../" . $keywordData;
    my $linkTitle = GetPagesTitle( $linkDir );
 
-   print IDX <<EndOfData
-       <LI>Added <a href="$linkDir/$gIndexLink">$linkTitle</a> $body
+   if ($keywordData eq "blog")
+   {
+      print IDX <<EndOfData
+          <LI>Added <a href="https://blog.davehylands.com/" target="_blank">blog</a> $body
 EndOfData
 ;
+   }
+   else
+   {
+      print IDX <<EndOfData
+          <LI>Added <a href="$linkDir/$gIndexLink">$linkTitle</a> $body
+EndOfData
+;
+   }
+
 }
 
 #############################################################################
@@ -2042,6 +2053,14 @@ sub ProcessKeywordThumbLink
    $body =~ s/\@INDEXDIR\///g;
    $body =~ s/\@FILEDIR\///g;
 
+   my $linkURL = "$linkDir/$gIndexLink";
+   my $target = "";
+   if ($linkTitle eq "blog")
+   {
+      $linkURL = "https://blog.davehylands.com/";
+      $target = "target=\"_blank\"";
+   }
+
    if ( $gIndexGrid )
    {
        if ( $gIndexGridX == 0 )
@@ -2052,10 +2071,10 @@ sub ProcessKeywordThumbLink
      <TD width="33%" height="100%">
        <TABLE cellpadding=15 cellspacing=0 border=$gBorderDebug bgcolor=\"lightgrey\" height="100%" width="100%">
          <TR><TD align=center height=180>
-           <A href="$linkDir/$gIndexLink"><IMG width="$w" height="$h" src="$imgThumbLinkName" border=0></A>
+           <A href="$linkURL" $target><IMG width="$w" height="$h" src="$imgThumbLinkName" border=0></A>
          </TD></TR>
          <TR><TD align=center valign=top>
-           <A href="$linkDir/$gIndexLink"><H3>$linkTitle</H3></A>
+           <A href="$linkURL" $target><H3>$linkTitle</H3></A>
            <p>
            $body
          </TD></TR>
@@ -2077,17 +2096,17 @@ EndOfData
   <TR><TD width=230 height="100%">
     <TABLE cellpadding=15 cellspacing=0 border=$gBorderDebug bgcolor=\"lightgrey\" height="100%">
       <TR><TD width=200 align=center>
-        <A href="$linkDir/$gIndexLink"><IMG width="$w" height="$h" src="$imgThumbLinkName" border=0></A>
+        <A href="$linkURL" $target><IMG width="$w" height="$h" src="$imgThumbLinkName" border=0></A>
       </TD></TR>
     </TABLE> 
   </TD>
   <TD height="100%"> 
     <TABLE cellpadding=15 cellspacing=0 border=$gBorderDebug bgcolor="lightgrey" width="100%" height="100%">
       <TR><TD>
-        <A href="$linkDir/$gIndexLink"><H3>$linkTitle</H3></A>
+        <A href="$linkURL" $target><H3>$linkTitle</H3></A>
         <p>
         $body
-        <A href="$linkDir/$gIndexLink">Details...</A>
+        <A href="$linkURL" $target>Details...</A>
       </TD></TR>
     </TABLE>
   </TD></TR>
