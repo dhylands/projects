@@ -14,14 +14,14 @@
 /label [
   (Cher Office) (Wall)
   (Cher Office) (AP)
-  (Dave Office) (Wall)
+  (Dave Office) (Wall-Blue)
   (Dave Office) (Closet)
   (Dave Office) (AP)
-  () ()
+  (Dave Office) (Wall)
 
-  (Living Room) (TV)
   (Rec Room) (TV)
-  () ()
+  (Living Room) (TV)
+  (Exercise) (Room TV)
   () ()
   () ()
   () ()
@@ -94,6 +94,19 @@
       label cell_num 2 mul get centershow
     grestore
 } for
+
+
+0 -0.5 inch translate
+0.5 inch 0 moveto
+(Print at 100%) show
+
+0 -0.25 inch translate
+0 0 moveto 0 0.25 inch lineto
+4 inch 0 moveto 4 inch 0.25 inch lineto
+stroke
+
+0.5 inch 0 moveto
+(Distance between lines should be 4") show
 
 showpage
 
