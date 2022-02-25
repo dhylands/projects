@@ -37,34 +37,43 @@ namespace Bioloid
         INVALID_ID      = 0xFF,
     };
 
-    enum Command
+    enum class Command : uint8_t
     {
-        CMD_PING        = 0x01, // Used to obatin a status packet
-        CMD_READ        = 0x02, // Read values from the control table
-        CMD_WRITE       = 0x03, // Write values to control table
-        CMD_REG_WRITE   = 0x04, // Prime values to write when ACTION sent
-        CMD_ACTION      = 0x05, // Triggers REG_WRITE
-        CMD_RESET       = 0x06, // Changes control values back to factory defaults
+        PING        = 0x01, // Used to obatin a status packet
+        READ        = 0x02, // Read values from the control table
+        WRITE       = 0x03, // Write values to control table
+        REG_WRITE   = 0x04, // Prime values to write when ACTION sent
+        ACTION      = 0x05, // Triggers REG_WRITE
+        RESET       = 0x06, // Changes control values back to factory defaults
 
-        CMD_SYNC_WRITE  = 0x83  // Writes values to many devices
+        SYNC_WRITE  = 0x83  // Writes values to many devices
     };
 
-    enum Error
-    {
-        ERROR_RESERVED      = 0x80, ///< Reserved - set to zero
-        ERROR_INSTRUCTION   = 0x40, ///< Undefined instruction
-        ERROR_OVERLOAD      = 0x20, ///< Max torque can't control applied load
-        ERROR_CHECKSUM      = 0x10, ///< Checksum of instruction packet incorrect
-        ERROR_RANGE         = 0x08, ///< Instruction is out of range
-        ERROR_OVERHEATING   = 0x04, ///< Internal temperature is too high
-        ERROR_ANGLE_LIMIT   = 0x02, ///< Goal position is outside of limit range
-        ERROR_INPUT_VOLTAGE = 0x01, ///< Input voltage out of range
-        ERROR_NONE          = 0x00, ///< No Error
+    static inline uint8_t as_uint8_t(Command cmd) {
+        return static_cast<uint8_t>(cmd);
+    }
 
-        ERROR_NOT_DONE      = 0x100,///< Special error code used by BioloidPacket::ProcessChar
-        ERROR_TIMEOUT       = 0x101,///< Indicates that a timeout occurred whilw waiting for a reply
-        ERROR_TOO_MUCH_DATA = 0x102,///< Packet storage isn't big enough
+    enum class Error : uint16_t
+    {
+        RESERVED      = 0x80, ///< Reserved - set to zero
+        INSTRUCTION   = 0x40, ///< Undefined instruction
+        OVERLOAD      = 0x20, ///< Max torque can't control applied load
+        CHECKSUM      = 0x10, ///< Checksum of instruction packet incorrect
+        RANGE         = 0x08, ///< Instruction is out of range
+        OVERHEATING   = 0x04, ///< Internal temperature is too high
+        ANGLE_LIMIT   = 0x02, ///< Goal position is outside of limit range
+        INPUT_VOLTAGE = 0x01, ///< Input voltage out of range
+        NONE          = 0x00, ///< No Error
+
+        NOT_DONE      = 0x100,///< Special error code used by BioloidPacket::ProcessChar
+        TIMEOUT       = 0x101,///< Indicates that a timeout occurred whilw waiting for a reply
+        TOO_MUCH_DATA = 0x102,///< Packet storage isn't big enough
     };
+
+    static inline uint16_t as_uint16_t(Error err) {
+        return static_cast<uint16_t>(err);
+    }
+
 };
 
 #endif  // BIOLOID_H

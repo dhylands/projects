@@ -194,14 +194,14 @@ bool BLD_RegParseStatusRet( struct BLD_Reg_s *reg, StrTokenizer &line, uint16_t 
 void BLD_RegFmtAlarm( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t maxLen )
 {
     StrPrintf( outStr, maxLen, "%s%s%s%s%s%s%s%s",
-               (( val & Bioloid::ERROR_INSTRUCTION ) != 0 )   ? "Inst "   : "",
-               (( val & Bioloid::ERROR_OVERLOAD ) != 0 )      ? "OvLoad " : "",
-               (( val & Bioloid::ERROR_CHECKSUM ) != 0 )      ? "ChkSum " : "",
-               (( val & Bioloid::ERROR_RANGE ) != 0 )         ? "Range "  : "",
-               (( val & Bioloid::ERROR_OVERHEATING ) != 0 )   ? "OvHeat " : "",
-               (( val & Bioloid::ERROR_ANGLE_LIMIT ) != 0 )   ? "AngLim " : "",
-               (( val & Bioloid::ERROR_INPUT_VOLTAGE ) != 0 ) ? "InVolt " : "",
-               ( val == Bioloid::ERROR_NONE )                 ? "None "   : "" );
+               (( val & as_uint16_t(Bioloid::Error::INSTRUCTION) ) != 0 )   ? "Inst "   : "",
+               (( val & as_uint16_t(Bioloid::Error::OVERLOAD) ) != 0 )      ? "OvLoad " : "",
+               (( val & as_uint16_t(Bioloid::Error::CHECKSUM) ) != 0 )      ? "ChkSum " : "",
+               (( val & as_uint16_t(Bioloid::Error::RANGE) ) != 0 )         ? "Range "  : "",
+               (( val & as_uint16_t(Bioloid::Error::OVERHEATING) ) != 0 )   ? "OvHeat " : "",
+               (( val & as_uint16_t(Bioloid::Error::ANGLE_LIMIT) ) != 0 )   ? "AngLim " : "",
+               (( val & as_uint16_t(Bioloid::Error::INPUT_VOLTAGE) ) != 0 ) ? "InVolt " : "",
+               ( val == as_uint16_t(Bioloid::Error::NONE) )                 ? "None "   : "" );
 }
 
 void BLD_RegFmtOnOff( struct BLD_Reg_s *reg, uint16_t val, char *outStr, size_t maxLen )

@@ -85,7 +85,7 @@ int main( int argc, char **argv )
         {
             size_t  numBytes;
             int     i;
-            uint32_t    crc = ~0uL;
+            uint32_t    crc = (uint32_t)~0uL;
 
             while (( numBytes = fread( buf, 1, sizeof( buf ), fs )) > 0 )
             {

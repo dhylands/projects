@@ -97,10 +97,10 @@ endif
 ifeq ($(MK_OS),host)
 MK_OS = $(MK_HOST_OS)
 endif
-  
+
 #--------------------------------------------------------------------------
 #
-# 	MK_OS describes the "Operating system" which is the source code is 
+# 	MK_OS describes the "Operating system" which is the source code is
 # 	currently being compiled for. For each supported OS, there is another
 # 	rules file in the $(MK_ROOT)/rules directory which is named using
 # 	mkRules_$(MK_OS).mk
@@ -158,8 +158,8 @@ MK_GEN_DIRS = obj lib bin
 
 #--------------------------------------------------------------------------
 #
-# 	MK_OBJ_DIR describes the location where the generated object and 
-# 	dependancy files will be placed. 
+# 	MK_OBJ_DIR describes the location where the generated object and
+# 	dependancy files will be placed.
 #
 
 ifeq ($(MK_OBJ_DIR),)
@@ -224,11 +224,11 @@ MK_OBJ_NAME = $(foreach objBase,$(1),$(MK_OBJ_DIR)/$(objBase)$(MK_OBJ_EXT))
 #--------------------------------------------------------------------------
 #
 # Setup variables for the various utilities that are required.
-# 
+#
 
 ECHO	= @echo
 MKDIR	= mkdir
-RM		= rm
+RM	= rm
 INSTALL	= install
 
 #--------------------------------------------------------------------------

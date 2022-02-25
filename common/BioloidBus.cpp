@@ -111,9 +111,9 @@ bool BioloidBus::ReadStatusPacket( BioloidPacket *pkt )
         }
         err = pkt->ProcessChar( ch );
 
-    } while ( err == Bioloid::ERROR_NOT_DONE );
+    } while ( err == Bioloid::Error::NOT_DONE );
 
-    if ( err == Bioloid::ERROR_NONE )
+    if ( err == Bioloid::Error::NONE )
     {
         if ( m_showPackets )
         {
@@ -128,7 +128,7 @@ bool BioloidBus::ReadStatusPacket( BioloidPacket *pkt )
         Log( "BioloidBus::ReadStatusPacket err = %d\n", err );
     }
 
-    return err == Bioloid::ERROR_NONE;
+    return err == Bioloid::Error::NONE;
 }
 
 //***************************************************************************
@@ -154,7 +154,7 @@ bool BioloidBus::Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ), 
     {
         scanDev.SetBusAndID( this, id );
 
-        if ( scanDev.Ping() == Bioloid::ERROR_NONE )
+        if ( scanDev.Ping() == Bioloid::Error::NONE )
         {
             someDevFound = true;
 
@@ -179,7 +179,7 @@ void BioloidBus::SendAction()
 {
     BLD_BUS_LOG( "Sending ACTION\n" );
 
-    SendCmdHeader( Bioloid::BROADCAST_ID, 0, Bioloid::CMD_ACTION );
+    SendCmdHeader( Bioloid::BROADCAST_ID, 0, Bioloid::Command::ACTION );
     SendCheckSum();
 }
 
@@ -256,7 +256,7 @@ void BioloidBus::SendCmdHeader
 
     SendByte( id );
     SendByte( paramLen + 2 );
-    SendByte( cmd );
+    SendByte( static_cast<uint8_t>(cmd) );
 }
 
 //***************************************************************************

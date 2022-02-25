@@ -84,7 +84,7 @@ BioloidPacket::~BioloidPacket()
 Bioloid::Error BioloidPacket::ProcessChar( uint8_t ch )
 {
     State           nextState = m_state;
-    Bioloid::Error  err = Bioloid::ERROR_NOT_DONE;
+    Bioloid::Error  err = Bioloid::Error::NOT_DONE;
 
     switch ( nextState )
     {
@@ -159,18 +159,18 @@ Bioloid::Error BioloidPacket::ProcessChar( uint8_t ch )
                 {
                     if ( m_paramIdx <= m_maxParam )
                     {
-                        err = Bioloid::ERROR_NONE;
+                        err = Bioloid::Error::NONE;
                     }
                     else
                     {
-                        err = Bioloid::ERROR_TOO_MUCH_DATA;
+                        err = Bioloid::Error::TOO_MUCH_DATA;
                     }
                 }
                 else
                 {
                     // CRC failed
 
-                    err = Bioloid::ERROR_CHECKSUM;
+                    err = Bioloid::Error::CHECKSUM;
                     LogError( "Rcvd Checksum: 0x%02x Expecting: 0x%02x\n",
                               ch, m_checksum );
                 }

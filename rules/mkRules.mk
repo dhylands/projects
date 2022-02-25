@@ -21,7 +21,7 @@ endif
 # 	the makefile by using:
 #
 #  		make exec="command to execute"
-#  
+#
 # 	Note that we're also specifying the default target here.
 #
 # 	You can also specify arbitrary targets by using the target=foo
@@ -47,12 +47,12 @@ all: $(filter %/,$(MK_SRC_FILES))
 
 #--------------------------------------------------------------------------
 #
-# 	Figure out what files need to be built. Note that even though all of 
-#	the components of MK_LIB_NAME haven't been defined yet, this is fine 
+# 	Figure out what files need to be built. Note that even though all of
+#	the components of MK_LIB_NAME haven't been defined yet, this is fine
 #	because of the deferred way that make evaluates things.
 #
-# 	The "EXTRA" versions are files that need to be compiled, but NOT 
-#	added to a library. Typically this is used when mixing libraries and 
+# 	The "EXTRA" versions are files that need to be compiled, but NOT
+#	added to a library. Typically this is used when mixing libraries and
 #	executables in the same makefile.
 #
 # 	We use the $(addsuffix $(MK_OBJ_EXT),$(basename ...)) so that we can
@@ -68,7 +68,7 @@ MK_EXTRA_DEP_FILES = $(MK_EXTRA_OBJ_FILES:$(MK_OBJ_EXT)=.d)
 #--------------------------------------------------------------------------
 #
 #	If the calling makefile is building a library, then it should define
-#	MK_LIB_BASE, and a rule to build the library will automatically be 
+#	MK_LIB_BASE, and a rule to build the library will automatically be
 #	defined.
 #
 
@@ -135,11 +135,27 @@ endif
 
 #--------------------------------------------------------------------------
 #
-# 	You can run arbitrary commands from within the context that is setup 
+# Format Source Code
+#
+
+CLANGFORMAT_ARGS := -style='{BasedOnStyle: chromium, IndentWidth: 4, AccessModifierOffset: -3, AlignAfterOpenBracket: AlwaysBreak, BinPackParameters: false, ColumnLimit: 100, SortIncludes: false}'
+
+style:
+	clang-format $(CLANGFORMAT_ARGS) -i $(MK_SRC_FILES)
+
+CPPLINT_ARGS :=
+
+lint:
+	cpplint --linelength=100 --filter=-build/include_subdir,-readability/casting,-whitespace/parens --recursive $(CPPLINT_ARGS) --headers=h,hpp,tcc  --extensions=c,h,cpp,hpp,tcc .
+
+
+#--------------------------------------------------------------------------
+#
+# 	You can run arbitrary commands from within the context that is setup
 #	by the makefile by using:
 #
 #  make exec="command to execute"
-#  
+#
 
 exec:
 	 @$(ECHO) "About to execute '$(exec)' ..."
@@ -153,7 +169,7 @@ exec:
 clean: clean-dirs clean-obj clean-dep clean-lib clean-bin
 
 clean-dirs: $(filter %/,$(MK_SRC_FILES))
-				  
+
 clean-dep:
 clean-bin:
 clean-lib:
@@ -166,7 +182,7 @@ clean-dep: mk_clean-dep
 mk_clean-dep:
 	@$(ECHO) "Removing $(MK_CLEAN_DESCR) dependencies ..."
 	$(Q)$(RM) -f $(MK_DEP_FILES)
-	 
+
 .PHONY: mk_clean-dep
 endif
 
@@ -175,7 +191,7 @@ clean-obj: mk_clean-obj
 mk_clean-obj:
 	 @$(ECHO) "Removing $(MK_CLEAN_DESCR) objects ..."
 	 $(Q)$(RM) -f $(MK_OBJ_FILES)
-	 
+
 .PHONY: mk_clean-obj
 endif
 
@@ -240,7 +256,7 @@ print-path:
 print-lib:
 	 @$(ECHO) "MK_LIB_BASE = $(MK_LIB_BASE)"
 	 @$(ECHO) "MK_LIB_NAME = $(MK_LIB_NAME)"
-	 
+
 print-src:
 	 @$(ECHO) "MK_SRC_FILES = $(MK_SRC_FILES)"
 

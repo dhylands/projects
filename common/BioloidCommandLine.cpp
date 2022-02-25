@@ -42,79 +42,6 @@ static char             gDelim[] = " \r\n\t";
 static uint8_t          gErrorBuf[ 80 ];
 static uint8_t          gReadBuf[ 80 ];
 
-// We use the register data structure to parse our global data, so we
-// need to make it look sort of like what a real device has (8 and 16-bit
-// data types - arranged contigupously in memory)
-
-struct Global_t
-{
-    uint8_t     m_showPackets;
-    uint8_t     m_timeout;
-
-};
-
-static  Global_t    gGlobal;
-
-#define GLBL_OFS(x) offsetof( Global_t, x )
-
-static BLD_Reg_t   gGlobalReg[] =
-{
-    { GLBL_OFS( m_showPackets ),    "show-packets",     BLD_REG_FLAG_8_RW,  0,    1,  BLD_RegFmtOnOff,  BLD_RegParseOnOff },
-    { GLBL_OFS( m_timeout ),        "timeout",          BLD_REG_FLAG_8_RW,  0,  255,  NULL,             NULL },
-};
-
-static BLD_DevType_t   gGlobalDevType =
-{
-    "global",                                       // devTypeStr
-    0,                                              // model
-    sizeof( gGlobalReg ) / sizeof( gGlobalReg[0] ), // numRegs
-    gGlobalReg,                                     // reg
-    sizeof( gGlobal ),                              // numRegBytes
-};
-
-class GlobalDevice : public BioloidDevice
-{
-public:
-    GlobalDevice();
-    virtual ~GlobalDevice();
-
-    virtual Bioloid::Error Read( uint8_t offset, void *data, uint8_t numBytes );
-    virtual Bioloid::Error Write( uint8_t offset, const void *data, uint8_t numBytes );
-
-private:
-
-};
-
-GlobalDevice::GlobalDevice()
-{
-}
-
-GlobalDevice::~GlobalDevice()
-{
-}
-
-Bioloid::Error GlobalDevice::Read( uint8_t offset, void *data, uint8_t numBytes )
-{
-    if ( offset + numBytes <= sizeof( gGlobal ))
-    {
-        memcpy( data, (uint8_t *)&gGlobal + offset, numBytes );
-        return Bioloid::ERROR_NONE;
-    }
-    return Bioloid::ERROR_RANGE;
-}
-
-Bioloid::Error GlobalDevice::Write( uint8_t offset, const void *data, uint8_t numBytes )
-{
-    if ( offset + numBytes <= sizeof( gGlobal ))
-    {
-        memcpy( (uint8_t *)&gGlobal + offset, data, numBytes );
-        return Bioloid::ERROR_NONE;
-    }
-    return Bioloid::ERROR_RANGE;
-}
-
-static  GlobalDevice    gGlobalDev;
-
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
 
@@ -233,7 +160,7 @@ bool BioloidCommandLine::ParseRegisterName( StrTokenizer &line, BLD_DevType_t *d
 */
 void BioloidCommandLine::AddErrorStr( Bioloid::Error err, Bioloid::Error mask, char *str, size_t maxLen, const char *errStr )
 {
-    if (( err & mask ) != 0 )
+    if (( as_uint16_t(err) & as_uint16_t(mask) ) != 0 )
     {
         if ( str[0] != '\0' )
         {
@@ -253,20 +180,20 @@ bool BioloidCommandLine::PrintError( Bioloid::Error err )
 
     str[0] = '\0';
 
-    if ( err == Bioloid::ERROR_NONE )
+    if ( err == Bioloid::Error::NONE )
     {
         return false;
     }
 
-    if ( err > 0xff )
+    if ( as_uint16_t(err) > 0xff )
     {
         const char *errStr;
 
         switch ( err )
         {
-            case Bioloid::ERROR_NOT_DONE:       errStr = "Not Done";        break;
-            case Bioloid::ERROR_TIMEOUT:        errStr = "Timeout";         break;
-            case Bioloid::ERROR_TOO_MUCH_DATA:  errStr = "Too Much Data";   break;
+            case Bioloid::Error::NOT_DONE:       errStr = "Not Done";        break;
+            case Bioloid::Error::TIMEOUT:        errStr = "Timeout";         break;
+            case Bioloid::Error::TOO_MUCH_DATA:  errStr = "Too Much Data";   break;
             default:                            errStr = "***Unknown***";   break;
         }
 
@@ -274,14 +201,14 @@ bool BioloidCommandLine::PrintError( Bioloid::Error err )
     }
     else
     {
-        AddErrorStr( err, Bioloid::ERROR_RESERVED,       str, sizeof( gErrorBuf ), "Reserved" );
-        AddErrorStr( err, Bioloid::ERROR_INSTRUCTION,    str, sizeof( gErrorBuf ), "Instruction" );
-        AddErrorStr( err, Bioloid::ERROR_OVERLOAD,       str, sizeof( gErrorBuf ), "Overload" );
-        AddErrorStr( err, Bioloid::ERROR_CHECKSUM,       str, sizeof( gErrorBuf ), "Checksum" );
-        AddErrorStr( err, Bioloid::ERROR_RANGE,          str, sizeof( gErrorBuf ), "Range" );
-        AddErrorStr( err, Bioloid::ERROR_OVERHEATING,    str, sizeof( gErrorBuf ), "Over Heating" );
-        AddErrorStr( err, Bioloid::ERROR_ANGLE_LIMIT,    str, sizeof( gErrorBuf ), "Angle Limit" );
-        AddErrorStr( err, Bioloid::ERROR_INPUT_VOLTAGE,  str, sizeof( gErrorBuf ), "Input Voltage" );
+        AddErrorStr( err, Bioloid::Error::RESERVED,       str, sizeof( gErrorBuf ), "Reserved" );
+        AddErrorStr( err, Bioloid::Error::INSTRUCTION,    str, sizeof( gErrorBuf ), "Instruction" );
+        AddErrorStr( err, Bioloid::Error::OVERLOAD,       str, sizeof( gErrorBuf ), "Overload" );
+        AddErrorStr( err, Bioloid::Error::CHECKSUM,       str, sizeof( gErrorBuf ), "Checksum" );
+        AddErrorStr( err, Bioloid::Error::RANGE,          str, sizeof( gErrorBuf ), "Range" );
+        AddErrorStr( err, Bioloid::Error::OVERHEATING,    str, sizeof( gErrorBuf ), "Over Heating" );
+        AddErrorStr( err, Bioloid::Error::ANGLE_LIMIT,    str, sizeof( gErrorBuf ), "Angle Limit" );
+        AddErrorStr( err, Bioloid::Error::INPUT_VOLTAGE,  str, sizeof( gErrorBuf ), "Input Voltage" );
     }
     Log( "%s\n", str );
 
@@ -651,7 +578,7 @@ bool BioloidCommandLine::ProcessLine( char *lineStr )
             return true;
         }
 
-        if (( err = m_device.Ping()) == Bioloid::ERROR_NONE )
+        if (( err = m_device.Ping()) == Bioloid::Error::NONE )
         {
             Log( "%s %d Response Received\n", devType->devTypeStr, id );
         }

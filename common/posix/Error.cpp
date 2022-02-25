@@ -71,9 +71,7 @@ char *GetErrorStr
     size_t      maxLen  ///< Max length that can be written into errStr.
 )
 {
-    strerror_r( errNum, errStr, maxLen );
-
-    return errStr;
+    return strerror_r( errNum, errStr, maxLen );
 
 } // GetErrorStr
 
