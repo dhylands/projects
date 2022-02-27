@@ -140,13 +140,17 @@ endif
 
 CLANGFORMAT_ARGS := -style='{BasedOnStyle: chromium, IndentWidth: 4, AccessModifierOffset: -3, AlignAfterOpenBracket: AlwaysBreak, BinPackParameters: false, ColumnLimit: 100, SortIncludes: false}'
 
+STYLE_FILES = $(wildcard $(addsuffix /*.h, $(MK_STYLE_DIRS))) $(wildcard $(addsuffix /*.c, $(MK_STYLE_DIRS))) $(wildcard $(addsuffix /*.cpp, $(MK_STYLE_DIRS)))
+
 style:
-	clang-format $(CLANGFORMAT_ARGS) -i $(MK_SRC_FILES)
+	@$(ECHO) "Stylizing source files ..."
+	$(Q)clang-format --verbose $(CLANGFORMAT_ARGS) -i $(STYLE_FILES)
 
 CPPLINT_ARGS :=
 
 lint:
-	cpplint --linelength=100 --filter=-build/include_subdir,-readability/casting,-whitespace/parens --recursive $(CPPLINT_ARGS) --headers=h,hpp,tcc  --extensions=c,h,cpp,hpp,tcc .
+	@$(ECHO) "Linting source files ..."
+	$(Q)cpplint --linelength=100 --filter=-build/include_subdir,-readability/casting,-whitespace/parens --recursive $(CPPLINT_ARGS) --headers=h,hpp,tcc  --extensions=c,h,cpp,hpp,tcc $(MK_STYLE_DIRS)
 
 
 #--------------------------------------------------------------------------

@@ -196,6 +196,13 @@ MK_RULES_DIR = $(MK_ROOT)/rules
 
 #--------------------------------------------------------------------------
 #
+# 	MK_STYLE_DIRS describes the directories that contains source files
+#	for stylizinf (i.e. running clang-format))
+
+MK_STYLE_DIRS = .
+
+#--------------------------------------------------------------------------
+#
 # 	MK_UTILS_DIR describes the location where all of the host utilities
 #	are installed.
 #
