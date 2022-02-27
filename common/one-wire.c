@@ -1,24 +1,24 @@
 /****************************************************************************
-*
-*   Copyright (c) 2009 Dave Hylands     <dhylands@gmail.com>
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License version 2 as
-*   published by the Free Software Foundation.
-*
-*   Alternatively, this software may be distributed under the terms of BSD
-*   license.
-*
-*   See README and COPYING for more details.
-*
-****************************************************************************/
+ *
+ *   Copyright (c) 2009 Dave Hylands     <dhylands@gmail.com>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2 as
+ *   published by the Free Software Foundation.
+ *
+ *   Alternatively, this software may be distributed under the terms of BSD
+ *   license.
+ *
+ *   See README and COPYING for more details.
+ *
+ ****************************************************************************/
 /**
-*
-*   @file   one-wire.c
-*
-*   @brief  Implements an interface to the 1-wire protocol/bus.
-*
-*****************************************************************************/
+ *
+ *   @file   one-wire.c
+ *
+ *   @brief  Implements an interface to the 1-wire protocol/bus.
+ *
+ *****************************************************************************/
 
 /* ---- Include Files ----------------------------------------------------- */
 
@@ -28,19 +28,19 @@
 
 /* ---- Private Constants and Types --------------------------------------- */
 
-#define OW_WRITE_1_LOW_USECS            6   // A
-#define OW_WRITE_1_RELEASE_USECS        64  // B
+#define OW_WRITE_1_LOW_USECS 6       // A
+#define OW_WRITE_1_RELEASE_USECS 64  // B
 
-#define OW_WRITE_0_LOW_USECS            60  // C
-#define OW_WRITE_0_RELEASE_USECS        10  // D
+#define OW_WRITE_0_LOW_USECS 60      // C
+#define OW_WRITE_0_RELEASE_USECS 10  // D
 
-#define OW_READ_SETUP_USECS             9   // E
-#define OW_READ_RELEASE_USECS           55  // F
+#define OW_READ_SETUP_USECS 9     // E
+#define OW_READ_RELEASE_USECS 55  // F
 
-#define OW_RESET_SETUP_USECS            0   // G
-#define OW_RESET_LOW_USECS              480 // H
-#define OW_RESET_DETECT_SETUP_USECS     70  // I
-#define OW_RESET_DETECT_RELEASE_USECS   410 // J
+#define OW_RESET_SETUP_USECS 0             // G
+#define OW_RESET_LOW_USECS 480             // H
+#define OW_RESET_DETECT_SETUP_USECS 70     // I
+#define OW_RESET_DETECT_RELEASE_USECS 410  // J
 
 /* ---- Private Variables ------------------------------------------------- */
 
@@ -55,11 +55,10 @@
 
 //***************************************************************************
 /**
-*   Initializes the hardware to be used for the one-wire protocol.
-*/
+ *   Initializes the hardware to be used for the one-wire protocol.
+ */
 
-void OW_Init( void )
-{
+void OW_Init(void) {
     OW_HAL_Init();
 }
 
@@ -118,172 +117,149 @@ void OW_SetSpeed( OW_Device_t *dev, OW_Speed_t speed )
 
 //***************************************************************************
 /**
-*   Resets the 1-wire bus, and returns 1 if no prescence detect
-*   was found.
-*/
+ *   Resets the 1-wire bus, and returns 1 if no prescence detect
+ *   was found.
+ */
 
-int OW_Reset( void )
-{
-    int                     detect;
-    OW_HAL_AtomicFlags_t    flags;
+int OW_Reset(void) {
+    int detect;
+    OW_HAL_AtomicFlags_t flags;
 
     flags = OW_HAL_AtomicStart();
     {
-        OW_HAL_DelayUSecs( OW_RESET_SETUP_USECS );
+        OW_HAL_DelayUSecs(OW_RESET_SETUP_USECS);
         OW_HAL_DriveDQLow();
-        OW_HAL_DelayUSecs( OW_RESET_LOW_USECS );
+        OW_HAL_DelayUSecs(OW_RESET_LOW_USECS);
         OW_HAL_ReleaseDQ();
-        OW_HAL_DelayUSecs( OW_RESET_DETECT_SETUP_USECS );
+        OW_HAL_DelayUSecs(OW_RESET_DETECT_SETUP_USECS);
         detect = OW_HAL_ReadDQ();
-        OW_HAL_DelayUSecs( OW_RESET_DETECT_RELEASE_USECS );
+        OW_HAL_DelayUSecs(OW_RESET_DETECT_RELEASE_USECS);
     }
-    OW_HAL_AtomicEnd( flags );
+    OW_HAL_AtomicEnd(flags);
 
     return detect;  // 1 means no devices detected
 
-} // OW_Reset
+}  // OW_Reset
 
 //***************************************************************************
 /**
-*   Writes a single bit onto the 1-wire bus.
-*/
+ *   Writes a single bit onto the 1-wire bus.
+ */
 
-void OW_WriteBit
-(
-    uint8_t bit     ///< Bit value to write onto the 1-wire bus (0 or 1)
-)
-{
-    OW_HAL_AtomicFlags_t    flags;
+void OW_WriteBit(uint8_t bit  ///< Bit value to write onto the 1-wire bus (0 or 1)
+) {
+    OW_HAL_AtomicFlags_t flags;
 
     flags = OW_HAL_AtomicStart();
     {
-        if ( bit )
-        {
+        if (bit) {
             // Write out a '1' bit
 
             OW_HAL_DriveDQLow();
-            OW_HAL_DelayUSecs( OW_WRITE_1_LOW_USECS );
+            OW_HAL_DelayUSecs(OW_WRITE_1_LOW_USECS);
             OW_HAL_ReleaseDQ();
-            OW_HAL_DelayUSecs( OW_WRITE_1_RELEASE_USECS );
-        }
-        else
-        {
+            OW_HAL_DelayUSecs(OW_WRITE_1_RELEASE_USECS);
+        } else {
             // Write out a '0' bit
 
             OW_HAL_DriveDQLow();
-            OW_HAL_DelayUSecs( OW_WRITE_0_LOW_USECS );
+            OW_HAL_DelayUSecs(OW_WRITE_0_LOW_USECS);
             OW_HAL_ReleaseDQ();
-            OW_HAL_DelayUSecs( OW_WRITE_0_RELEASE_USECS );
+            OW_HAL_DelayUSecs(OW_WRITE_0_RELEASE_USECS);
         }
     }
-    OW_HAL_AtomicEnd( flags );
+    OW_HAL_AtomicEnd(flags);
 
-} // OW_WriteBit
+}  // OW_WriteBit
 
 //***************************************************************************
 /**
-*   Writes a byte onto the 1-wire bus.
-*/
+ *   Writes a byte onto the 1-wire bus.
+ */
 
-void OW_WriteByte
-(
-    uint8_t byte       ///< Byte value to write onto the 1-wire bus
-)
-{
+void OW_WriteByte(uint8_t byte  ///< Byte value to write onto the 1-wire bus
+) {
     uint8_t i;
 
-    for ( i = 0; i < 8; i++ )
-    {
+    for (i = 0; i < 8; i++) {
         // Write the data out 1 bit at a time, least significant bit first
 
-        OW_WriteBit( byte & 1 );
+        OW_WriteBit(byte & 1);
 
         byte >>= 1;
     }
-} // OW_WriteByte
+}  // OW_WriteByte
 
 //***************************************************************************
 /**
-*   Reads a single bit from the 1-wire bus.
-*/
+ *   Reads a single bit from the 1-wire bus.
+ */
 
-uint8_t OW_ReadBit( void )
-{
+uint8_t OW_ReadBit(void) {
     uint8_t bit;
 
-    OW_HAL_AtomicFlags_t    flags;
+    OW_HAL_AtomicFlags_t flags;
 
     flags = OW_HAL_AtomicStart();
     {
         OW_HAL_DriveDQLow();
-        OW_HAL_DelayUSecs( OW_WRITE_1_LOW_USECS );
+        OW_HAL_DelayUSecs(OW_WRITE_1_LOW_USECS);
         OW_HAL_ReleaseDQ();
-        OW_HAL_DelayUSecs( OW_READ_SETUP_USECS );
+        OW_HAL_DelayUSecs(OW_READ_SETUP_USECS);
         bit = OW_HAL_ReadDQ();
-        OW_HAL_DelayUSecs( OW_READ_RELEASE_USECS );
+        OW_HAL_DelayUSecs(OW_READ_RELEASE_USECS);
     }
-    OW_HAL_AtomicEnd( flags );
+    OW_HAL_AtomicEnd(flags);
 
     return bit;
 
-} // OW_ReadBit
+}  // OW_ReadBit
 
 //***************************************************************************
 /**
-*   Reads a byte from the 1-wire bus.
-*/
+ *   Reads a byte from the 1-wire bus.
+ */
 
-uint8_t OW_ReadByte( void )
-{
+uint8_t OW_ReadByte(void) {
     uint8_t i;
     uint8_t result = 0;
 
-    for ( i = 0; i < 8; i++ )
-    {
+    for (i = 0; i < 8; i++) {
         result >>= 1;
 
         // Write the data out 1 bit at a time, least significant bit first
 
-        if ( OW_ReadBit() )
-        {
+        if (OW_ReadBit()) {
             result |= 0x80;
         }
     }
 
     return result;
 
-} // OW_ReadByte
+}  // OW_ReadByte
 
 //***************************************************************************
 /**
-*   Writes a byte to the 1-wire bus and returns the sampled result.
-*/
+ *   Writes a byte to the 1-wire bus and returns the sampled result.
+ */
 
-uint8_t OW_TouchByte
-(
-    uint8_t byte   ///< Byte to write
-)
-{
+uint8_t OW_TouchByte(uint8_t byte  ///< Byte to write
+) {
     uint8_t i;
     uint8_t result = 0;
 
-    for ( i = 0; i < 8; i++ )
-    {
+    for (i = 0; i < 8; i++) {
         result >>= 1;
 
-        if ( byte & 1 )
-        {
+        if (byte & 1) {
             // Reading a bit is just like writing a 1 bit except that
             // it also does a sample
 
-            if ( OW_ReadBit() )
-            {
+            if (OW_ReadBit()) {
                 result |= 0x80;
             }
-        }
-        else
-        {
-            OW_WriteBit( 0 );
+        } else {
+            OW_WriteBit(0);
         }
 
         byte >>= 1;
@@ -291,30 +267,25 @@ uint8_t OW_TouchByte
 
     return result;
 
-
-} // OW_TouchByte
+}  // OW_TouchByte
 
 //***************************************************************************
 /**
-*   Writes a block and returns the sampled result in the same buffer.
-*/
+ *   Writes a block and returns the sampled result in the same buffer.
+ */
 
-void OW_TouchBlock
-(
-    void   *voidData,   ///< Pointer to block to read/write
-    size_t  numBytes    ///< Number of bytes to write/read
-)
-{
-    uint8_t *data = voidData;
+void OW_TouchBlock(
+    void* voidData,  ///< Pointer to block to read/write
+    size_t numBytes  ///< Number of bytes to write/read
+) {
+    uint8_t* data = voidData;
 
-    while ( numBytes > 0 )
-    {
-        *data = OW_TouchByte( *data );
+    while (numBytes > 0) {
+        *data = OW_TouchByte(*data);
         data++;
         numBytes--;
     }
 
-} // OW_TouchBlock
+}  // OW_TouchBlock
 
 /** @} */
-

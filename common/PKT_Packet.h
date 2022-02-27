@@ -1,33 +1,33 @@
 /****************************************************************************
-*
-*   Copyright (c) 2007 Dave Hylands     <dhylands@gmail.com>
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License version 2 as
-*   published by the Free Software Foundation.
-*
-*   Alternatively, this software may be distributed under the terms of BSD
-*   license.
-*
-*   See README and COPYING for more details.
-*
-****************************************************************************/
+ *
+ *   Copyright (c) 2007 Dave Hylands     <dhylands@gmail.com>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2 as
+ *   published by the Free Software Foundation.
+ *
+ *   Alternatively, this software may be distributed under the terms of BSD
+ *   license.
+ *
+ *   See README and COPYING for more details.
+ *
+ ****************************************************************************/
 /**
-*
-*   @file   PacketProtocol.h
-*
-*   @brief  This file contains the interface for the packet protocol.
-*
-****************************************************************************/
+ *
+ *   @file   PacketProtocol.h
+ *
+ *   @brief  This file contains the interface for the packet protocol.
+ *
+ ****************************************************************************/
 /**
-*   @defgroup   PacketProtocol   Allows sending/receiving packets
-*
-*   @brief      Allows packets to be sent or received via the serial port.
-*
-****************************************************************************/
+ *   @defgroup   PacketProtocol   Allows sending/receiving packets
+ *
+ *   @brief      Allows packets to be sent or received via the serial port.
+ *
+ ****************************************************************************/
 
-#if !defined( PKT_PACKET_H )
-#define PKT_PACKET_H                   ///< Include Guard
+#if !defined(PKT_PACKET_H)
+#define PKT_PACKET_H  ///< Include Guard
 
 /* ---- Include Files ---------------------------------------------------- */
 
@@ -36,9 +36,8 @@
  * @{
  */
 
-#if defined( __cplusplus )
-extern "C"
-{
+#if defined(__cplusplus)
+extern "C" {
 #endif
 
 /**
@@ -64,9 +63,8 @@ extern "C"
 
 // Some Character codes used in the protocol
 
-#define PKT_STX 0x82    /**< Used to deliniate the end of a packet and start of text mode           */
-#define PKT_ETX 0x83    /**< Used to deliniate the end of text mode and the start of packet mode    */
-
+#define PKT_STX 0x82 /**< Used to deliniate the end of a packet and start of text mode */
+#define PKT_ETX 0x83 /**< Used to deliniate the end of text mode and the start of packet mode */
 
 /**
  *  Since we're using this to "wrap" i2c commands which have a maximum
@@ -74,17 +72,16 @@ extern "C"
  *  for the extra stuff like addressing.
  */
 
-#define PKT_MAX_DATA_LEN    40
+#define PKT_MAX_DATA_LEN 40
 
 /**
  *  Describes a packet.
  */
 
-typedef struct
-{
-    unsigned char   len;
-    unsigned char   crc;
-    unsigned char   data[ PKT_MAX_DATA_LEN ];
+typedef struct {
+    unsigned char len;
+    unsigned char crc;
+    unsigned char data[PKT_MAX_DATA_LEN];
 
 } PKT_Packet;
 
@@ -93,19 +90,19 @@ typedef struct
  *  text mode.
  */
 
-typedef void (*PKT_TextCharFuncPtr)( unsigned char ch, void *userData );
+typedef void (*PKT_TextCharFuncPtr)(unsigned char ch, void* userData);
 
 /**
  *  Type which describes a function called when a packet is received.
  */
 
-typedef void (*PKT_PacketReceivedFuncPtr)( PKT_Packet *packet, void *userData );
+typedef void (*PKT_PacketReceivedFuncPtr)(PKT_Packet* packet, void* userData);
 
 /**
  *  Type which describes a function called to send a packet.
  */
 
-typedef void (*PKT_SendCharFuncPtr)( unsigned char ch, void *userData );
+typedef void (*PKT_SendCharFuncPtr)(unsigned char ch, void* userData);
 
 /* ---- Variable Externs ------------------------------------------------- */
 
@@ -114,31 +111,30 @@ typedef void (*PKT_SendCharFuncPtr)( unsigned char ch, void *userData );
  *  text mode.
  */
 
-extern  PKT_TextCharFuncPtr         PKT_TextChar;
+extern PKT_TextCharFuncPtr PKT_TextChar;
 
 /**
  *  Pointer to a function which is called when a packet is received.
  */
 
-extern  PKT_PacketReceivedFuncPtr   PKT_PacketReceived;
+extern PKT_PacketReceivedFuncPtr PKT_PacketReceived;
 
 /**
  *  Pointer to a function which sends a character over the serial line.
  */
 
-extern PKT_SendCharFuncPtr         PKT_SendChar;
+extern PKT_SendCharFuncPtr PKT_SendChar;
 
 /* ---- Function Prototypes ---------------------------------------------- */
 
-void PKT_ProcessChar( unsigned char ch, void *userData );
-void PKT_SendPacket( const PKT_Packet *pkt, void *userData );
-void PKT_SendText( const char *str, void *userData );
+void PKT_ProcessChar(unsigned char ch, void* userData);
+void PKT_SendPacket(const PKT_Packet* pkt, void* userData);
+void PKT_SendText(const char* str, void* userData);
 
-#if defined( __cplusplus )
+#if defined(__cplusplus)
 }
 #endif
 
 /** @} */
 
-#endif // PKT_PACKET_H
-
+#endif  // PKT_PACKET_H

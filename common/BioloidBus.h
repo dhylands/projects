@@ -1,28 +1,27 @@
 /****************************************************************************
-*
-*   Copyright (c) 2009 Dave Hylands     <dhylands@gmail.com>
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License version 2 as
-*   published by the Free Software Foundation.
-*
-*   Alternatively, this software may be distributed under the terms of BSD
-*   license.
-*
-*   See README and COPYING for more details.
-*
-****************************************************************************/
+ *
+ *   Copyright (c) 2009 Dave Hylands     <dhylands@gmail.com>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2 as
+ *   published by the Free Software Foundation.
+ *
+ *   Alternatively, this software may be distributed under the terms of BSD
+ *   license.
+ *
+ *   See README and COPYING for more details.
+ *
+ ****************************************************************************/
 /**
-*
-*   @file   BioloidBus.h
-*
-*   @brief  Contains the definitions for a bioloid bus. Essentially
-*           there is a bus for each UART with bioloid devices attached.
-*
-****************************************************************************/
+ *
+ *   @file   BioloidBus.h
+ *
+ *   @brief  Contains the definitions for a bioloid bus. Essentially
+ *           there is a bus for each UART with bioloid devices attached.
+ *
+ ****************************************************************************/
 
-#if !defined( BIOLOIDBUS_H )
-#define BIOLOIDBUS_H       /**< Include Guard                             */
+#pragma once
 
 // ---- Include Files -------------------------------------------------------
 
@@ -37,12 +36,15 @@ class BioloidDevice;
  * @{
  */
 
-#define BLD_BUS_LOG( fmt, args... ) do { if ( BioloidBus::m_log ) { Log( fmt, ##args ); }} while (0)
+#define BLD_BUS_LOG(fmt, args...) \
+    do {                          \
+        if (BioloidBus::m_log) {  \
+            Log(fmt, ##args);     \
+        }                         \
+    } while (0)
 
-class BioloidBus
-{
-public:
-
+class BioloidBus {
+ public:
     //------------------------------------------------------------------------
     // Default constructor
 
@@ -57,7 +59,8 @@ public:
     // Scans the bus, calling the passed callback for each device
     // ID which responds.
 
-    bool Scan( bool (*devFound)( BioloidBus *bus, BioloidDevice *dev ), uint8_t startId, uint8_t numIds );
+    bool
+    Scan(bool (*devFound)(BioloidBus* bus, BioloidDevice* dev), uint8_t startId, uint8_t numIds);
 
     //------------------------------------------------------------------------
     // Broadcasts an action packet to all of the devices on the bus.
@@ -70,7 +73,7 @@ public:
     // Sends a byte. This will automatically accumulate the byte into
     // the checksum
 
-    virtual void SendByte( uint8_t data );
+    virtual void SendByte(uint8_t data);
 
     //------------------------------------------------------------------------
     // Reads a byte. This function returns true if a character was read, and
@@ -81,7 +84,7 @@ public:
     // is 500 usec). This represents the minimum time between receiving a
     // packet and sending the response.
 
-    virtual bool ReadByte( uint8_t *ch ) = 0;
+    virtual bool ReadByte(uint8_t* ch) = 0;
 
     //------------------------------------------------------------------------
     // Send the checksum. Since the checksum byte is the last byte of the
@@ -93,7 +96,7 @@ public:
     //------------------------------------------------------------------------
     // Sends 'len' bytes
 
-    void SendData( uint8_t len, const void *data );
+    void SendData(uint8_t len, const void* data);
 
     //------------------------------------------------------------------------
     // Sends the command header, which is common to all of the commands.
@@ -101,30 +104,26 @@ public:
     // way the caller is only responsible for figuring out how many extra
     // parameter bytes are being sent.
 
-    virtual void SendCmdHeader( Bioloid::ID_t id, uint8_t paramLen, Bioloid::Command cmd );
+    virtual void SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Command cmd);
 
     //------------------------------------------------------------------------
     // Reads a packet. Returns true if a packet was read successfully,
     // false if a timeout or error occurred.
 
-    virtual bool ReadStatusPacket( BioloidPacket *pkt );
+    virtual bool ReadStatusPacket(BioloidPacket* pkt);
 
     //------------------------------------------------------------------------
     // Sets debug option which causes packet data to be printed.
 
-    void SetShowPackets( bool showPackets )
-    {
-        m_showPackets = showPackets;
-    }
+    void SetShowPackets(bool showPackets) { m_showPackets = showPackets; }
 
-    static  bool    m_log;
+    static bool m_log;
 
-protected:
-
+ protected:
     //------------------------------------------------------------------------
     // Adds a byte to the buffer of data to send.
 
-    void BufferByte( uint8_t data );
+    void BufferByte(uint8_t data);
 
     //------------------------------------------------------------------------
     // Writes all of the buffered bytes to the serial port.
@@ -134,29 +133,25 @@ protected:
     //------------------------------------------------------------------------
     // Core portion of WriteBuffer which writes the data
 
-    virtual void WriteBufferedData( void *data, size_t numBytes ) = 0;
+    virtual void WriteBufferedData(void* data, size_t numBytes) = 0;
 
     //------------------------------------------------------------------------
 
-    uint8_t     m_checksum;
-    bool        m_showPackets;
+    uint8_t m_checksum;
+    bool m_showPackets;
 
-private:
-
+ private:
     //------------------------------------------------------------------------
     // The copy constructor and assignment operator are not need for this
     // class so we declare them private and don't provide an implementation.
 
-    BioloidBus( const BioloidBus & copy );
-    BioloidBus &operator =( const BioloidBus &rhs );
+    BioloidBus(const BioloidBus& copy);
+    BioloidBus& operator=(const BioloidBus& rhs);
 
     //------------------------------------------------------------------------
 
-    size_t      m_dataBytes;
-    uint8_t     m_data[ 128 ];
+    size_t m_dataBytes;
+    uint8_t m_data[128];
 };
 
 /** @} */
-
-#endif /* BIOLOIDBUS_H */
-
