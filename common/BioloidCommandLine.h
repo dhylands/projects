@@ -33,17 +33,19 @@
 #include "BioloidDevice.h"
 #include "StrToken.h"
 
-class BioloidCommandLine {
+namespace Bioloid {
+
+class CommandLine {
  public:
     //------------------------------------------------------------------------
     // Default constructor
 
-    BioloidCommandLine();
+    CommandLine();
 
     //------------------------------------------------------------------------
     // Destructor
 
-    ~BioloidCommandLine();
+    ~CommandLine();
 
     //------------------------------------------------------------------------
     // Processes one line of data
@@ -58,7 +60,7 @@ class BioloidCommandLine {
     //------------------------------------------------------------------------
     // Sets the bus used to send commands.
 
-    void SetBus(BioloidBus* bus) { m_bus = bus; }
+    void SetBus(Bus* bus) { m_bus = bus; }
 
  private:
     //------------------------------------------------------------------------
@@ -100,13 +102,13 @@ class BioloidCommandLine {
     // Processes the get and get-raw command
 
     void
-    ProcessDeviceGetCommand(BLD_DevType_t* devType, Bioloid::ID_t id, StrTokenizer* line, bool raw);
+    ProcessDeviceGetCommand(BLD_DevType_t* devType, Bioloid::ID id, StrTokenizer* line, bool raw);
 
     //------------------------------------------------------------------------
     // Processes the set and set-raw command
 
     void
-    ProcessDeviceSetCommand(BLD_DevType_t* devType, Bioloid::ID_t id, StrTokenizer* line, bool raw);
+    ProcessDeviceSetCommand(BLD_DevType_t* devType, Bioloid::ID id, StrTokenizer* line, bool raw);
 
     //------------------------------------------------------------------------
     // Processes the global get command
@@ -120,9 +122,11 @@ class BioloidCommandLine {
 
     //------------------------------------------------------------------------
 
-    BioloidBus* m_bus;
-    BioloidDevice m_device;
+    Bus* m_bus;
+    Device m_device;
 
     unsigned m_numDevTypes;
     BLD_DevType_t** m_devType;
 };
+
+}  // namespace Bioloid

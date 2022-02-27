@@ -20,8 +20,7 @@
  *
  ****************************************************************************/
 
-#if !defined(STRTOKEN_H)
-#define STRTOKEN_H  ///< Include Guard
+#pragma once
 
 // ---- Include Files -------------------------------------------------------
 
@@ -106,5 +105,3 @@ inline const char* StrTokenizer::Remainder() const {
 }
 
 /** @} */
-
-#endif  // STRTOKEN_H

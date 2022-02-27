@@ -51,22 +51,19 @@
 
 #define POLYNOMIAL (0x1070U << 3)
 
-unsigned char Crc8( unsigned char inCrc, unsigned char inData )
-{
-	int i;
-    unsigned short  data;
+unsigned char Crc8( unsigned char inCrc, unsigned char inData ) {
+    int i;
+    uint16_t  data;
 
     data = inCrc ^ inData;
     data <<= 8;
 
-	for ( i = 0; i < 8; i++ )
-    {
-		if (( data & 0x8000 ) != 0 )
-        {
+    for ( i = 0; i < 8; i++ ) {
+        if (( data & 0x8000 ) != 0 ) {
             data = data ^ POLYNOMIAL;
         }
-		data = data << 1;
-	}
+        data = data << 1;
+    }
 
 #if 0
 #if defined(LogBuf2)
@@ -76,9 +73,8 @@ unsigned char Crc8( unsigned char inCrc, unsigned char inData )
 #endif
 #endif
 
-	return (unsigned char)( data >> 8 );
-
-} // Crc8
+    return (unsigned char)( data >> 8 );
+}  // Crc8
 
 #else  // Optimized for 8 bit CPUs (0x22 bytes on ATMega128 versus 0x30 for above version)
 
@@ -106,7 +102,6 @@ unsigned char Crc8(unsigned char inCrc, unsigned char inData) {
 #endif
 
     return data;
-
 }  // Crc8
 
 #endif
@@ -125,7 +120,6 @@ uint8_t Crc8Block(uint8_t crc, uint8_t* data, uint8_t len) {
     }
 
     return crc;
-
 }  // Crc8Block
 
 #endif  // CFG_CRC8BLOCK

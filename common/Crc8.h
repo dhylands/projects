@@ -21,8 +21,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CRC8_H)
-#define CRC_H  ///< Include Guard
+#pragma once
 
 /* ---- Include Files ----------------------------------------------------- */
 
@@ -45,5 +44,3 @@ uint8_t Crc8Block(uint8_t crc, uint8_t* data, uint8_t len);
 #endif
 
 /** @} */
-
-#endif  // CRC8_H

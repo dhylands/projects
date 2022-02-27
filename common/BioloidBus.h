@@ -29,7 +29,9 @@
 #include "Bioloid.h"
 #include "BioloidPacket.h"
 
-class BioloidDevice;
+namespace Bioloid {
+
+class Device;
 
 /**
  * @addtogroup bioloid
@@ -38,29 +40,28 @@ class BioloidDevice;
 
 #define BLD_BUS_LOG(fmt, args...) \
     do {                          \
-        if (BioloidBus::m_log) {  \
+        if (Bus::m_log) {         \
             Log(fmt, ##args);     \
         }                         \
     } while (0)
 
-class BioloidBus {
+class Bus {
  public:
     //------------------------------------------------------------------------
     // Default constructor
 
-    BioloidBus();
+    Bus();
 
     //------------------------------------------------------------------------
     // Destructor
 
-    virtual ~BioloidBus();
+    virtual ~Bus();
 
     //------------------------------------------------------------------------
     // Scans the bus, calling the passed callback for each device
     // ID which responds.
 
-    bool
-    Scan(bool (*devFound)(BioloidBus* bus, BioloidDevice* dev), uint8_t startId, uint8_t numIds);
+    bool Scan(bool (*devFound)(Bus* bus, Device* dev), Bioloid::ID startId, uint8_t numIds);
 
     //------------------------------------------------------------------------
     // Broadcasts an action packet to all of the devices on the bus.
@@ -110,7 +111,7 @@ class BioloidBus {
     // Reads a packet. Returns true if a packet was read successfully,
     // false if a timeout or error occurred.
 
-    virtual bool ReadStatusPacket(BioloidPacket* pkt);
+    virtual bool ReadStatusPacket(Packet* pkt);
 
     //------------------------------------------------------------------------
     // Sets debug option which causes packet data to be printed.
@@ -145,13 +146,13 @@ class BioloidBus {
     // The copy constructor and assignment operator are not need for this
     // class so we declare them private and don't provide an implementation.
 
-    BioloidBus(const BioloidBus& copy);
-    BioloidBus& operator=(const BioloidBus& rhs);
+    Bus(const Bus& copy);
+    Bus& operator=(const Bus& rhs);
 
     //------------------------------------------------------------------------
 
     size_t m_dataBytes;
     uint8_t m_data[128];
 };
-
+}  // namespace Bioloid
 /** @} */

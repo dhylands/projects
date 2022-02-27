@@ -59,7 +59,6 @@ static SwitchState_t gSwitchState[CFG_NUM_SWITCHES];
 
 static inline void SetSwitchState(SwitchNum_t sw, SwitchState_t state) {
     gSwitchState[sw] = state;
-
 }  // SetSwitchState
 
 /***************************************************************************/
@@ -69,7 +68,6 @@ static inline void SetSwitchState(SwitchNum_t sw, SwitchState_t state) {
 
 static inline void ClearSwitchBounceCount(SwitchNum_t sw) {
     gSwitchBounceCount[sw] = 0;
-
 }  // ClearSwitchBounceCounter
 
 /***************************************************************************/
@@ -79,7 +77,6 @@ static inline void ClearSwitchBounceCount(SwitchNum_t sw) {
 
 static inline void IncrementSwitchBounceCount(SwitchNum_t sw) {
     gSwitchBounceCount[sw]++;
-
 }  // IncrementSwitchBounceCounter
 
 /***************************************************************************/
@@ -89,7 +86,6 @@ static inline void IncrementSwitchBounceCount(SwitchNum_t sw) {
 
 static inline SwitchCount_t SwitchBounceCount(SwitchNum_t sw) {
     return gSwitchBounceCount[sw];
-
 }  // IncrementSwitchBounceCounter
 
 /***************************************************************************/
@@ -151,5 +147,4 @@ void CheckSwitches(void) {
             SetSwitchState(sw, SWITCH_STATE_OFF);
         }
     }
-
 }  // CheckSwitches

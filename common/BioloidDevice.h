@@ -34,27 +34,29 @@
  * @{
  */
 
-class BioloidDevice {
+namespace Bioloid {
+
+class Device {
  public:
     //------------------------------------------------------------------------
     // Default constructor
 
-    BioloidDevice();
+    Device();
 
     //------------------------------------------------------------------------
     // Normal constructor
 
-    BioloidDevice(BioloidBus* bus, Bioloid::ID_t id);
+    Device(Bus* bus, Bioloid::ID id);
 
     //------------------------------------------------------------------------
     // Destructor
 
-    virtual ~BioloidDevice();
+    virtual ~Device();
 
     //------------------------------------------------------------------------
     // Returns the ID of this device.
 
-    Bioloid::ID_t ID() const { return m_id; }
+    Bioloid::ID ID() const { return m_id; }
 
     //------------------------------------------------------------------------
     // Pings the device and waits for a status packet.
@@ -106,7 +108,7 @@ class BioloidDevice {
     //------------------------------------------------------------------------
     // Sets the Bus and ID
 
-    void SetBusAndID(BioloidBus* bus, Bioloid::ID_t id) {
+    void SetBusAndID(Bus* bus, Bioloid::ID id) {
         m_bus = bus;
         m_id = id;
     }
@@ -119,18 +121,20 @@ class BioloidDevice {
  protected:
     //------------------------------------------------------------------------
 
-    BioloidBus* m_bus;
-    Bioloid::ID_t m_id;  // The ID of this device
+    Bus* m_bus;
+    Bioloid::ID m_id;  // The ID of this device
 
  private:
     //------------------------------------------------------------------------
     // The copy constructor and assignment operator are not need for this
     // class so we declare them private and don't provide an implementation.
 
-    BioloidDevice(const BioloidDevice& copy);
-    BioloidDevice& operator=(const BioloidDevice& rhs);
+    Device(const Device& copy);
+    Device& operator=(const Device& rhs);
 };
 
 // ---- Inline Functions ----------------------------------------------------
+
+}  // namespace Bioloid
 
 /** @} */

@@ -70,8 +70,7 @@
  *
  ****************************************************************************/
 
-#if !defined(SWITCH_H)
-#define SWITCH_H /**< Include Guard                             */
+#pragma once
 
 /* ---- Include Files ---------------------------------------------------- */
 
@@ -143,7 +142,6 @@ extern uint8_t gSwitchEnabled[NUM_SWITCH_BYTES];
 
 static inline SwitchBool_t IsRawSwitchPressed(SwitchNum_t sw) {
     return (SWITCH_RAW_BYTE(sw) & SWITCH_MASK(sw)) != 0;
-
 }  // IsRawSwitchPressed
 
 /***************************************************************************/
@@ -153,7 +151,6 @@ static inline SwitchBool_t IsRawSwitchPressed(SwitchNum_t sw) {
 
 static inline SwitchBool_t IsSwitchEnabled(SwitchNum_t sw) {
     return (SWITCH_ENABLED_BYTE(sw) & SWITCH_MASK(sw)) != 0;
-
 }  // IsSwitchEnabled
 
 /***************************************************************************/
@@ -167,7 +164,6 @@ static inline void SetRawSwitch(SwitchNum_t sw, SwitchBool_t isSet) {
     } else {
         SWITCH_RAW_BYTE(sw) &= ~SWITCH_MASK(sw);
     }
-
 }  // SetRawSwitch
 
 /***************************************************************************/
@@ -177,7 +173,6 @@ static inline void SetRawSwitch(SwitchNum_t sw, SwitchBool_t isSet) {
 
 static inline void EnableSwitch(SwitchNum_t sw) {
     SWITCH_ENABLED_BYTE(sw) |= SWITCH_MASK(sw);
-
 }  // EnableSwitch
 
 /***************************************************************************/
@@ -187,7 +182,6 @@ static inline void EnableSwitch(SwitchNum_t sw) {
 
 static inline void DisableSwitch(SwitchNum_t sw) {
     SWITCH_ENABLED_BYTE(sw) &= ~SWITCH_MASK(sw);
-
 }  // EnableSwitch
 
 /* ---- Function Prototypes ---------------------------------------------- */
@@ -198,5 +192,3 @@ void CheckSwitches(void);
 // following prototype.
 
 void SwitchEvent(SwitchNum_t switchNum, SwitchEvent_t event);
-
-#endif  // SWITCH_H

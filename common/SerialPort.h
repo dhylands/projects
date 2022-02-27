@@ -26,8 +26,7 @@
  *
  ****************************************************************************/
 
-#if !defined(SERIALPORT_H)
-#define SERIALPORT_H  ///< Include Guard
+#pragma once
 
 // ---- Include Files -------------------------------------------------------
 
@@ -112,5 +111,3 @@ class SerialPort {
 // ---- Inline Functions ----------------------------------------------------
 
 /** @} */
-
-#endif  // SERILAPORT_H

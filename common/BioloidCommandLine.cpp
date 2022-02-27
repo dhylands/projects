@@ -50,12 +50,14 @@ static uint8_t gReadBuf[80];
  * @{
  */
 
+namespace Bioloid {
+
 //***************************************************************************
 /**
  *   Constructor
  */
 
-BioloidCommandLine::BioloidCommandLine() : m_bus(NULL) {}
+CommandLine::CommandLine() : m_bus(NULL) {}
 
 //***************************************************************************
 /**
@@ -64,14 +66,14 @@ BioloidCommandLine::BioloidCommandLine() : m_bus(NULL) {}
  *   virtual
  */
 
-BioloidCommandLine::~BioloidCommandLine() {}
+CommandLine::~CommandLine() {}
 
 //***************************************************************************
 /**
  *   Dumps information about the registers
  */
 
-void BioloidCommandLine::DumpRegInfo(BLD_DevType_t* devType) {
+void CommandLine::DumpRegInfo(BLD_DevType_t* devType) {
     BLD_Reg_t* reg;
     unsigned regIdx;
 
@@ -96,7 +98,7 @@ void BioloidCommandLine::DumpRegInfo(BLD_DevType_t* devType) {
  *   Parses an offset and some data.
  */
 
-bool BioloidCommandLine::ParseOffsetAndData(
+bool CommandLine::ParseOffsetAndData(
     StrTokenizer* line,
     uint8_t* offset,
     uint8_t* numBytes,
@@ -121,7 +123,7 @@ bool BioloidCommandLine::ParseOffsetAndData(
  *   Parses a register name
  */
 
-bool BioloidCommandLine::ParseRegisterName(
+bool CommandLine::ParseRegisterName(
     StrTokenizer* line,
     BLD_DevType_t* devType,
     BLD_Reg_t** outRegp) {
@@ -148,12 +150,7 @@ bool BioloidCommandLine::ParseRegisterName(
 /**
  *   Parses the error code and prints the results.
  */
-void BioloidCommandLine::AddErrorStr(
-    Bioloid::Error err,
-    Bioloid::Error mask,
-    char* str,
-    size_t maxLen,
-    const char* errStr) {
+void CommandLine::AddErrorStr(Error err, Error mask, char* str, size_t maxLen, const char* errStr) {
     if ((as_uint16_t(err) & as_uint16_t(mask)) != 0) {
         if (str[0] != '\0') {
             StrMaxCat(str, ",", maxLen);
@@ -166,12 +163,12 @@ void BioloidCommandLine::AddErrorStr(
 /**
  *   Prints the error code and prints the results.
  */
-bool BioloidCommandLine::PrintError(Bioloid::Error err) {
+bool CommandLine::PrintError(Error err) {
     char* str = (char*)&gErrorBuf[0];
 
     str[0] = '\0';
 
-    if (err == Bioloid::Error::NONE) {
+    if (err == Error::NONE) {
         return false;
     }
 
@@ -179,13 +176,13 @@ bool BioloidCommandLine::PrintError(Bioloid::Error err) {
         const char* errStr;
 
         switch (err) {
-            case Bioloid::Error::NOT_DONE:
+            case Error::NOT_DONE:
                 errStr = "Not Done";
                 break;
-            case Bioloid::Error::TIMEOUT:
+            case Error::TIMEOUT:
                 errStr = "Timeout";
                 break;
-            case Bioloid::Error::TOO_MUCH_DATA:
+            case Error::TOO_MUCH_DATA:
                 errStr = "Too Much Data";
                 break;
             default:
@@ -195,14 +192,14 @@ bool BioloidCommandLine::PrintError(Bioloid::Error err) {
 
         StrMaxCpy(str, errStr, sizeof(gErrorBuf));
     } else {
-        AddErrorStr(err, Bioloid::Error::RESERVED, str, sizeof(gErrorBuf), "Reserved");
-        AddErrorStr(err, Bioloid::Error::INSTRUCTION, str, sizeof(gErrorBuf), "Instruction");
-        AddErrorStr(err, Bioloid::Error::OVERLOAD, str, sizeof(gErrorBuf), "Overload");
-        AddErrorStr(err, Bioloid::Error::CHECKSUM, str, sizeof(gErrorBuf), "Checksum");
-        AddErrorStr(err, Bioloid::Error::RANGE, str, sizeof(gErrorBuf), "Range");
-        AddErrorStr(err, Bioloid::Error::OVERHEATING, str, sizeof(gErrorBuf), "Over Heating");
-        AddErrorStr(err, Bioloid::Error::ANGLE_LIMIT, str, sizeof(gErrorBuf), "Angle Limit");
-        AddErrorStr(err, Bioloid::Error::INPUT_VOLTAGE, str, sizeof(gErrorBuf), "Input Voltage");
+        AddErrorStr(err, Error::RESERVED, str, sizeof(gErrorBuf), "Reserved");
+        AddErrorStr(err, Error::INSTRUCTION, str, sizeof(gErrorBuf), "Instruction");
+        AddErrorStr(err, Error::OVERLOAD, str, sizeof(gErrorBuf), "Overload");
+        AddErrorStr(err, Error::CHECKSUM, str, sizeof(gErrorBuf), "Checksum");
+        AddErrorStr(err, Error::RANGE, str, sizeof(gErrorBuf), "Range");
+        AddErrorStr(err, Error::OVERHEATING, str, sizeof(gErrorBuf), "Over Heating");
+        AddErrorStr(err, Error::ANGLE_LIMIT, str, sizeof(gErrorBuf), "Angle Limit");
+        AddErrorStr(err, Error::INPUT_VOLTAGE, str, sizeof(gErrorBuf), "Input Voltage");
     }
     Log("%s\n", str);
 
@@ -213,7 +210,7 @@ bool BioloidCommandLine::PrintError(Bioloid::Error err) {
 /**
  *   Called from the Scan command when a device is found.
  */
-static bool DevFound(BioloidBus* bus, BioloidDevice* dev) {
+static bool DevFound(Bus* bus, Device* dev) {
     uint16_t model;
     uint8_t version;
 
@@ -230,9 +227,9 @@ static bool DevFound(BioloidBus* bus, BioloidDevice* dev) {
  *   Called to process the get and get-raw commands
  */
 
-void BioloidCommandLine::ProcessDeviceGetCommand(
+void CommandLine::ProcessDeviceGetCommand(
     BLD_DevType_t* devType,
-    Bioloid::ID_t id,
+    ID id,
     StrTokenizer* line,
     bool raw) {
     BLD_Reg_t* reg;
@@ -242,7 +239,7 @@ void BioloidCommandLine::ProcessDeviceGetCommand(
     int i;
     unsigned regIdx;
 
-    if (id == Bioloid::BROADCAST_ID) {
+    if (id == ID::BROADCAST) {
         LogError("Broadcast ID not valid with get command\n");
         return;
     }
@@ -338,9 +335,9 @@ void BioloidCommandLine::ProcessDeviceGetCommand(
  *   Called to process the set and set-raw commands
  */
 
-void BioloidCommandLine::ProcessDeviceSetCommand(
+void CommandLine::ProcessDeviceSetCommand(
     BLD_DevType_t* devType,
-    Bioloid::ID_t id,
+    ID id,
     StrTokenizer* line,
     bool raw) {
     BLD_Reg_t* reg;
@@ -378,7 +375,7 @@ void BioloidCommandLine::ProcessDeviceSetCommand(
  *   Processes one line of data
  */
 
-bool BioloidCommandLine::ProcessLine(char* lineStr) {
+bool CommandLine::ProcessLine(char* lineStr) {
     char* devTypeStr;
     BLD_DevType_t* devType;
     char token[20];
@@ -392,7 +389,7 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
 
     // Pull out the device type
 
-    if ((devTypeStr = line->NextToken(gDelim)) == NULL) {
+    if ((devTypeStr = line.NextToken(gDelim)) == NULL) {
         // Empty line - ignore
 
         return true;
@@ -411,19 +408,19 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
     if (strcmp(devTypeStr, "scan") == 0) {
         uint8_t numIds;
 
-        if (!line->NextNum(&numIds)) {
+        if (!line.NextNum(&numIds)) {
             numIds = 32;
         }
 
         if (numIds < 100) {
-            bool servoIdFound = m_bus->Scan(DevFound, 0, numIds);
-            bool sensorIdFound = m_bus->Scan(DevFound, 100, numIds);
+            bool servoIdFound = m_bus->Scan(DevFound, as_ID(0), numIds);
+            bool sensorIdFound = m_bus->Scan(DevFound, as_ID(100), numIds);
 
             if (!servoIdFound && !sensorIdFound) {
                 Log("No devices found\n");
             }
         } else {
-            if (!m_bus->Scan(DevFound, 0, numIds)) {
+            if (!m_bus->Scan(DevFound, as_ID(0), numIds)) {
                 Log("No devices found\n");
             }
         }
@@ -460,25 +457,26 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
         return true;
     }
 
-    Bioloid::ID_t id;
+    uint8_t id_num;
 
-    if (!line->NextNum(&id)) {
-        if (strcmp(line->PrevToken(), "reg") == 0) {
+    if (!line.NextNum(&id_num)) {
+        if (strcmp(line.PrevToken(), "reg") == 0) {
             DumpRegInfo(devType);
             return true;
         }
-        LogError("Invalid ID: '%s'\n", line->PrevToken());
+        LogError("Invalid ID: '%s'\n", line.PrevToken());
         return true;
     }
-    if (id >= Bioloid::INVALID_ID) {
+    if (id_num >= as_uint8_t(ID::INVALID)) {
         LogError("IDs must be 254 (0xFE) or less\n");
         return true;
     }
+    ID id = as_ID(id_num);
     m_device.SetBusAndID(m_bus, id);
 
     char* cmdStr;
 
-    if ((cmdStr = line->NextToken()) == NULL) {
+    if ((cmdStr = line.NextToken()) == NULL) {
         LogError("No command specified for %s %u\n", devType->devTypeStr, id);
         return true;
     }
@@ -486,14 +484,14 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
     LogVerbose("DevType: %s ID: %d Cmd: %s\n", devType->devTypeStr, id, cmdStr);
 
     if (strcmp(cmdStr, "ping") == 0) {
-        Bioloid::Error err;
+        Error err;
 
-        if (id == Bioloid::BROADCAST_ID) {
+        if (id == ID::BROADCAST) {
             LogError("Broadcast ID not valid with ping command\n");
             return true;
         }
 
-        if ((err = m_device.Ping()) == Bioloid::Error::NONE) {
+        if ((err = m_device.Ping()) == Error::NONE) {
             Log("%s %d Response Received\n", devType->devTypeStr, id);
         } else {
             Log("%s %d ", devType->devTypeStr, id);
@@ -503,17 +501,17 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
         uint8_t offset;
         uint8_t numBytes;
 
-        if (id == Bioloid::BROADCAST_ID) {
+        if (id == ID::BROADCAST) {
             LogError("Broadcast ID not valid with read-data command\n");
             return true;
         }
 
-        if (!line->NextNum(&offset)) {
-            LogError("Invalid offset specified: '%s'\n", line->PrevToken());
+        if (!line.NextNum(&offset)) {
+            LogError("Invalid offset specified: '%s'\n", line.PrevToken());
             return true;
         }
-        if (!line->NextNum(&numBytes)) {
-            LogError("Invalid numBytes specified: '%s'\n", line->PrevToken());
+        if (!line.NextNum(&numBytes)) {
+            LogError("Invalid numBytes specified: '%s'\n", line.PrevToken());
             return true;
         }
         if (numBytes > sizeof(gReadBuf)) {
@@ -531,7 +529,7 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
         uint8_t numBytes;
         uint8_t data[20];
 
-        if (!ParseOffsetAndData(line, &offset, &numBytes, data, sizeof(data))) {
+        if (!ParseOffsetAndData(&line, &offset, &numBytes, data, sizeof(data))) {
             return true;
         }
         PrintError(m_device.Write(offset, data, numBytes));
@@ -540,18 +538,18 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
         uint8_t numBytes;
         uint8_t data[20];
 
-        if (!ParseOffsetAndData(line, &offset, &numBytes, data, sizeof(data))) {
+        if (!ParseOffsetAndData(&line, &offset, &numBytes, data, sizeof(data))) {
             return true;
         }
         m_device.SendDeferredWrite(offset, data, numBytes);
     } else if (strcmp(cmdStr, "get") == 0) {
-        ProcessDeviceGetCommand(devType, id, line, false);
+        ProcessDeviceGetCommand(devType, id, &line, false);
     } else if (strcmp(cmdStr, "get-raw") == 0) {
-        ProcessDeviceGetCommand(devType, id, line, true);
+        ProcessDeviceGetCommand(devType, id, &line, true);
     } else if (strcmp(cmdStr, "set") == 0) {
-        ProcessDeviceSetCommand(devType, id, line, false);
+        ProcessDeviceSetCommand(devType, id, &line, false);
     } else if (strcmp(cmdStr, "set-raw") == 0) {
-        ProcessDeviceSetCommand(devType, id, line, true);
+        ProcessDeviceSetCommand(devType, id, &line, true);
     } else if (strcmp(cmdStr, "reset") == 0) {
         m_device.Reset();
     } else {
@@ -566,7 +564,9 @@ bool BioloidCommandLine::ProcessLine(char* lineStr) {
  *   Register the devices that we'll recognize
  */
 
-void BioloidCommandLine::RegisterDeviceTypes(unsigned numDevTypes, BLD_DevType_t** devType) {
+void CommandLine::RegisterDeviceTypes(unsigned numDevTypes, BLD_DevType_t** devType) {
     m_numDevTypes = numDevTypes;
     m_devType = devType;
 }
+
+}  // namespace Bioloid

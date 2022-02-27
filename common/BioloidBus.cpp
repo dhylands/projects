@@ -16,7 +16,7 @@
  *
  *   @file   BioloidBus.cpp
  *
- *   @brief  This file implements the BioloidBus class, which is an
+ *   @brief  This file implements the Bioloid::Bus class, which is an
  *           abstract base class for the hardware which actually talks
  *   to the bioloid bus. This hardware usually takes the form of a UART.
  *
@@ -32,7 +32,9 @@
 
 // ---- Public Variables ----------------------------------------------------
 
-bool BioloidBus::m_log = false;
+namespace Bioloid {
+
+bool Bus::m_log = false;
 
 // ---- Private Constants and Types -----------------------------------------
 // ---- Private Variables ---------------------------------------------------
@@ -49,7 +51,7 @@ bool BioloidBus::m_log = false;
  *   Constructor
  */
 
-BioloidBus::BioloidBus() : m_showPackets(false), m_dataBytes(0) {}
+Bus::Bus() : m_showPackets(false), m_dataBytes(0) {}
 
 //***************************************************************************
 /**
@@ -58,14 +60,14 @@ BioloidBus::BioloidBus() : m_showPackets(false), m_dataBytes(0) {}
  *   virtual
  */
 
-BioloidBus::~BioloidBus() {}
+Bus::~Bus() {}
 
 //***************************************************************************
 /**
  *   Adds a byte to the buffer of data to send.
  */
 
-void BioloidBus::BufferByte(uint8_t data) {
+void Bus::BufferByte(uint8_t data) {
     m_data[m_dataBytes++] = data;
 
     if (m_dataBytes >= sizeof(m_data)) {
@@ -81,7 +83,7 @@ void BioloidBus::BufferByte(uint8_t data) {
  *   virtual
  */
 
-bool BioloidBus::ReadStatusPacket(BioloidPacket* pkt) {
+bool Bus::ReadStatusPacket(Packet* pkt) {
     Bioloid::Error err;
 
     m_dataBytes = 0;
@@ -90,7 +92,7 @@ bool BioloidBus::ReadStatusPacket(BioloidPacket* pkt) {
         uint8_t ch;
 
         if (!ReadByte(&ch)) {
-            // LogError( "BioloidBus::ReadStatusPacket: ReadByte returned false\n");
+            // LogError( "Bus::ReadStatusPacket: ReadByte returned false\n");
             return false;
         }
 
@@ -107,7 +109,7 @@ bool BioloidBus::ReadStatusPacket(BioloidPacket* pkt) {
             }
         }
     } else {
-        Log("BioloidBus::ReadStatusPacket err = %d\n", err);
+        Log("Bus::ReadStatusPacket err = %d\n", err);
     }
 
     return err == Bioloid::Error::NONE;
@@ -119,22 +121,19 @@ bool BioloidBus::ReadStatusPacket(BioloidPacket* pkt) {
  *   ID which responds.
  */
 
-bool BioloidBus::Scan(
-    bool (*devFound)(BioloidBus* bus, BioloidDevice* dev),
-    ID startId,
-    uint8_t numIds) {
-    Bioloid::ID id;
-    Bioloid::ID endId;
-    BioloidDevice scanDev;
+bool Bus::Scan(bool (*devFound)(Bus* bus, Device* dev), ID startId, uint8_t numIds) {
+    uint8_t id;
+    uint8_t endId;
+    Device scanDev;
     bool someDevFound = false;
 
-    endId = startId + numIds - 1;
-    if (endId >= Bioloid::BROADCAST_ID) {
-        endId = Bioloid::BROADCAST_ID - 1;
+    endId = as_uint8_t(startId) + numIds - 1;
+    if (endId >= as_uint8_t(ID::BROADCAST)) {
+        endId = as_uint8_t(ID::BROADCAST) - 1;
     }
 
-    for (id = startId; id <= endId; id++) {
-        scanDev.SetBusAndID(this, id);
+    for (id = as_uint8_t(startId); id <= endId; id++) {
+        scanDev.SetBusAndID(this, as_ID(id));
 
         if (scanDev.Ping() == Bioloid::Error::NONE) {
             someDevFound = true;
@@ -155,10 +154,10 @@ bool BioloidBus::Scan(
  *   at the same time.
  */
 
-void BioloidBus::SendAction() {
+void Bus::SendAction() {
     BLD_BUS_LOG("Sending ACTION\n");
 
-    SendCmdHeader(Bioloid::BROADCAST_ID, 0, Bioloid::Command::ACTION);
+    SendCmdHeader(ID::BROADCAST, 0, Bioloid::Command::ACTION);
     SendCheckSum();
 }
 
@@ -170,7 +169,7 @@ void BioloidBus::SendAction() {
  *   virtual
  */
 
-void BioloidBus::SendByte(uint8_t data) {
+void Bus::SendByte(uint8_t data) {
     m_checksum += data;
 
     BufferByte(data);
@@ -185,7 +184,7 @@ void BioloidBus::SendByte(uint8_t data) {
  *   virtual
  */
 
-void BioloidBus::SendCheckSum() {
+void Bus::SendCheckSum() {
     SendByte(~m_checksum);
 
     WriteBuffer();
@@ -197,7 +196,7 @@ void BioloidBus::SendCheckSum() {
  *   into the checksum)
  */
 
-void BioloidBus::SendData(uint8_t len, const void* voidData) {
+void Bus::SendData(uint8_t len, const void* voidData) {
     const uint8_t* data = static_cast<const uint8_t*>(voidData);
 
     while (len-- > 0) {
@@ -215,7 +214,7 @@ void BioloidBus::SendData(uint8_t len, const void* voidData) {
  *   virtual
  */
 
-void BioloidBus::SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Command cmd) {
+void Bus::SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Command cmd) {
     m_dataBytes = 0;
 
     SendByte(0xff);
@@ -223,7 +222,7 @@ void BioloidBus::SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Comman
 
     m_checksum = 0;
 
-    SendByte(id);
+    SendByte(as_uint8_t(id));
     SendByte(paramLen + 2);
     SendByte(static_cast<uint8_t>(cmd));
 }
@@ -233,7 +232,7 @@ void BioloidBus::SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Comman
  *   Writes all of the buffered bytes to the serial port.
  */
 
-void BioloidBus::WriteBuffer() {
+void Bus::WriteBuffer() {
     if (m_showPackets) {
         DumpMem("W", 0, m_data, m_dataBytes);
     }
@@ -242,5 +241,7 @@ void BioloidBus::WriteBuffer() {
 
     m_dataBytes = 0;
 }
+
+}  // namespace Bioloid
 
 /** @} */
