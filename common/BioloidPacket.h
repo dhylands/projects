@@ -59,7 +59,7 @@ class Packet {
 
     Bioloid::ID ID() { return m_id; }
     uint8_t Length() { return m_length; }
-    uint8_t Command() { return m_cmd; }
+    Bioloid::Command Command() { return as_Command(m_cmd); }
     Bioloid::Error ErrorCode() { return (Bioloid::Error)m_cmd; }
     uint8_t CheckSum() { return m_checksum; }
 

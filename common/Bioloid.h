@@ -53,6 +53,9 @@ enum class Command : uint8_t {
 static inline uint8_t as_uint8_t(Command cmd) {
     return static_cast<uint8_t>(cmd);
 }
+static inline Command as_Command(uint8_t val) {
+    return static_cast<Command>(val);
+}
 
 enum class Error : uint16_t {
     RESERVED = 0x80,       ///< Reserved - set to zero

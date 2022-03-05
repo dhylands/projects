@@ -21,6 +21,8 @@ MK_SRC_FILES	= \
 	emu.cpp	\
 	Log.c \
 
+MK_STYLE_DIRS += ../src ../../../common ../../../common/posix
+
 vpath %.cpp ../src
 
 LDLIBS += -lpthread

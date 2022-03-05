@@ -58,19 +58,6 @@ class Bus {
     virtual ~Bus();
 
     //------------------------------------------------------------------------
-    // Scans the bus, calling the passed callback for each device
-    // ID which responds.
-
-    bool Scan(bool (*devFound)(Bus* bus, Device* dev), Bioloid::ID startId, uint8_t numIds);
-
-    //------------------------------------------------------------------------
-    // Broadcasts an action packet to all of the devices on the bus.
-    // This causes all of the devices to perform their deferred writes
-    // at the same time.
-
-    void SendAction();
-
-    //------------------------------------------------------------------------
     // Sends a byte. This will automatically accumulate the byte into
     // the checksum
 
@@ -87,6 +74,11 @@ class Bus {
 
     virtual bool ReadByte(uint8_t* ch) = 0;
 
+
+    //------------------------------------------------------------------------
+    // Reads a packet. This function returns true
+    bool ReadPacket(Packet* pkt);
+
     //------------------------------------------------------------------------
     // Send the checksum. Since the checksum byte is the last byte of the
     // packet, this function is made virtual to allow bus drivers to
@@ -98,20 +90,6 @@ class Bus {
     // Sends 'len' bytes
 
     void SendData(uint8_t len, const void* data);
-
-    //------------------------------------------------------------------------
-    // Sends the command header, which is common to all of the commands.
-    // 2 is added to paramLen (to cover the length and cmd bytes). This
-    // way the caller is only responsible for figuring out how many extra
-    // parameter bytes are being sent.
-
-    virtual void SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Command cmd);
-
-    //------------------------------------------------------------------------
-    // Reads a packet. Returns true if a packet was read successfully,
-    // false if a timeout or error occurred.
-
-    virtual bool ReadStatusPacket(Packet* pkt);
 
     //------------------------------------------------------------------------
     // Sets debug option which causes packet data to be printed.
@@ -140,6 +118,8 @@ class Bus {
 
     uint8_t m_checksum;
     bool m_showPackets;
+    size_t m_dataBytes;
+    uint8_t m_data[128];
 
  private:
     //------------------------------------------------------------------------
@@ -148,11 +128,6 @@ class Bus {
 
     Bus(const Bus& copy);
     Bus& operator=(const Bus& rhs);
-
-    //------------------------------------------------------------------------
-
-    size_t m_dataBytes;
-    uint8_t m_data[128];
 };
 }  // namespace Bioloid
 /** @} */

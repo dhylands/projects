@@ -85,7 +85,7 @@ int g_debug = 0;
 int g_listen_socket;
 int g_socket;
 
-BioloidGadget gadget;
+Bioloid::Gadget g_gadget(Bioloid::as_ID(0), 20, 10);
 
 /* ---- Private Function Prototypes --------------------------------------- */
 
@@ -160,6 +160,8 @@ int main(int argc, char** argv) {
         Log("port = %d\n", port);
     }
 
+    g_gadget.InitializeControlTable();
+
     if ((g_listen_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         LogError("Call to socket failed: '%s'\n", strerror(errno));
         exit(1);
@@ -176,7 +178,7 @@ int main(int argc, char** argv) {
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_family = AF_INET;
 
-    if (bind(g_listen_socket, (const sockaddr *)&server, sizeof(server)) < 0) {
+    if (bind(g_listen_socket, (const sockaddr*)&server, sizeof(server)) < 0) {
         LogError("Failed to bind to port: %d: %s\n", port, strerror(errno));
         exit(1);
     }
@@ -189,7 +191,7 @@ int main(int argc, char** argv) {
     struct sockaddr_in client;
     memset(&client, 0, sizeof(client));
     socklen_t client_len = sizeof(client);
-    if ((g_socket = accept(g_listen_socket, (sockaddr *)&client, &client_len)) < 0) {
+    if ((g_socket = accept(g_listen_socket, (sockaddr*)&client, &client_len)) < 0) {
         LogError("Failed to accept incoming connection: %s\n", strerror(errno));
         exit(1);
     }
@@ -199,9 +201,8 @@ int main(int argc, char** argv) {
     uint8_t buf[1024];
     while ((bytesRcvd = recv(g_socket, buf, sizeof(buf), 0)) > 0) {
         DumpMem("R", 0, buf, bytesRcvd);
-        gadget.ProcessBytes(buf, bytesRcvd);
+        g_gadget.ProcessBytes(buf, bytesRcvd);
     }
-
 
     close(g_socket);
     close(g_listen_socket);
