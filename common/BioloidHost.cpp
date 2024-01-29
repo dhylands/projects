@@ -52,9 +52,7 @@ bool Bus::m_log = false;
  *   Constructor
  */
 
-Host::Host(Bus *bus)
-    : m_bus(bus) {
-}
+Host::Host(Bus* bus) : m_bus(bus) {}
 
 //***************************************************************************
 /**
@@ -134,7 +132,6 @@ void Host::SendAction() {
  */
 
 void Host::SendCmdHeader(Bioloid::ID id, uint8_t paramLen, Bioloid::Command cmd) {
-
     // May need to call a function on m_bus to reset m_datBytes
 
     m_dataBytes = 0;

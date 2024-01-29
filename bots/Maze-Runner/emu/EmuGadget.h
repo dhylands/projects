@@ -14,7 +14,7 @@
  ****************************************************************************/
 /**
  *
- *   @file   BioloidGadget.h
+ *   @file   EmuGadget.h
  *
  *   @brief  Base class for implementing a bioloid gadget, which is a device
  *           on the bioloid bus.
@@ -26,41 +26,21 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "BioloidPacket.h"
+#include "BioloidGadget.h"
 
 // ---- Include Files -------------------------------------------------------
 
-namespace Bioloid {
+namespace Emu {
 
-//! Base class to implement a bioloid gadget.
-class Gadget {
+//! Gadget used to emulate a bioloid gadget.
+class Gadget : public Bioloid::Gadget {
  public:
-    Gadget(Bioloid::ID id, uint8_t numControlTableEntries);
-    virtual ~Gadget();
-
-    virtual void InitializeControlTable();
-
-    void ProcessBytes(uint8_t* buf, size_t numBytes);
+    Gadget(Bioloid::ID id, uint8_t numControlTableEntries, uint8_t numEEPROMEntries)
+        : Bioloid::Gadget(id, numControlTableEntries, numEEPROMEntries) {}
 
  protected:
-    virtual void ReadEEPROMTable();
-    virtual void ResetEEPROMValue();
-    virtual void WriteEEPROMTable();
-
-    virtual void ProcessPacket();
-
-    virtual void delay_us(uint32_t usec) = 0;
-    virtual void SendByte(uint8_t byte) = 0;
-
-    void SendResponse(Error errorCode, bool forceResponse);
-
- private:
-    Bioloid::ID m_id;
-    uint8_t m_numControlTableEntries;
-    uint8_t m_numEEPROMEntries;
-    uint8_t* m_controlTable;
-
-    Packet m_packet;
+    void delay_us(uint32_t usec) override;
+    void SendByte(uint8_t byte) override;
 };
 
-}  // namespace Bioloid
+}  // namespace Emu

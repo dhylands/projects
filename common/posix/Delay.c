@@ -22,12 +22,15 @@
 
 #include "Delay.h"
 
+#include <unistd.h>
+
 //***************************************************************************
 /**
- *   Spin for ms milliseconds
+ * Spin for ms milliseconds
  */
-
-void ms_spin(unsigned short ms) {
+void ms_spin(
+    unsigned short ms  //!< [in] Number of milliseconds to spin for.
+) {
     if (!ms) {
         return;
     }
@@ -37,10 +40,11 @@ void ms_spin(unsigned short ms) {
 
 //***************************************************************************
 /**
- *   Spin for us microseconds
+ * Spin for us microseconds
  */
-
-void us_spin(unsigned short us) {
+void us_spin(
+    unsigned short us  //!< [in] Number of microseconds to spin for.
+) {
     if (!us) {
         return;
     }
@@ -50,10 +54,9 @@ void us_spin(unsigned short us) {
 
 /***************************************************************************/
 /**
- *  Delays for a multiple of 100 microseconds.
+ * Delays for a multiple of 100 microseconds.
  */
-
-void Delay100uSec(uint8_t num100uSec /**< Number of 100 microsecond units to delay       */
+void Delay100uSec(uint8_t num100uSec //!< [in] Number of 100 microsecond units to delay
 ) {
     while (num100uSec > 0) {
         us_spin(100);
@@ -63,10 +66,9 @@ void Delay100uSec(uint8_t num100uSec /**< Number of 100 microsecond units to del
 
 /***************************************************************************/
 /**
- *  Delays for a multiple of 10 microseconds.
+ * Delays for a multiple of 10 microseconds.
  */
-
-void Delay10uSec(uint8_t num10uSec /**< Number of 10 microsecond units to delay         */
+void Delay10uSec(uint8_t num10uSec //!< Number of 10 microsecond units to delay
 ) {
     while (num10uSec > 0) {
         us_spin(10);
@@ -78,7 +80,6 @@ void Delay10uSec(uint8_t num10uSec /**< Number of 10 microsecond units to delay 
 /**
  *  Delays for a multiple of 100 milliseconds.
  */
-
 void Delay100mSec(uint8_t num100mSec /**< Number of 100 microsecond units to delay       */
 ) {
     while (num100mSec > 0) {
@@ -91,7 +92,6 @@ void Delay100mSec(uint8_t num100mSec /**< Number of 100 microsecond units to del
 /**
  *  Delays for a multiple of 10 milliseconds.
  */
-
 void Delay10mSec(uint8_t num10mSec /**< Number of 10 microsecond units to delay         */
 ) {
     while (num10mSec > 0) {
@@ -104,7 +104,6 @@ void Delay10mSec(uint8_t num10mSec /**< Number of 10 microsecond units to delay 
 /**
  *  Delays for a multiple of 1 milliseconds.
  */
-
 void Delay1mSec(uint8_t num1mSec /**< Number of 10 microsecond units to delay         */
 ) {
     while (num1mSec > 0) {

@@ -1,3 +1,4 @@
+
 /****************************************************************************
  *
  *   Copyright (c) 2022 Dave Hylands     <dhylands@gmail.com>
@@ -14,53 +15,37 @@
  ****************************************************************************/
 /**
  *
- *   @file   BioloidGadget.h
+ *   @file   EmuControlTableh
  *
- *   @brief  Base class for implementing a bioloid gadget, which is a device
- *           on the bioloid bus.
+ *   @brief  Class for implementing an emulated Control Table, which is
+ *           persisted as a file on disk..
  *
  *****************************************************************************/
 
 #pragma once
 
+// ---- Include Files -------------------------------------------------------
+
 #include <stddef.h>
 #include <stdint.h>
 
-#include "BioloidPacket.h"
+#include "BioloidControlTable.h"
 
-// ---- Include Files -------------------------------------------------------
+namespace Emu {
 
-namespace Bioloid {
-
-//! Base class to implement a bioloid gadget.
-class Gadget {
+class ControlTable : public Bioloid::ControlTable {
  public:
-    Gadget(Bioloid::ID id, uint8_t numControlTableEntries);
-    virtual ~Gadget();
+    ControlTable(Bioloid::ID id, uint8_t numControlTableEntries, uint8_t numEEPROMEntries);
+    virtual ~ControlTable();
 
-    virtual void InitializeControlTable();
-
-    void ProcessBytes(uint8_t* buf, size_t numBytes);
+    virtual void Initialize();
 
  protected:
     virtual void ReadEEPROMTable();
     virtual void ResetEEPROMValue();
     virtual void WriteEEPROMTable();
 
-    virtual void ProcessPacket();
-
-    virtual void delay_us(uint32_t usec) = 0;
-    virtual void SendByte(uint8_t byte) = 0;
-
-    void SendResponse(Error errorCode, bool forceResponse);
-
  private:
-    Bioloid::ID m_id;
-    uint8_t m_numControlTableEntries;
-    uint8_t m_numEEPROMEntries;
-    uint8_t* m_controlTable;
-
-    Packet m_packet;
 };
 
-}  // namespace Bioloid
+}  // namespace Emu

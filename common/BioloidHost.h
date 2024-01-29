@@ -44,7 +44,7 @@ class Host {
     //------------------------------------------------------------------------
     // Default constructor
 
-    Host(Bus *bus);
+    Host(Bus* bus);
 
     //------------------------------------------------------------------------
     // Destructor
@@ -79,7 +79,7 @@ class Host {
     virtual bool ReadStatusPacket(Packet* pkt);
 
  private:
-    Bus *m_bus;
+    Bus* m_bus;
 
     //------------------------------------------------------------------------
     // The copy constructor and assignment operator are not need for this

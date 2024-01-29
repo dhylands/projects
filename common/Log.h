@@ -36,12 +36,14 @@
 #include "Config.h"
 #endif
 #if !defined(CFG_LOG_USE_STDIO) && !defined(CFG_LOG_USE_USB_DEBUG)
+//! If CFG_LOG_USE_STIOD is non-zero then printf will be used for logging
 #define CFG_LOG_USE_STDIO 1
 #endif
 #if !defined(CFG_LOG_USE_STDIO)
 #define CFG_LOG_USE_STDIO 0
 #endif
 #if !defined(CFG_LOG_USE_USB_DEBUG)
+//! If CFG_LOG_USE_USB_DEBUG is non-zero then a USB CDC port will be used for logging
 #define CFG_LOG_USE_USB_DEBUG 0
 #endif
 
@@ -85,6 +87,7 @@
  */
 
 #if !defined(CFG_LOG_ENABLED)
+//! Setting CFG_LOG_ENABLED to 0 turns off all logging.
 #define CFG_LOG_ENABLED 1
 #endif
 
@@ -98,6 +101,7 @@
 
 #else
 
+//! Assert macro which logs failures using the Log functions.
 #define ASSERT(expr) \
     ((expr) ? ((void)0) : LogAssertFailed(#expr, __FILE__, __LINE__, __FUNCTION__), ((void)0))
 
@@ -215,10 +219,16 @@ void vLog_P(const char* fmt, va_list args);
 
 #else  // AVR
 
+//! Logging level for normal log messages.
 #define LOG_LEVEL_NORMAL 0
+
+//! Logging level for logging errors.
 #define LOG_LEVEL_ERROR 1
+
+//! Logging level for logging fatal errors (i.e. ASSERTs)
 #define LOG_LEVEL_ASSERT 2
 
+//! typedef for overriding the logging function.
 typedef void (*LogFunc_t)(int logLevel, const char* fmt, va_list args);
 
 extern int gQuiet;
@@ -232,9 +242,16 @@ void vLogError(const char* fmt, va_list args);
 void LogFunc(int logLevel, const char* fmt, ...);
 void vLogFunc(int logLevel, const char* fmt, va_list args);
 
+//! Compatability macro for AVR Log_P function
 #define Log_P(fmt, args...) Log(fmt, ##args)
+
+//! Compatability macro for AVR LogError_P function
 #define LogError_P(fmt, args...) LogError(fmt, ##args)
+
+//! Compatability macro for AVR LogAssertFailed_P function
 #define LogAssertFailed_P(expr, file, lineNum, function) LogAssertFailed(expr, file, line, function)
+
+//! Compatability macro for AVR vLog_P function
 #define vLog_P(fmt, args) vLog(fmt, args)
 
 void SetLogFunc(LogFunc_t logFunc);
@@ -245,12 +262,15 @@ void DefaultLogFunc(int logLevel, const char* fmt, va_list args);
 extern int gVerbose;
 extern int gDebug;
 
+//! Macro for logging a debug log.
 #define LogDebug(fmt, args...) \
     do {                       \
         if (gDebug) {          \
             Log(fmt, ##args);  \
         }                      \
     } while (0)
+
+//! Macro for logging a verbose log.
 #define LogVerbose(fmt, args...) \
     do {                         \
         if (gVerbose) {          \

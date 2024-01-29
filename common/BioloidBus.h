@@ -74,7 +74,6 @@ class Bus {
 
     virtual bool ReadByte(uint8_t* ch) = 0;
 
-
     //------------------------------------------------------------------------
     // Reads a packet. This function returns true
     bool ReadPacket(Packet* pkt);

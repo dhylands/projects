@@ -27,6 +27,8 @@
 #include <stdint.h>
 
 namespace Bioloid {
+
+//! Enumeration used to represent an ID.
 enum class ID : uint8_t {
     DEFAULT = 0x00,
     BROADCAST = 0xFE,
@@ -39,6 +41,7 @@ static inline ID as_ID(uint8_t val) {
     return static_cast<ID>(val);
 }
 
+//! Enumeration for standard bioloid commands
 enum class Command : uint8_t {
     PING = 0x01,       // Used to obatin a status packet
     READ = 0x02,       // Read values from the control table
@@ -57,6 +60,7 @@ static inline Command as_Command(uint8_t val) {
     return static_cast<Command>(val);
 }
 
+//! Enumeration describing various error bits.
 enum class Error : uint16_t {
     RESERVED = 0x80,       ///< Reserved - set to zero
     INSTRUCTION = 0x40,    ///< Undefined instruction
@@ -72,6 +76,9 @@ enum class Error : uint16_t {
     TIMEOUT = 0x101,        ///< Indicates that a timeout occurred whilw waiting for a reply
     TOO_MUCH_DATA = 0x102,  ///< Packet storage isn't big enough
 };
+static inline uint8_t as_uint8_t(Error err) {
+    return static_cast<uint8_t>(err);
+}
 static inline uint16_t as_uint16_t(Error err) {
     return static_cast<uint16_t>(err);
 }

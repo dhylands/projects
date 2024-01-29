@@ -152,6 +152,21 @@ lint:
 	@$(ECHO) "Linting source files ..."
 	$(Q)cpplint --linelength=100 --filter=-build/include_subdir,-readability/casting,-whitespace/parens --recursive $(CPPLINT_ARGS) --headers=h,hpp,tcc  --extensions=c,h,cpp,hpp,tcc $(MK_STYLE_DIRS)
 
+.PHONY: docs
+docs:
+	@$(ECHO) "Building documentaion ..."
+	$(Q)mkdir -p ${MK_DOCS_BUILD_DIR}
+	$(Q)export MK_PROJECT_NUMBER=$$(git rev-parse HEAD) \
+	export DEPENDENCIES="$$(cat ${MK_DEP_FILES} | sed 's/.*://g' | sed 's/\\//g' | tr '\n' ' ' | tr ' ' '\n' | sort | uniq | tr '\n' ' ')" && \
+		sed 's|\$${MK_DOCS_FILES}|'" $${DEPENDENCIES} $(DOCS_EXTRA)"'|' $(MK_RULES_DIR)/doxygen.cfg | \
+		sed 's|\$${MK_DOCS_BUILD_DIR}|${MK_DOCS_BUILD_DIR}|' | \
+		sed 's|\$${MK_PROJECT_NAME}|${MK_PROJECT_NAME}|' | \
+		sed 's|\$${MK_PROJECT_BRIEF}|${MK_PROJECT_BRIEF}|' | \
+		sed 's|\$${EXCLUSIONS}|${DOCUMENTATION_EXCLUDE}|' | \
+		sed 's|\$${PREDEFINED}|${DOXYGEN_DEFINES}|' | \
+		tee doxy.cfg | \
+		doxygen -
+
 
 #--------------------------------------------------------------------------
 #

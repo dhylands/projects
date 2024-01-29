@@ -14,10 +14,9 @@
  ****************************************************************************/
 /**
  *
- *   @file   BioloidBus.h
+ *   @file   BioloidPacket.h
  *
- *   @brief  Contains the definitions for a bioloid bus. Essentially
- *           there is a bus for each UART with bioloid devices attached.
+ *   @brief  Contains the definitions for a bioloid packet.
  *
  ****************************************************************************/
 
@@ -37,39 +36,35 @@
 
 namespace Bioloid {
 
+//! Class for defining a bioloid packet.
 class Packet {
  public:
-    //------------------------------------------------------------------------
-    // Default constructor
-
     Packet();
-
-    //------------------------------------------------------------------------
-    // Constructor where the storage for parameter data is specified.
-
-    Packet(void* data, uint8_t maxData);
-
-    //------------------------------------------------------------------------
-    // Destructor
-
+    Packet( void* data, uint8_t maxData);
     ~Packet();
 
     //------------------------------------------------------------------------
     // Accessor functions which allow portions of the packet to be retrieved.
 
+    //! @brief Returns the ID contained within the packet.
+    //! @return The ID contained in the packet.
     Bioloid::ID ID() { return m_id; }
-    uint8_t Length() { return m_length; }
-    Bioloid::Command Command() { return as_Command(m_cmd); }
-    Bioloid::Error ErrorCode() { return (Bioloid::Error)m_cmd; }
-    uint8_t CheckSum() { return m_checksum; }
 
-    //------------------------------------------------------------------------
-    // Runs a single character through the state machine.
-    //
-    // ProcessChar returns Bioloid::ERROR_NOT_DONE if the packet is incomplete.
-    // If the packet was parsed successfully, then Bioloid::ERROR_NONE is
-    // returned. If an error is detected that Bioloid::ERROR_CHECKSUM is
-    // returned.
+    //! @brief Returns the length of the packet in bytes.
+    //! @return the length of the packet in bytes.
+    uint8_t Length() { return m_length; }
+
+    //! @brief Returns the command contained within a request packet.
+    //! @return the  command contained within a request packet.
+    Bioloid::Command Command() { return as_Command(m_cmd); }
+
+    //! @brief Returns the Error Code contained within a response packet.
+    //! @return the Error Code contained within a response packet.
+    Bioloid::Error ErrorCode() { return (Bioloid::Error)m_cmd; }
+
+    //! @brief Returns the checksum of the packet.
+    //! @return the checksum of the packet.
+    uint8_t CheckSum() { return m_checksum; }
 
     Bioloid::Error ProcessChar(uint8_t ch);
 

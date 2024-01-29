@@ -1,5 +1,6 @@
 .svn/
 obj/
 bin/
+docs/
 !bash/bin/
 BootHost.log

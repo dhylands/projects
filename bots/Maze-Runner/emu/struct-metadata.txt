@@ -1,0 +1,19 @@
+https://gist.github.com/AndrewScheidecker/930f4a6e0966b8421806
+
+https://marzer.github.io/tomlplusplus/
+
+https://sillycross.github.io/2021/08/23/2021-08-23/
+
+https://gist.github.com/AndrewScheidecker/930f4a6e0966b8421806#file-gistfile1-cpp-L80
+
+
+
+Looks Promising - Lookup Part 1 as well
+Part 2 zip file is in ~/Downloads
+https://cecilsunkure.blogspot.com/2012/10/c-reflection-type-metadata-part-2-type.html
+
+https://playfulprogramming.blogspot.com/2016/12/serializing-structs-with-c17-structured.html
+
+
+C++ Header Parser written in python
+https://github.com/robotpy/cxxheaderparser

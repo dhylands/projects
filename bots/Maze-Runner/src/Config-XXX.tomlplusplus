@@ -1,0 +1,10 @@
+Config-XXX.tomlplusplus
+
+[eeprom]
+model = 104
+firmware_version = 1
+id = 1
+baud_rate = 1
+return_delay_time = 250
+status_return_level = 2
+led = 0

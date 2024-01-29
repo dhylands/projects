@@ -48,7 +48,12 @@
 
 namespace Bioloid {
 
-Gadget::Gadget(Bioloid::ID id, uint8_t numControlTableEntries, uint8_t numEEPROMEntries)
+//! Constructor.
+Gadget::Gadget(
+    Bioloid::ID id,
+    uint8_t numControlTableEntries,
+    int8_t numEEPROMEntries
+)
     : m_id(id),
       m_numControlTableEntries(numControlTableEntries),
       m_numEEPROMEntries(numEEPROMEntries),
@@ -185,19 +190,23 @@ void Gadget::SendResponse(Error errorCode, bool forceResponse) {
     // we don't call this routine for READ_DATA, so we don't send a response unless
     // the status return level is set to ALL... However, if forceResponse is true, then
     // we're going to return a response anyways, because that is how PING is supposed to work
-    if (!forceResponse &&
-        (this->m_controlTable[as_uint8_t(Control::STATUS_RETURN_LEVEL)] != as_uint8_t(StatusReturnLevel::ALL))) {
+    if (!forceResponse && (this->m_controlTable[as_uint8_t(Control::STATUS_RETURN_LEVEL)] !=
+                           as_uint8_t(StatusReturnLevel::ALL))) {
         return;
     }
 
-    us_spin(this->m_controlTable[as_uint8_t(Control::RETURN_DELAY_TIME)] * 2);
+    this->delay_us(
+        static_cast<uint32_t>(this->m_controlTable[as_uint8_t(Control::RETURN_DELAY_TIME)]) * 2);
 
-    UART0_PutChar(0xFF);
-    UART0_PutChar(0xFF);
-    UART0_PutChar(gMyId);
-    UART0_PutChar(0x02);  // length for blank response is always 2
-    UART0_PutChar(errorCode);
-    UART0_PutChar(~(gMyId + 0x02 + errorCode));  // checksum is ~(ID + LENGTH + ERROR)
+    uint8_t ec = Bioloid::as_uint8_t(errorCode);
+    uint8_t id = Bioloid::as_uint8_t(this->m_id);
+
+    this->SendByte(0xFF);
+    this->SendByte(0xFF);
+    this->SendByte(id);
+    this->SendByte(0x02);  // length for blank response is always 2
+    this->SendByte(ec);
+    this->SendByte(~(id + 0x02 + ec));  // checksum is ~(ID + LENGTH + ERROR)
 }
 
 }  // namespace Bioloid

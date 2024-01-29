@@ -26,6 +26,8 @@
 
 /* ---- Constants and Types ---------------------------------------------- */
 
+//! Make Logging go to stdout
 #define CFG_LOG_USE_STDIO 1
 
+//! Should EEPROM be emulated?
 #define CFG_EMULATE_EEPROM 1

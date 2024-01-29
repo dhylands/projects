@@ -43,14 +43,16 @@
 
 #include "DumpMem.h"
 #include "Log.h"
-#include "BioloidGadget.h"
+#include "EmuGadget.h"
 
 /* ---- Public Variables -------------------------------------------------- */
 
 /* ---- Private Constants and Types --------------------------------------- */
 
+//! Port to use for the emulated gadget, which connects using sockets.
 constexpr in_port_t DEFAULT_PORT = 8888;
 
+//! Enumeration for short options.
 enum {
     // Options assigned a single character code can use that charater code
     // as a short option.
@@ -69,7 +71,7 @@ enum {
 
 static const char* g_pgm_name;
 
-struct option g_long_option[] = {
+static struct option g_long_option[] = {
     // option       A  Flag   V  (has_arg, flag, val)
     // -----------  -  ----  ---
     {"debug", 0, NULL, OPT_DEBUG},
@@ -79,13 +81,13 @@ struct option g_long_option[] = {
     {0},
 };
 
-int g_verbose = 0;
-int g_debug = 0;
+static int g_verbose = 0;
+static int g_debug = 0;
 
-int g_listen_socket;
-int g_socket;
+static int g_listen_socket;
+static int g_socket;
 
-Bioloid::Gadget g_gadget(Bioloid::as_ID(0), 20, 10);
+static Emu::Gadget g_gadget(Bioloid::as_ID(0), 20, 10);
 
 /* ---- Private Function Prototypes --------------------------------------- */
 
@@ -95,10 +97,13 @@ static void usage(void);
 
 //***************************************************************************
 /**
- *   Main program
+ * @brief Main program
+ * @return 0 on success, non-zero to indicate an error.
  */
-
-int main(int argc, char** argv) {
+int main(
+    int argc,    //!< [in] Number of arguments
+    char** argv  //!< [in] Array of pointers to arguments
+) {
     in_port_t port = DEFAULT_PORT;
 
     // Figure out which directory our executable came from

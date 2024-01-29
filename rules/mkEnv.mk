@@ -154,7 +154,7 @@ MK_OS_DIR	= $(MK_OS)
 #	rm -rf'd to remove all generated files.
 #
 
-MK_GEN_DIRS = obj lib bin
+MK_GEN_DIRS = obj lib bin docs
 
 #--------------------------------------------------------------------------
 #
@@ -184,6 +184,10 @@ endif
 
 ifeq ($(MK_BIN_DIR),)
 MK_BIN_DIR = ./bin/$(MK_OS_DIR)$(MK_REL_EXT)
+endif
+
+ifeq ($(MK_DOCS_BUILD_DIR),)
+MK_DOCS_BUILD_DIR = ./docs
 endif
 
 #--------------------------------------------------------------------------

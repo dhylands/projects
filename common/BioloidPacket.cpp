@@ -32,10 +32,8 @@
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
 
-/**
- * @addtogroup bioloid
- * @{
- */
+//! @addtogroup bioloid
+//! @{
 
 namespace Bioloid {
 
@@ -43,36 +41,37 @@ namespace Bioloid {
 /**
  *   Constructor
  */
-
 Packet::Packet() : m_state(Packet::State::IDLE), m_param(NULL), m_maxParam(0) {}
 
 //***************************************************************************
 /**
  *   Constructor where storage for parameter data is specified.
  */
-
-Packet::Packet(void* data, uint8_t maxData)
+Packet::Packet(
+    void* data,      //!< [out] Place to store the packet bytes.
+    uint8_t maxData  //!< [in] Size of the packet buffer.
+)
     : m_state(Packet::State::IDLE), m_param(static_cast<uint8_t*>(data)), m_maxParam(maxData) {}
 
 //***************************************************************************
 /**
  *   Destructor
- *
- *   virtual
  */
-
 Packet::~Packet() {}
 
 //***************************************************************************
 /**
- *   Runs a single character through the state machine. Once a packet
- *   has been parsed successfully, the PacketReceived virtual method
- *   is called.
- *
- *   virtual
+ *  @brief  Runs a single character through the state machine.
+ *  @details Once a packet has been parsed successfully, the PacketReceived()
+ *           callback is called.
+ *  @return Bioloid::Error::NONE if a packet was parsed successfully.
+ *  @return Bioloid::Error::ERROR_NOT_DONE if more data is needed.
+ *  @return Bioloid::Error::TOO_MUCH_DATA is the packet doesn't fit in the buffer.
+ *  @return Bioloid::Error::CHECKSUM if a checksum error was parsed.
  */
-
-Bioloid::Error Packet::ProcessChar(uint8_t ch) {
+Bioloid::Error Packet::ProcessChar(
+    uint8_t ch  //!< [in] Character to parse,
+) {
     State nextState = m_state;
     Bioloid::Error err = Bioloid::Error::NOT_DONE;
 
@@ -169,3 +168,5 @@ Bioloid::Error Packet::ProcessChar(uint8_t ch) {
 }
 
 }  // namespace Bioloid
+
+//! @}

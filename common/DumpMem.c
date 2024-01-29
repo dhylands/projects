@@ -32,12 +32,19 @@
 // ---- Private Function Prototypes -----------------------------------------
 // ---- Functions -----------------------------------------------------------
 
+//! Number of bytes per line
+#define LINE_WIDTH 16
+
 /**************************************************************************/
 /**
- *   Dumps a page of output for debugging purposes.
+ * Dumps a page of output for debugging purposes.
  */
-
-void DumpMem(const char* prefix, unsigned address, const void* inData, unsigned numBytes) {
+void DumpMem(
+    const char* prefix,  //!< [in] Prefix to print on each line of the dump.
+    unsigned address,    //!< [in] Address to print for the first byte.
+    const void* inData,  //!< [in] Pointer to data to dump.
+    unsigned numBytes    //!< [in] Number of bytes of data to dump.
+) {
     const uint8_t* data = (const uint8_t*)inData;
     unsigned byteOffset;
 
@@ -45,8 +52,6 @@ void DumpMem(const char* prefix, unsigned address, const void* inData, unsigned 
         Log("%s: No data\n", prefix);
         return;
     }
-
-#define LINE_WIDTH 16
 
     for (byteOffset = 0; byteOffset < numBytes; byteOffset += LINE_WIDTH) {
         unsigned i;

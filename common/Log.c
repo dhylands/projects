@@ -14,7 +14,7 @@
  ****************************************************************************/
 /**
  *
- *   @file   Log.cpp
+ *   @file   Log.c
  *
  *   @brief  This file contains the implementation of the logging functions.
  *
@@ -52,13 +52,18 @@
 
 #else
 
+//! Compatability macro for AVR
 #define PSTR(str) str
 
+//! When qQuiet is non-zero NORMAL logs will be suppressed.
 int gQuiet = 0;
 
 #endif
 
+//! When qVerbose is non-zero LogVerbose output will be enabled.
 int gVerbose = 0;
+
+//! When qVerbose is non-zero LogDebug output will be enabled.
 int gDebug = 0;
 
 #if CFG_LOG_TO_BUFFER
@@ -74,6 +79,7 @@ int gDeferredNewline = 0;
 
 #if CFG_LOG_USE_STDIO
 
+//! Pointer to file stream to use for logging to stdio
 FILE* gLogFs = NULL;
 
 #endif
@@ -89,7 +95,12 @@ FILE* gLogFs = NULL;
 
 #if !defined(AVR)
 
-void DefaultLogFunc(int logLevel, const char* fmt, va_list args) {
+//! @brief Default logging function for non-AVR platforms
+void DefaultLogFunc(
+    int logLevel,     //!< [in] Logging level for this message.
+    const char* fmt,  //!< [in] printf style format string.
+    va_list args      //!< [in] varadic arguments.
+) {
     FILE* fs;
 
     if (gQuiet && (logLevel == LOG_LEVEL_NORMAL)) {
@@ -113,19 +124,23 @@ void DefaultLogFunc(int logLevel, const char* fmt, va_list args) {
 
 static LogFunc_t gLogFunc = DefaultLogFunc;
 
-void SetLogFunc(LogFunc_t logFunc) {
+//! Sets the logging function to use.
+void SetLogFunc(
+    LogFunc_t logFunc  //!< [in] Pointer to logging function to use for logging.
+) {
     gLogFunc = logFunc;
 }  // SetLogFunc
 
 #endif
 
+#if CFG_LOG_USE_STDIO
 //***************************************************************************
 /**
  *   Sets the logging stream
  */
-
-#if CFG_LOG_USE_STDIO
-void LogInit(FILE* logFs) {
+void LogInit(
+    FILE* logFs  //!< [in] Pointer to file stream to use for logging.
+) {
     gLogFs = logFs;
 }  // LogInit
 
@@ -278,12 +293,12 @@ void LogError(
 /**
  *   Logs an assertion failure
  */
-
 void LogAssertFailed(
-    const char* expr,
-    const char* fileName,
-    unsigned lineNum,
-    const char* function) {
+    const char* expr,      //!< [in] Expression that failed.
+    const char* fileName,  //!< [in] Name of file the assert occurred in.
+    unsigned lineNum,      //!< [in] Line number that the asseet occurred on.
+    const char* function   //!< [in] Name of the function that the assert occurred in.
+) {
 #if defined(AVR)
     Log_P(PSTR("ASSERT failed: "));
     Log_P(fileName);
