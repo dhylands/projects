@@ -31,10 +31,12 @@
 
 #define LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
+#if defined(LED_BUILTIN)
 Led led{LED_BUILTIN, Led::Active::HIGH};
 
 static uint16_t heartbeat_seq[] = {100, 100, 100, 700};
 static LedSequence heartbeat{&led, heartbeat_seq, LEN(heartbeat_seq), LedSequence::Mode::CONTINUUS};
+#endif
 
 static uint8_t packet1_params[16];
 static uint8_t packet2_params[16];
@@ -52,7 +54,9 @@ BioloidUART bioloid_uart2{&Serial2, 1000000, 8, 9};
 static uint8_t sendId = 1;
 
 void setup() {
+#if defined(LED_BUILTIN)
     heartbeat.init();
+#endif
 
     Serial.begin();
 
@@ -151,7 +155,10 @@ static void process_bus2(uint8_t byte) {
 }
 
 void loop() {
+#if defined(LED_BUILTIN)
     heartbeat.run();
+#endif
+
     if (Serial.available()) {
         int ch = Serial.read();
         process_cmd(ch);

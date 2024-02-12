@@ -2,36 +2,53 @@
 
 ARDUINO_CLI = arduino-cli
 
+# override the PROFILE from sketch.yml
+PROFILE ?= picow
+
+VID ?= 0x2e8a
+PID_picow = 0xf00a
+PID_pico  = 0x000a
+PID_zero  = 0x0003
+PID ?= $(PID_$(PROFILE))
+
 # NOTE: The arduino-cli buffers characters typed until a newline is entered
 #		so we use python's miniterm instead which sends each character as it's
 #		typed.
 
 .PHONY: compile
 compile:
-	$(ARDUINO_CLI) compile
+	@echo Compiling with PROFILE = $(PROFILE)
+	$(ARDUINO_CLI) compile --profile $(PROFILE)
 
 # Try detecting the RPi Pico via the serial port. If no serial port found,
 # look for the RPi Pico mounted as a filesystem.
 .PHONY: upload
-upload: PORT = $(shell find_port.py --vid 0x2e8a --pid 0xf00a)
+upload: PORT = $(shell find_port.py --vid $(VID) --pid $(PID))
 upload: RPI_DIR = /media/$(USER)/RPI-RP2
 upload:
 	@if [ -z "$(PORT)" ]; then \
 		if [ -d "${RPI_DIR}" ]; then \
-			$(ARDUINO_CLI) compile --upload --port $(RPI_DIR) && \
+			echo Compiling with PROFILE = $(PROFILE); \
+			$(ARDUINO_CLI) compile --profile $(PROFILE) --upload --port $(RPI_DIR) && \
 			python3 -m serial.tools.miniterm $(PORT) 115200; \
 		else \
 			echo "No RPi Pico found"; \
 		fi \
 	else \
-		$(ARDUINO_CLI) compile --upload --port $(PORT) &&  \
+		echo Compiling with PROFILE = $(PROFILE); \
+		$(ARDUINO_CLI) compile  --profile $(PROFILE) --upload --port $(PORT) &&  \
 		python3 -m serial.tools.miniterm $(PORT) 115200; \
 	fi
 
 # Fires up a terminal monitor to interact with the rp2040 over USB serial
 .PHONY: momitor
-monitor: PORT = $(shell find_port.py --vid 0x2e8a --pid 0xf00a)
+monitor: PORT = $(shell find_port.py --vid $(VID) --pid $(PID))
 monitor:
+	@if [ -z "$(PORT)" ]; then \
+		echo "No RPi found with USB ID $(VID):$(PID)"; \
+		find_port.py -l; \
+		exit 1; \
+	fi
 	python3 -m serial.tools.miniterm $(PORT) 115200;
 
 # Installs arduino-cli into ~/bin and does the setup for the rp2040
