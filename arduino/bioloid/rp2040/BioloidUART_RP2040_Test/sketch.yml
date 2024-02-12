@@ -1,0 +1,8 @@
+profiles:
+  picow:
+    fqbn: rp2040:rp2040:rpipicow
+    platforms:
+      - platform: rp2040:rp2040 (3.7.0)
+        platform_index_url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+
+default_profile: picow
